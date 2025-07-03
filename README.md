@@ -2,11 +2,11 @@
 
 # Meeps Security: Cybersecurity Awareness and Training Horror Game
 
-MEEPS SECURITY is a simulation game with horror elements designed to extend cybersecurity training and awareness by playing as an L1 Security Operation Center (SOC) analyst. Players handle incoming calls regarding cybersecurity incidents, evaluating and submitting the appropriate threat to the callers within the given service level agreement (SLA). The player must correctly resolve at least 80% of tickets to pass the assessment during the shift. 
+Meeps Security is a simulation mini-game with horror elements designed to extend cybersecurity training and awareness by playing as an L1 Security Operation Center (SOC) analyst. Players handle incoming calls regarding cybersecurity incidents, evaluating and submitting the appropriate threat to the callers within the given service level agreement (SLA). The player must correctly resolve at least 80% of tickets to pass the assessment during the shift. 
 
 This is named after one of my chows, named Meepo (Yes, the DOTA character).
 
-**Note:** The game is playable but still under development.
+**Note:** The game is playable, but it is still under development.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ MEEPS SECURITY is written in Python 3 using the `PyGame` and `PyGame GUI` librar
 
 The main menu has three buttons: START SHIFT, CREATE TICKETS, and LOG OFF. To play MEEPS SECURITY, select the "START SHIFT" button. This will take you to the main game loop, where you play as an L1 SOC analyst. 
 
-MEEPS SECURITY also allows players to manage the tickets, including creating custom tickets by clicking the "MANAGE TICKET" button. At the time of wiring, threat management is still under development.
+MEEPS SECURITY also allows players to manage the tickets, including creating custom tickets by clicking the "MANAGE TICKET" button. At the time of writing, threat management is still under development.
 
 ![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/d449ad9d-8346-4fd8-b552-7c1ab7833ef0)
 
@@ -32,17 +32,17 @@ When starting your shift, you will anticipate calls from various MEEPS SECURITY 
 
 ![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/8762a4d7-10e2-48c0-86f3-4bbc45fdcddc)
 
-A pop-up window will be displayed when an incoming call must be answered within the specified SLA. Failure to answer within SLA will deny you the opportunity for a possible score.
+A pop-up window will be displayed when an incoming call must be answered within the specified SLA. Failure to answer within the SLA will deny you the opportunity for a possible score.
 
 ![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/831045de-8828-40f7-b06c-862076ae6ca0)
 
-After answering the call, MEEPS SECURITY will display the current caller information, specifically their name, organization, email, and contact number, together with their cyber security concern (ticket). MEEPS SECURITY provides the players with a list of threats, a brief description of the threat, its indicators, and countermeasures. The player must analyze the ticket, select the appropriate threat (from the list), and submit it to the caller. The player will be granted a score when the correct threat is submitted. In addition, the players must be able to submit the appropriate threat within the allotted SLA for a score to be granted.
+After answering the call, MEEPS SECURITY will display the current caller's information, specifically their name, organization, email, and contact number, together with their cyber security concern (ticket). MEEPS SECURITY provides the players with a list of threats, a brief description of the threat, its indicators, and countermeasures. The player must analyze the ticket, select the appropriate threat (from the list), and submit it to the caller. The player will be granted a score when the correct threat is submitted. In addition, the players must be able to submit the appropriate threat within the allotted SLA for a score to be granted.
 
 **Note:** More threats and scenarios will be added over time.
 
 ![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/c651298a-4344-4456-81e1-2ac5e8048382)
 
-After your shift, your performance will be evaluated. The players must have submitted at least 80% correct threats to pass the assessment. The shift report also provides the total number of tickets handled, any missed calls and missed tickets.
+After your shift, your performance will be evaluated. The players must have submitted at least 80% correct threats to pass the assessment. The shift report also provides the total number of tickets handled, any missed calls, and missed tickets.
 
 ![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/66c959f0-5629-427d-a11c-6ed31a68a9ff)
 
