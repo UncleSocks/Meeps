@@ -3,6 +3,9 @@ FPS = 60
 CURRENT_VERSION = 'v2025.0.1 BETA'
 DATABASE_FILE = 'data.db'
 
+MIN_CALL_INTERVAL = 5
+MAX_CALL_INTERVAL = 12
+
 TITLE_IMAGE_PATH = 'assets/images/general/title.png'
 DEFAULT_THREAT_IMAGE_PATH = 'assets/images/threats/default.png'
 

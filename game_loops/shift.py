@@ -76,7 +76,7 @@ class ShiftLoop:
         self.total_tickets = len(self.ticket_ids_list)
         self.threat_list = threats(self.cursor)
 
-        self.randomized_ticket_entry = random.uniform(5, 12)
+        self.randomized_ticket_interval = random.uniform(config.MIN_CALL_INTERVAL, config.MAX_CALL_INTERVAL)
 
         self.mid_difficulty_marker = self.total_tickets / 2
         self.final_difficulty_marker = self.mid_difficulty_marker / 2
@@ -154,6 +154,7 @@ class ShiftLoop:
 
             events = pygame.event.get()
             self._handle_events(events)
+            self._renderer()
 
 
     def _handle_events(self, events):
@@ -172,7 +173,7 @@ class ShiftLoop:
 
             self.manager.process_events(event)
 
-        if self.ticket_timer >= self.randomized_ticket_entry and not self.ticket_presence and self.caller_popup_window is None:
+        if self.ticket_timer >= self.randomized_ticket_interval and not self.ticket_presence and self.caller_popup_window is None:
             self._display_caller_popup_window()
         
         if not self.ticket_ids_list and not self.ticket_presence:
@@ -197,9 +198,6 @@ class ShiftLoop:
 
             if self.ticket_presence and self.caller_popup_window is None:
                 self._sla_counter()
-
-        self._renderer()
-
 
 
     def _handle_threat_selection(self, selected_threat):
@@ -357,6 +355,8 @@ class ShiftLoop:
 
 
     def _reset_ticket_ui(self):
+
+        self.randomized_ticket_interval = random.uniform(config.MIN_CALL_INTERVAL, config.MAX_CALL_INTERVAL)
 
         self.ticket_title_tbox.set_text("")
         self.ticket_entry_tbox.set_text("AWAITING TICKET...")
