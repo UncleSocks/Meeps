@@ -281,6 +281,7 @@ class ShiftLoop:
 
         self.incoming_call_channel.stop()
         self.main_sla_timer = 0
+        self.selected_threat = None
 
         self.selected_id = self.ticket_ids_list[0]
         self.cursor.execute('SELECT t.title, t.entry, t.answer, a.name, a.organization, a.email, a.contact, a.picture FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?',
@@ -332,6 +333,7 @@ class ShiftLoop:
 
         if main_sla_countdown_difference <= 0:
             self._reset_ticket_ui()
+            self.missed_tickets += 1
 
 
     def _shift_report(self):
