@@ -44,7 +44,7 @@ class MainMenu:
         main_menu_element.github_label_func(self.manager)
 
     def _init_music(self):
-        pygame.mixer.music.load(config.MENU_BUTTON_MUSIC_PATH)
+        self.menu_button_music = pygame.mixer.music.load(config.MENU_BUTTON_MUSIC_PATH)
         self.menu_button_music_channel = pygame.mixer.Channel(0)
 
 
