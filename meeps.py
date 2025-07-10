@@ -57,7 +57,7 @@ class MainMenu:
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    pygame.quit()
 
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     self.menu_button_music_channel.play(pygame.mixer.Sound(config.MENU_BUTTON_MUSIC_PATH))

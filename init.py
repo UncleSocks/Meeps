@@ -1,34 +1,32 @@
 import sqlite3
 import pygame
 import pygame_gui
+
+import config
 from colors import color
-import elements.main_loop_elements as main_loop_elements
+
 
 
 def pygame_init():
 
     pygame.init()
-    pygame.display.set_caption('MEEPS SECURITY Responder.exe')
+    pygame.display.set_caption(config.WINDOW_CAPTION)
 
-    icon_path = "assets/images/general/icon.png"
-    icon_load = pygame.image.load(icon_path)
-    pygame.display.set_icon(icon_load)
+    window_icon_load = pygame.image.load(config.WINDOW_ICON_PATH)
+    pygame.display.set_icon(window_icon_load)
 
-    window_width, window_height = 800, 650
-    window_surface = pygame.display.set_mode((window_width, window_height))
+    window_surface = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
     clock = pygame.time.Clock()
 
-    background = pygame.Surface((window_width, window_height))
+    background = pygame.Surface((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
     background.fill(pygame.Color(color('black')))
 
     return window_surface, clock, background
 
 
 def pygame_gui_init():
-    
-    window_width, window_height = 800, 650
-    manager = pygame_gui.UIManager((window_width, window_height), 'theme.json')
 
+    manager = pygame_gui.UIManager((config.WINDOW_WIDTH, config.WINDOW_HEIGHT), config.THEME_PATH)
     return manager
 
 

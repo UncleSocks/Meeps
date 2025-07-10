@@ -28,7 +28,7 @@ def shift_introduction(connect, cursor):
     running = True
     while running:
 
-        time_delta = clock.tick(60) / 1000.0
+        time_delta = clock.tick(config.FPS) / 1000.0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -222,10 +222,11 @@ class ShiftLoop:
     def _handle_button_pressed(self, event, selected_threat, answer):
 
         if event.ui_element == self.back_button:
+
             self.back_button_music_channel.play(pygame.mixer.Sound(config.BACK_BUTTON_MUSIC_PATH))
             self.back_button_music_channel.stop()
 
-            self.ticket_transcript_channel.stop()
+            self.ticket_transcript_channel.stop() if self.ticket_transcript_channel else None
 
             pygame.mixer.music.unload()
             self.running = False
