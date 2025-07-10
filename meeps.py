@@ -26,10 +26,12 @@ class MainMenu:
         self.connect, self.cursor = init.database_init(config.DATABASE_FILE)
 
     def _init_pygame(self):
-        self.window_surface, self.clock, self.background = init.pygame_init()
-        self.manager = init.pygame_gui_init()
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
 
     def _init_ui_elements(self):
+
         self.start_button = main_menu_element.start_button_func(self.manager)
         self.ticket_management_button = main_menu_element.ticket_management_button_func(self.manager)
         self.account_management_button = main_menu_element.accounts_management_button_func(self.manager)
@@ -37,6 +39,7 @@ class MainMenu:
         self.quit_button = main_menu_element.quit_button_func(self.manager)
 
     def _init_misc_assets(self):
+
         main_menu_element.main_title_image_func(self.manager, config.TITLE_IMAGE_PATH)
         main_menu_element.main_title_slogan_label_func(self.manager)
 
@@ -44,6 +47,7 @@ class MainMenu:
         main_menu_element.github_label_func(self.manager)
 
     def _init_music(self):
+
         self.menu_button_music = pygame.mixer.music.load(config.MENU_BUTTON_MUSIC_PATH)
         self.menu_button_music_channel = pygame.mixer.Channel(0)
 
@@ -53,7 +57,7 @@ class MainMenu:
         self.running = True
         while self.running:
 
-            time_delta = self.clock.tick(config.FPS) / 1000.0
+            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MS_TO_SECOND_CONVERSION_FACTOR
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -79,11 +83,7 @@ class MainMenu:
 
                 self.manager.process_events(event)
 
-            self.manager.update(time_delta)
-
-            self.window_surface.blit(self.background, (0,0))
-            self.manager.draw_ui(self.window_surface)
-            pygame.display.update()
+            self.pygame_renderer.ui_renderer(self.manager, time_delta)
 
 
     def _quit(self) -> None:

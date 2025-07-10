@@ -12,8 +12,8 @@ from queries import ticket_ids,threats
 
 def shift_introduction(connect, cursor):
 
-    window_surface, clock, background = init.pygame_init()
-    manager = init.pygame_gui_init()
+    pygame_renderer = init.PygameRenderer()
+    manager = pygame_renderer.manager
 
     back_button = main_loop_elements.back_button_func(manager)
 
@@ -28,7 +28,7 @@ def shift_introduction(connect, cursor):
     running = True
     while running:
 
-        time_delta = clock.tick(config.FPS) / 1000.0
+        time_delta = pygame_renderer.clock.tick(config.FPS) / 1000.0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -45,11 +45,7 @@ def shift_introduction(connect, cursor):
                 
             manager.process_events(event)
 
-        manager.update(time_delta)
-        window_surface.blit(background, (0, 0))
-        manager.draw_ui(window_surface)
-
-        pygame.display.update()
+        pygame_renderer.ui_renderer(manager, time_delta)
 
 
 class ShiftLoop:
@@ -67,8 +63,8 @@ class ShiftLoop:
 
     def _init_pygame(self):
 
-        self.window_surface, self.clock, self.background = init.pygame_init()
-        self.manager = init.pygame_gui_init()
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
 
     def _init_gameplay_elements(self):
 
@@ -149,12 +145,12 @@ class ShiftLoop:
         self.running = True
         while self.running:
 
-            self.time_delta = self.clock.tick(config.FPS) / 1000.0
+            self.time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MS_TO_SECOND_CONVERSION_FACTOR
             self.ticket_timer += self.time_delta
 
             events = pygame.event.get()
             self._handle_events(events)
-            self._renderer()
+            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
 
 
     def _handle_events(self, events):
@@ -192,7 +188,7 @@ class ShiftLoop:
                     self.manager.process_events(event)
 
             else:
-                self.manager.draw_ui(self.window_surface)
+                self.manager.draw_ui(self.pygame_renderer.window_surface)
 
             self._difficulty_logic()
 
@@ -258,7 +254,7 @@ class ShiftLoop:
     def _caller_popup_window_countdown(self):
 
         self.caller_popup_window.show()
-        self.manager.draw_ui(self.window_surface)
+        self.manager.draw_ui(self.pygame_renderer.window_surface)
 
         popup_window_sla_countdown_difference = self.popup_window_sla_countdown - self.popup_window_close_timer
         self.popup_window_countdown.set_text("SLA: {:.1f}".format(max(0, popup_window_sla_countdown_difference)))
@@ -341,20 +337,10 @@ class ShiftLoop:
 
         self.background_music_channel.stop()
 
-        run_shift_report = ShiftReport(self.window_surface, self.clock, self.background,
-                                        self.manager, self.total_score, self.total_tickets, 
-                                        self.missed_calls, self.missed_tickets)
+        run_shift_report = ShiftReport(self.total_score, self.total_tickets, self.missed_calls, self.missed_tickets)
         
         run_shift_report.shift_report()
         self.running = False
-
-
-    def _renderer(self):
-
-        self.manager.update(self.time_delta)
-        self.window_surface.blit(self.background, (0,0))
-        self.manager.draw_ui(self.window_surface)
-        pygame.display.update()
 
 
     def _reset_ticket_ui(self):
@@ -374,14 +360,12 @@ class ShiftLoop:
 
 
 
-
 class ShiftReport:
 
-    def __init__ (self, window_surface, clock, background, manager,
-                  total_score, total_tickets, missed_calls, missed_tickets):
-    
-        self.window_surface, self.clock, self.background, self.manager = window_surface, \
-            clock, background, manager
+    def __init__ (self, total_score, total_tickets, missed_calls, missed_tickets):
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
 
         self.missed_calls = missed_calls
         self.missed_tickets = missed_tickets
@@ -419,7 +403,7 @@ class ShiftReport:
         running = True
         while running:
 
-            time_delta = self.clock.tick(60) / 1000.0
+            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MS_TO_SECOND_CONVERSION_FACTOR
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -431,8 +415,4 @@ class ShiftReport:
 
                 self.manager.process_events(event)
 
-            self.manager.update(time_delta)
-            self.window_surface.blit(self.background, (0, 0))
-            self.manager.draw_ui(self.window_surface)
-            
-            pygame.display.update()
+            self.pygame_renderer.ui_renderer(self.manager, time_delta)
