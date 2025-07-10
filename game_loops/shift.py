@@ -28,7 +28,7 @@ def shift_introduction(connect, cursor):
     running = True
     while running:
 
-        time_delta = pygame_renderer.clock.tick(config.FPS) / 1000.0
+        time_delta = pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -145,7 +145,7 @@ class ShiftLoop:
         self.running = True
         while self.running:
 
-            self.time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MS_TO_SECOND_CONVERSION_FACTOR
+            self.time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
             self.ticket_timer += self.time_delta
 
             events = pygame.event.get()
@@ -403,7 +403,7 @@ class ShiftReport:
         running = True
         while running:
 
-            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MS_TO_SECOND_CONVERSION_FACTOR
+            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
