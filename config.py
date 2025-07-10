@@ -24,3 +24,4 @@ INCORRECT_SUBMIT_MUSIC_PATH = 'assets/sounds/incorrect_submit.mp3'
 CORRECT_SUBMIT_MUSIC_PATH = 'assets/sounds/correct_submit.mp3'
 BACK_BUTTON_MUSIC_PATH = 'assets/sounds/back_button.mp3'
 
+BACKGROUND_COLOR_RGB = 0,0,0 #RGB values for black.

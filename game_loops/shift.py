@@ -74,8 +74,6 @@ class ShiftLoop:
 
         self.randomized_ticket_interval = random.uniform(config.MIN_CALL_INTERVAL, config.MAX_CALL_INTERVAL)
 
-        self.mid_difficulty_marker = self.total_tickets / 2
-        self.final_difficulty_marker = self.mid_difficulty_marker / 2
 
     def _init_ui_elements(self):
         
@@ -131,6 +129,7 @@ class ShiftLoop:
 
         self.selected_threat = None
         self.answer = None
+        self.accept_button = None
 
         self.total_score = 0
         self.missed_calls = 0
@@ -180,20 +179,13 @@ class ShiftLoop:
             if self.caller_popup_window:
                 self._caller_popup_window_countdown()
 
-                for event in events:
-                    if event.type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element == self.accept_button:
-                
-                        self._generate_ticket()
-
-                    self.manager.process_events(event)
-
             else:
                 self.manager.draw_ui(self.pygame_renderer.window_surface)
 
-            self._difficulty_logic()
-
             if self.ticket_presence and self.caller_popup_window is None:
-                self._sla_counter()
+                self._ticket_sla_counter()
+
+            self._difficulty_update_logic()
 
 
     def _handle_threat_selection(self, selected_threat):
@@ -240,6 +232,10 @@ class ShiftLoop:
 
             self.ticket_transcript_channel.stop()
             pygame.mixer.music.unload()
+
+        if self.accept_button and event.ui_element == self.accept_button:
+
+            self._generate_ticket()
         
 
     def _display_caller_popup_window(self):
@@ -313,15 +309,19 @@ class ShiftLoop:
         return self.answer
 
 
-    def _difficulty_logic(self):
+    def _difficulty_update_logic(self):
+   
+        mid_difficulty_marker = self.total_tickets / 2
+        final_difficulty_marker = mid_difficulty_marker / 2
 
-        if len(self.ticket_ids_list) <= self.final_difficulty_marker:
+        if len(self.ticket_ids_list) <= final_difficulty_marker:
             self.main_sla_countdown = 60
 
-        elif len(self.ticket_ids_list) <= self.mid_difficulty_marker:
+        elif len(self.ticket_ids_list) <= mid_difficulty_marker:
             self.main_sla_countdown = 120
 
-    def _sla_counter(self):
+
+    def _ticket_sla_counter(self):
 
         main_sla_countdown_difference = self.main_sla_countdown - self.main_sla_timer
         self.main_sla_timer_label.set_text("SLA: {:.1f}".format(max(0, main_sla_countdown_difference)))

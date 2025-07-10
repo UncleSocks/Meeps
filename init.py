@@ -3,7 +3,6 @@ import pygame
 import pygame_gui
 
 import config
-from colors import color
 
 
 
@@ -19,7 +18,7 @@ def pygame_init():
     clock = pygame.time.Clock()
 
     background = pygame.Surface((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
-    background.fill(pygame.Color(color('black')))
+    background.fill(pygame.Color(config.BACKGROUND_COLOR_RGB))
 
     return window_surface, clock, background
 
@@ -59,7 +58,7 @@ class PygameRenderer:
         window_surface = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
 
         background = pygame.Surface((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
-        background.fill(pygame.Color(color('black')))
+        background.fill(pygame.Color(config.BACKGROUND_COLOR_RGB))
 
         return window_surface, background
 
