@@ -2,30 +2,30 @@ import sqlite3
 import pygame
 import pygame_gui
 
-import config
+import constants
 
 
 
 def pygame_init():
 
     pygame.init()
-    pygame.display.set_caption(config.WINDOW_CAPTION)
+    pygame.display.set_caption(constants.WINDOW_CAPTION)
 
-    window_icon_load = pygame.image.load(config.WINDOW_ICON_PATH)
+    window_icon_load = pygame.image.load(constants.WINDOW_ICON_PATH)
     pygame.display.set_icon(window_icon_load)
 
-    window_surface = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
+    window_surface = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
     clock = pygame.time.Clock()
 
-    background = pygame.Surface((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
-    background.fill(pygame.Color(config.BACKGROUND_COLOR_RGB))
+    background = pygame.Surface((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
+    background.fill(pygame.Color(constants.BACKGROUND_COLOR_RGB))
 
     return window_surface, clock, background
 
 
 def pygame_gui_init():
 
-    manager = pygame_gui.UIManager((config.WINDOW_WIDTH, config.WINDOW_HEIGHT), config.THEME_PATH)
+    manager = pygame_gui.UIManager((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT), constants.THEME_PATH)
     return manager
 
 
@@ -44,21 +44,21 @@ class PygameRenderer:
         pygame.init()
         self.window_surface, self.background = self.window_init()
 
-        self.manager = pygame_gui.UIManager((config.WINDOW_WIDTH, config.WINDOW_HEIGHT), config.THEME_PATH)
+        self.manager = pygame_gui.UIManager((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT), constants.THEME_PATH)
         self.clock = pygame.time.Clock()
         
     
     def window_init(self):
 
-        pygame.display.set_caption(config.WINDOW_CAPTION)
+        pygame.display.set_caption(constants.WINDOW_CAPTION)
 
-        window_icon_load = pygame.image.load(config.WINDOW_ICON_PATH)
+        window_icon_load = pygame.image.load(constants.WINDOW_ICON_PATH)
         pygame.display.set_icon(window_icon_load)
 
-        window_surface = pygame.display.set_mode((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
+        window_surface = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
 
-        background = pygame.Surface((config.WINDOW_WIDTH, config.WINDOW_HEIGHT))
-        background.fill(pygame.Color(config.BACKGROUND_COLOR_RGB))
+        background = pygame.Surface((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
+        background.fill(pygame.Color(constants.BACKGROUND_COLOR_RGB))
 
         return window_surface, background
 

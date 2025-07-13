@@ -1,258 +1,306 @@
 import pygame
 import pygame_gui
+
 import init
-import queries
+import constants
 import elements.threats_elements as threat_element
 
 
-def threat_creation_init_values():
 
-    threat_entry_name = None
-    threat_entry_description = None
-    threat_entry_indicators = None
-    threat_entry_countermeasures = None
-    threat_confirm_window = None
+def threats_queries(cursor):
 
-    return threat_entry_name, threat_entry_description, threat_entry_indicators, \
-    threat_entry_countermeasures, threat_confirm_window
+    cursor.execute('SELECT name FROM threats')
+    threat_list_results = cursor.fetchall()
+    threat_list = [threat_list_result[0] for threat_list_result in threat_list_results]
+
+    return threat_list
 
 
-def threat_database_management(connect, cursor):
+
+class ThreatManagement():
+
+    def __init__(self, connect, cursor):
+        
+        self.connect = connect
+        self.cursor = cursor
+
+        self._init_pygame()
+        self._init_gameplay_elements()
+        self._init_ui_elements()
+        self._init_state_variables()
+        self._init_music()
+
+    def _init_pygame(self):
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
+        self.window_surface = self.pygame_renderer.window_surface
+
+    def _init_gameplay_elements(self):
+
+        self.threat_list = threats_queries(self.cursor)
+
+    def _init_ui_elements(self):
+
+        self.back_button = threat_element.back_button_func(self.manager)
+        self.create_button = threat_element.create_button_func(self.manager)
+        self.delete_button = threat_element.delete_button_func(self.manager)
+
+        self.threat_database_image = threat_element.threat_database_image_func(self.manager, constants.THREAT_DATABASE_IMAGE_PATH)
+        self.threat_entry_title_tbox = threat_element.threat_entry_slist_misc_func(self.manager)
+        self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, self.threat_list)
+
+        self.threat_details_label, self.selected_threat_title_tbox, self.selected_threat_description_tbox, \
+            self.selected_threat_indicators_tbox, self.selected_threat_countermeasures_tbox, \
+                self.selected_threat_image_path_tbox = threat_element.threat_details_func(self.manager)
+        
+    def _init_state_variables(self):
+
+        self.selected_threat = None
+        self.threat_delete_confirm_window = False
+        
+    def _init_music(self):
+
+        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
+        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
+        self.delete_button_music = pygame.mixer.music.load(constants.DELETE_BUTTON__MUSIC_PATH)
+        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
+
+        self.menu_button_music_channel = pygame.mixer.Channel(0)
+        self.create_button_music_channel = pygame.mixer.Channel(1)
+        self.delete_button_music_channel = pygame.mixer.Channel(2)
+        self.back_button_music_channel = pygame.mixer.Channel(3)
+
+    def threat_management_loop(self):
+
+        self.running = True
+        while self.running:
+
+            self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            events = pygame.event.get()
+            self._handle_events(events)
+            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+
+
+    def _handle_events(self, events):
+
+        for event in  events:
+
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and event.ui_element == self.threat_entry_slist:
+
+                self.selected_threat = event.text
+                self._handle_threat_selection()
+
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                self._handle_button_pressed(event)
+
+            self.manager.process_events(event)
+
+
+    def _handle_threat_selection(self):
+
+        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+
+        self.cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [self.selected_threat])
+        description, indicators, countermeasures, image_path = self.cursor.fetchone()
+
+        self.selected_threat_title_tbox.set_text(f"<b>{self.selected_threat}</b>")
+        self.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{description}")
+        self.selected_threat_indicators_tbox.set_text(f"INDICATORS:\n{indicators}")
+        self.selected_threat_countermeasures_tbox.set_text(f"COUNTERMEASURES:\n{countermeasures}")
+        self.selected_threat_image_path_tbox.set_text(f"{image_path}")
 
     
-    def music_init():
+    def _handle_button_pressed(self, event):
 
-        menu_button_music_path = "assets/sounds/list_click2.mp3"
-        pygame.mixer.music.load(menu_button_music_path)
-        menu_button_music_channel = pygame.mixer.Channel(0)
+        if event.ui_element == self.back_button:
 
-        delete_button_music_path = "assets/sounds/delete_button.mp3"
-        pygame.mixer.music.load(delete_button_music_path)
-        delete_button_music_channel = pygame.mixer.Channel(1)
+            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.back_button_music_channel.set_volume(0.2)
+            self.running = False
 
-        add_button_music_path = "assets/sounds/add_button.mp3"
-        pygame.mixer.music.load(add_button_music_path)
-        add_button_music_channel = pygame.mixer.Channel(2)
+        if event.ui_element == self.create_button:
 
-        return menu_button_music_path, menu_button_music_channel, delete_button_music_path, delete_button_music_channel, add_button_music_path, add_button_music_channel
+            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
 
-    
-    def threat_database_management_init(connect, cursor):
+            threat_create = ThreatCreation(self.connect, self.cursor)
+            updated_threat_list = threat_create.threat_creation_loop()
+            self.threat_entry_slist.kill()
+            self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, updated_threat_list)
 
-        window_surface, clock, background = init.pygame_init()
-        manager = init.pygame_gui_init()
+        if event.ui_element == self.delete_button and self.selected_threat is not None:
 
-        threat_list = queries.threats(cursor)
-        threat_database_image_path = "assets/images/general/threat_database.png"
+            self.delete_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
+            
 
-        back_button = threat_element.back_button_func(manager)
-        threat_database_image = threat_element.threat_database_image_func(manager, 
-                                                                        threat_database_image_path)
+        if self.threat_delete_confirm_window:
+            
+            self.threat_delete_confirm_window.show()
 
-        create_button, delete_button = threat_element.create_button_button_func(manager)
-        threat_entry_title_tbox = threat_element.threat_entry_slist_misc_func(manager)
-        threat_entry_slist = threat_element.threat_entry_slist_func(manager, threat_list)
+            if event.ui_element == self.threat_delete_confirm_yes_button:
 
-        threat_details_label, selected_threat_title_tbox, selected_threat_description_tbox, \
-            selected_threat_indicators_tbox, selected_threat_countermeasures_tbox, \
-                selected_threat_image_path_tbox = threat_element.threat_details_func(manager)
+                self.delete_button_music_channel.play(pygame.mixer.Sound(constants.DELETE_BUTTON__MUSIC_PATH))
+
+                updated_threat_list = self._delete_threat()
+                self.threat_entry_slist.kill()
+                self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, updated_threat_list)
+
+                self.threat_delete_confirm_window.kill()
+
+            if event.ui_element == self.threat_delete_confirm_no_button:
+                
+                self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+                self.threat_delete_confirm_window.kill()
+
+
+    def _delete_threat(self):
+
+        self.cursor.execute('DELETE FROM tickets WHERE answer=?', [self.selected_threat])
+        self.connect.commit()
+
+        self.cursor.execute('DELETE FROM threats WHERE name=?', [self.selected_threat])
+        self.connect.commit()
+
+        updated_threat_list = threats_queries(self.cursor)
+
+        return updated_threat_list
+
+
+
+class ThreatCreation():
+
+    def __init__(self, connect, cursor):
+
+        self.connect = connect
+        self.cursor = cursor
+
+        self._init_pygame()
+        self._init_ui_elements()
+        self._init_state_variables()
+        self._init_music()
+        self._init_threat_entry_variables()
+
+
+    def _init_pygame(self):
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
+        self.window_surface = self.pygame_renderer.window_surface
+
+    def _init_ui_elements(self):
+
+        self.threat_create_image = threat_element.add_threat_image_func(self.manager, constants.THREAT_CREATE_IMAGE_PATH)
         
-        selected_threat = None
+        self.back_button = threat_element.back_button_func(self.manager)
+        self.add_button = threat_element.threat_entry_add_button_func(self.manager)
 
-        return threat_database_management_loop(connect, cursor, 
-                                            window_surface, clock, background, manager,
-                                            threat_list, back_button, threat_database_image,
-                                            create_button, delete_button,
-                                            threat_entry_title_tbox, threat_entry_slist,
-                                            threat_details_label, selected_threat_title_tbox, 
-                                            selected_threat_description_tbox, selected_threat_indicators_tbox,
-                                            selected_threat_countermeasures_tbox, selected_threat_image_path_tbox,
-                                            selected_threat)
-
-    def threat_database_management_loop(connect, cursor, 
-                                        window_surface, clock, background, manager,
-                                        threat_list, back_button, threat_database_image,
-                                        create_button, delete_button,
-                                        threat_entry_title_tbox, threat_entry_slist,
-                                        threat_details_label, selected_threat_title_tbox, 
-                                        selected_threat_description_tbox, selected_threat_indicators_tbox,
-                                        selected_threat_countermeasures_tbox, selected_threat_image_path_tbox,
-                                        selected_threat):
-
-        menu_button_music_path, menu_button_music_channel, delete_button_music_path, delete_button_music_channel, add_button_music_path, add_button_music_channel = music_init()
+        self.threat_entry_name, self.threat_entry_description, self.threat_entry_indicators, \
+            self.threat_entry_countermeasures, self.threat_entry_image_path = threat_element.threat_entry_func(self.manager)
         
-        back_button_music_path = "assets/sounds/back_button.mp3"
-        pygame.mixer.music.load(back_button_music_path)
-        back_button_music_channel = pygame.mixer.Channel(3)
-       
-        running = True
-        while running:
-            time_delta = clock.tick(60) / 1000.0
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
+    def _init_state_variables(self):
 
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == back_button:
-                        back_button_music_channel.play(pygame.mixer.Sound(back_button_music_path))
-                        back_button_music_channel.set_volume(0.2)
-                        running = False
+        self.updated_threat_list = None
 
-                    if event.ui_element == create_button:
+    def _init_music(self):
 
-                        add_button_music_channel.play(pygame.mixer.Sound(add_button_music_path))
+        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
+        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
 
-                        threat_list = threat_creation_init(connect, cursor)
-                        threat_entry_slist.kill()
-                        threat_entry_slist = threat_element.threat_entry_slist_func(manager, threat_list)
+        self.create_button_music_channel = pygame.mixer.Channel(3)
 
-                if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
-                    if event.ui_element == threat_entry_slist:
-                        
-                        menu_button_music_channel.play(pygame.mixer.Sound(menu_button_music_path))
-                        
-                        selected_threat = event.text
+        self.back_button_channel = pygame.mixer.Channel(4)
+        self.back_button_channel.set_volume(0.2)
 
-                        cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [selected_threat])
-                        description, indicators, countermeasures, image_path = cursor.fetchone()
+            
+    def _init_threat_entry_variables(self):
 
-                        selected_threat_title_tbox.set_text(f"<b>{selected_threat}</b>")
-                        selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{description}")
-                        selected_threat_indicators_tbox.set_text(f"INDICATORS:\n{indicators}")
-                        selected_threat_countermeasures_tbox.set_text(f"COUNTERMEASURES:\n{countermeasures}")
-                        selected_threat_image_path_tbox.set_text(f"{image_path}")
+        self.threat_name = None
+        self.threat_description = None
+        self.threat_indicators = None
+        self.threat_countermeasures = None
+        self.threat_image_path = None
 
-                if selected_threat is not None:
-                    if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                        if event.ui_element == delete_button:
-
-                            delete_button_music_channel.play(pygame.mixer.Sound(delete_button_music_path))
-                            
-                            cursor.execute('DELETE FROM tickets WHERE answer=?', [selected_threat])
-                            connect.commit()
-                            cursor.execute('DELETE FROM threats WHERE name=?', [selected_threat])
-                            connect.commit()
-
-                            threat_list = queries.threats(cursor)
-                            threat_entry_slist.kill()
-                            threat_entry_slist = threat_element.threat_entry_slist_func(manager, threat_list)
-
-                manager.process_events(event)
-
-            manager.update(time_delta)
-
-            window_surface.blit(background, (0, 0))
-            manager.draw_ui(window_surface)
-            pygame.display.update()
+        self.confirm_window = False
 
 
-    def threat_creation_init(connect, cursor):
+    def threat_creation_loop(self):
 
-        window_surface, clock, background = init.pygame_init()
-        manager = init.pygame_gui_init()
+        self.running = True
+        while self.running:
 
-        add_threat_image_path = "assets/images/general/add_threat.png"
-        add_threat_image = threat_element.add_threat_image_func(manager, add_threat_image_path)
+            self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            events = pygame.event.get()
+            self._handle_events(events)
+            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
 
-        back_button = threat_element.back_button_func(manager)
-        add_button = threat_element.threat_entry_add_button_func(manager)
+        return self.updated_threat_list
 
-        threat_entry_name_tentry, threat_entry_description_tentry, threat_entry_indicators_tentry, \
-            threat_entry_countermeasures_tentry, threat_entry_image_path_tentry = threat_element.threat_entry_func(manager)
+
+    def _handle_events(self, events):
         
-        threat_entry_name, threat_entry_description, threat_entry_indicators, \
-            threat_entry_countermeasures, threat_confirm_window = threat_creation_init_values()
+        for event in events:
+
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                self._handle_button_pressed(event)
+
+            self._handle_threat_entry_content()
+
+            self.manager.process_events(event)
+
+
+
+    def _handle_button_pressed(self, event):
+
+        if event.ui_element == self.back_button:
+
+            self.back_button_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.updated_threat_list = threats_queries(self.cursor)
+
+            self.running = False
         
-        return threat_creation_loop(connect, cursor, window_surface, clock, background, manager,
-                                    add_threat_image, back_button, add_button, threat_entry_name_tentry, 
-                                    threat_entry_description_tentry, threat_entry_indicators_tentry,
-                                    threat_entry_countermeasures_tentry, threat_entry_image_path_tentry,
-                                    threat_entry_name, threat_entry_description, threat_entry_indicators,
-                                    threat_entry_countermeasures, threat_confirm_window)
+        if event.ui_element == self.add_button and self.threat_name is not None and self.threat_description is not None and self.threat_indicators is not None and self.threat_countermeasures is not None:
+
+            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+
+            self.cursor.execute('SELECT MAX(id) FROM threats')
+            last_id = self.cursor.fetchone()[0]
+            new_id = last_id + 1
+
+            new_threat_entry = (new_id, self.threat_name, self.threat_description, self.threat_indicators, self.threat_countermeasures, self.threat_image_path)
+            self.cursor.execute('INSERT INTO threats VALUES (?, ?, ?, ?, ?, ?)', new_threat_entry)
+            self.connect.commit()
+
+            self.confirm_window, self.confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
+
         
+        if self.confirm_window:
 
-    def threat_creation_loop(connect, cursor, window_surface, clock, background, manager, 
-                             add_threat_image, back_button, add_button, threat_entry_name_tentry, 
-                             threat_entry_description_tentry, threat_entry_indicators_tentry, 
-                             threat_entry_countermeasures_tentry, threat_entry_image_path_tentry, 
-                             threat_entry_name, threat_entry_description, threat_entry_indicators, 
-                             threat_entry_countermeasures, threat_confirm_window):
-        
-        
-        create_button_music_path = "assets/sounds/create_button.mp3"
-        pygame.mixer.music.load(create_button_music_path)
-        create_button_music_channel = pygame.mixer.Channel(3)
+            self.confirm_window.show()
+            self.manager.draw_ui(self.window_surface)
 
-        back_button_music_path = "assets/sounds/back_button.mp3"
-        pygame.mixer.music.load(back_button_music_path)
-        back_button_music_channel = pygame.mixer.Channel(4)
-        back_button_music_channel.set_volume(0.2)
-        
-        running = True
-        while running:
-            time_delta = clock.tick(60) / 1000.0
-            for event in pygame.event.get():
+            if event.ui_element == self.confirm_close_button:
 
-                if event.type == pygame.QUIT:
-                    pygame.quit()
+                self.threat_entry_name.set_text("")
+                self.threat_entry_description.set_text("")
+                self.threat_entry_indicators.set_text("")
+                self.threat_entry_countermeasures.set_text("")
+                self.threat_entry_image_path.set_text("")
 
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == back_button:
-                        back_button_music_channel.play(pygame.mixer.Sound(back_button_music_path))
-                        updated_threat_list = queries.threats(cursor)
-                        return updated_threat_list
+                self.confirm_window.hide()
 
-                threat_entry_name = threat_entry_name_tentry.get_text()
-                threat_entry_description = threat_entry_description_tentry.get_text()
-                threat_entry_indicators = threat_entry_indicators_tentry.get_text()
-                threat_entry_countermeasures = threat_entry_countermeasures_tentry.get_text()
-                threat_entry_image_path = threat_entry_image_path_tentry.get_text()
+                self._init_threat_entry_variables()
 
-                if threat_entry_name is not None and threat_entry_description is not None and threat_entry_indicators is not None and threat_entry_countermeasures is not None:
-                    if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                        if event.ui_element == add_button:
+    def _handle_threat_entry_content(self):
 
-                            create_button_music_channel.play(pygame.mixer.Sound(create_button_music_path))
-
-                            cursor.execute('SELECT MAX(id) FROM threats')
-                            last_id = cursor.fetchone()[0]
-                            new_id = last_id + 1
-
-                            new_threat = (new_id, threat_entry_name, threat_entry_description, threat_entry_indicators, threat_entry_countermeasures, threat_entry_image_path)
-                            cursor.execute('INSERT INTO threats VALUES (?, ?, ?, ?, ?, ?)', new_threat)
-                            connect.commit()
-
-                            threat_confirm_window, threat_confirm_close_button = threat_element.threat_confirm_window_func(manager)
-
-                manager.process_events(event)
-
-            manager.update(time_delta)
-            window_surface.blit(background, (0, 0))
-
-            if threat_confirm_window:
-                threat_confirm_window.show()
-                manager.draw_ui(window_surface)
-
-                for event in pygame.event.get():
-                    if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                        if event.ui_element == threat_confirm_close_button:
-
-                            threat_entry_name_tentry.set_text("")
-                            threat_entry_description_tentry.set_text("")
-                            threat_entry_indicators_tentry.set_text("")
-                            threat_entry_countermeasures_tentry.set_text("")
-
-                            threat_confirm_window.hide()
-
-                            threat_entry_name, threat_entry_description, threat_entry_indicators, \
-                                threat_entry_countermeasures, threat_confirm_window = threat_creation_init_values()
-                        
-                    manager.process_events(event)
-
-            manager.update(time_delta)
-            window_surface.blit(background, (0, 0))
-            manager.draw_ui(window_surface)
-            pygame.display.update()
-
-
-    threat_database_management_init(connect, cursor)   
+        self.threat_name = self.threat_entry_name.get_text()
+        self.threat_description = self.threat_entry_description.get_text()
+        self.threat_indicators = self.threat_entry_indicators.get_text()
+        self.threat_countermeasures = self.threat_entry_countermeasures.get_text()
+        self.threat_image_path = self.threat_entry_image_path.get_text()

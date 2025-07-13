@@ -1,13 +1,13 @@
 import pygame
 import pygame_gui
 
-import config
+import constants
 import init
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
 from game_loops.tickets import ticket_management
 from game_loops.accounts import accounts_management
-from game_loops.threats import threat_database_management
+from game_loops.threats import ThreatManagement
 
 
 
@@ -23,7 +23,7 @@ class MainMenu:
     
     def _init_database(self):
 
-        self.connect, self.cursor = init.database_init(config.DATABASE_FILE)
+        self.connect, self.cursor = init.database_init(constants.DATABASE_FILE)
 
     def _init_pygame(self):
 
@@ -40,15 +40,15 @@ class MainMenu:
 
     def _init_misc_assets(self):
 
-        main_menu_element.main_title_image_func(self.manager, config.TITLE_IMAGE_PATH)
+        main_menu_element.main_title_image_func(self.manager, constants.TITLE_IMAGE_PATH)
         main_menu_element.main_title_slogan_label_func(self.manager)
 
-        main_menu_element.version_label_func(self.manager, config.CURRENT_VERSION)
+        main_menu_element.version_label_func(self.manager, constants.CURRENT_VERSION)
         main_menu_element.github_label_func(self.manager)
 
     def _init_music(self):
 
-        self.menu_button_music = pygame.mixer.music.load(config.MENU_BUTTON_MUSIC_PATH)
+        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
         self.menu_button_music_channel = pygame.mixer.Channel(0)
 
 
@@ -57,21 +57,21 @@ class MainMenu:
         self.running = True
         while self.running:
 
-            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
+            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
 
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    self.menu_button_music_channel.play(pygame.mixer.Sound(config.MENU_BUTTON_MUSIC_PATH))
+                    self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
 
                     button_action_map = {
 
                         self.start_button: lambda: shift_introduction(self.connect, self.cursor), 
                         self.ticket_management_button: lambda: ticket_management(self.connect, self.cursor),
                         self.account_management_button: lambda: accounts_management(self.connect, self.cursor),
-                        self.threat_entries_button: lambda: threat_database_management(self.connect, self.cursor),
+                        self.threat_entries_button: lambda: ThreatManagement(self.connect, self.cursor).threat_management_loop(),
                         self.quit_button: lambda: self._quit()
 
                     }

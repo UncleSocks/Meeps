@@ -20,7 +20,7 @@ def threat_database_image_func(manager, image_path):
     return threat_database_image
 
 
-def create_button_button_func(manager):
+def create_button_func(manager):
 
     create_button_rect = pygame.Rect(0, 0, 45, 30)
     create_button_rect.bottomleft = (320, -470)
@@ -28,13 +28,18 @@ def create_button_button_func(manager):
                                                  text="+", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
+    return create_button
+    
+
+def delete_button_func(manager):
+    
     delete_button_rect = pygame.Rect(0, 0, 45, 30)
     delete_button_rect.bottomleft = (280, -470)
     delete_button = pygame_gui.elements.UIButton(relative_rect=delete_button_rect,
                                                  text="-", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
-    return create_button, delete_button
+    return delete_button
 
 
 def threat_entry_slist_misc_func(manager):
@@ -165,3 +170,40 @@ def threat_confirm_window_func(manager):
                                                                      anchors={'left':'left', 'bottom':'bottom'})
     
     return threat_confirm_window, threat_confirm_close_button
+
+
+def threat_delete_confirm_window_func(manager):
+
+    threat_delete_confirm_window_rect = pygame.Rect(0, 0, 400, 200)
+    threat_delete_confirm_window = pygame_gui.elements.UIWindow(rect=threat_delete_confirm_window_rect, 
+                                                                window_display_title="Meeps Security: Delete Threat",
+                                                                manager=manager)
+    
+    
+    threat_delete_confirm_window_label_rect = pygame.Rect(0, -10, 300, 200)
+    threat_delete_confirm_window_label = pygame_gui.elements.UILabel(relative_rect=threat_delete_confirm_window_label_rect,
+                                                                     text="Delete selected threat?",
+                                                                     manager=manager,
+                                                                     container=threat_delete_confirm_window,
+                                                                     anchors={'center':'center'})
+    
+    threat_delete_confirm_window_warning_label_rect = pygame.Rect(0, -40, 350, 200)
+    threat_delete_confirm_window_warning_label = pygame_gui.elements.UILabel(relative_rect=threat_delete_confirm_window_warning_label_rect,
+                                                                     text="[!] This will delete associated tickets.",
+                                                                     manager=manager,
+                                                                     container=threat_delete_confirm_window,
+                                                                     anchors={'center':'center'})
+    
+    threat_delete_confirm_yes_button_rect = pygame.Rect(10, 10, 100, 40)
+    threat_delete_confirm_yes_button_rect.bottomright = (185, -10)
+    threat_delete_confirm_yes_button = pygame_gui.elements.UIButton(relative_rect=threat_delete_confirm_yes_button_rect,
+                                                                    text="YES", manager=manager, container=threat_delete_confirm_window,
+                                                                    anchors={'left':'left', 'bottom':'bottom'})
+    
+    threat_delete_confirm_no_button_rect = pygame.Rect(10, 10, 100, 40)
+    threat_delete_confirm_no_button_rect.bottomright = (285, -10)
+    threat_delete_confirm_no_button = pygame_gui.elements.UIButton(relative_rect=threat_delete_confirm_no_button_rect, 
+                                                                   text="NO", manager=manager, container=threat_delete_confirm_window,
+                                                                   anchors={'left':'left', 'bottom':'bottom'})
+
+    return threat_delete_confirm_window, threat_delete_confirm_yes_button, threat_delete_confirm_no_button

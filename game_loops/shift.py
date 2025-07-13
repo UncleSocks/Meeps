@@ -3,7 +3,7 @@ import random
 import pygame
 import pygame_gui
 
-import config
+import constants
 import init
 import elements.main_loop_elements as main_loop_elements
 from queries import ticket_ids,threats
@@ -28,7 +28,7 @@ def shift_introduction(connect, cursor):
     running = True
     while running:
 
-        time_delta = pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
+        time_delta = pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -72,13 +72,13 @@ class ShiftLoop:
         self.total_tickets = len(self.ticket_ids_list)
         self.threat_list = threats(self.cursor)
 
-        self.randomized_ticket_interval = random.uniform(config.MIN_CALL_INTERVAL, config.MAX_CALL_INTERVAL)
+        self.randomized_ticket_interval = random.uniform(constants.MIN_CALL_INTERVAL, constants.MAX_CALL_INTERVAL)
 
 
     def _init_ui_elements(self):
         
         self.back_button = main_loop_elements.back_button_func(self.manager)
-        self.title_label = main_loop_elements.title_image_func(self.manager, config.TITLE_IMAGE_PATH)
+        self.title_label = main_loop_elements.title_image_func(self.manager, constants.TITLE_IMAGE_PATH)
 
         self.main_sla_timer_label = main_loop_elements.main_sla_timer_label_func(self.manager)
         self.caller_profile_tbox = main_loop_elements.caller_profile_tbox_func(self.manager)
@@ -96,15 +96,15 @@ class ShiftLoop:
     
     def _init_music(self):
 
-        self.background_music = pygame.mixer.music.load(config.BACKGROUND_MUSIC_PATH)
-        self.incoming_call_music = pygame.mixer.music.load(config.INCOMING_CALL_MUSIC_PATH)
-        self.list_click_music = pygame.mixer.music.load(config.LIST_CLICK_MUSIC_PATH)
-        self.incorrect_submit_music = pygame.mixer.music.load(config.INCORRECT_SUBMIT_MUSIC_PATH)
-        self.correct_submit_music = pygame.mixer.music.load(config.CORRECT_SUBMIT_MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(config.BACK_BUTTON_MUSIC_PATH)
+        self.background_music = pygame.mixer.music.load(constants.BACKGROUND_MUSIC_PATH)
+        self.incoming_call_music = pygame.mixer.music.load(constants.INCOMING_CALL_MUSIC_PATH)
+        self.list_click_music = pygame.mixer.music.load(constants.LIST_CLICK_MUSIC_PATH)
+        self.incorrect_submit_music = pygame.mixer.music.load(constants.INCORRECT_SUBMIT_MUSIC_PATH)
+        self.correct_submit_music = pygame.mixer.music.load(constants.CORRECT_SUBMIT_MUSIC_PATH)
+        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
 
-        self.background_music_channel = pygame.mixer.Channel(1)  
         self.incoming_call_channel = pygame.mixer.Channel(0)
+        self.background_music_channel = pygame.mixer.Channel(1)  
         self.list_click_music_channel = pygame.mixer.Channel(2)
         self.incorrect_submit_music_channel = pygame.mixer.Channel(3)
         self.correct_submit_music_channel = pygame.mixer.Channel(4)
@@ -139,12 +139,12 @@ class ShiftLoop:
 
     def shift_loop(self):
 
-        self.background_music_channel.play(pygame.mixer.Sound(config.BACKGROUND_MUSIC_PATH), loops=-1)
+        self.background_music_channel.play(pygame.mixer.Sound(constants.BACKGROUND_MUSIC_PATH), loops=-1)
 
         self.running = True
         while self.running:
 
-            self.time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
+            self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             self.ticket_timer += self.time_delta
 
             events = pygame.event.get()
@@ -190,7 +190,7 @@ class ShiftLoop:
 
     def _handle_threat_selection(self, selected_threat):
 
-        self.list_click_music_channel.play(pygame.mixer.Sound(config.LIST_CLICK_MUSIC_PATH))
+        self.list_click_music_channel.play(pygame.mixer.Sound(constants.LIST_CLICK_MUSIC_PATH))
 
         self.cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [selected_threat])
         description, indicators, countermeasures, image_file = self.cursor.fetchone()
@@ -201,7 +201,7 @@ class ShiftLoop:
         try: 
             threat_image_load = pygame.image.load(image_path)
         except:
-            threat_image_load = pygame.image.load(config.DEFAULT_THREAT_IMAGE_PATH)
+            threat_image_load = pygame.image.load(constants.DEFAULT_THREAT_IMAGE_PATH)
 
         self.threat_image.set_image(new_image=threat_image_load)
         self.threat_description_tbox.set_text(f'<b>Description</b>:\n{description}\n<b>Indicators:\n</b>{indicators}\n<b>Countermeasures:</b>\n{countermeasures}')
@@ -211,7 +211,7 @@ class ShiftLoop:
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(config.BACK_BUTTON_MUSIC_PATH))
+            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
             self.back_button_music_channel.stop()
 
             self.ticket_transcript_channel.stop() if self.ticket_transcript_channel else None
@@ -224,17 +224,17 @@ class ShiftLoop:
             self._reset_ticket_ui()
 
             if selected_threat == answer:
-                self.correct_submit_music_channel.play(pygame.mixer.Sound(config.CORRECT_SUBMIT_MUSIC_PATH))
+                self.correct_submit_music_channel.play(pygame.mixer.Sound(constants.CORRECT_SUBMIT_MUSIC_PATH))
                 self.total_score += 1
 
             else:
-                self.incorrect_submit_music_channel.play(pygame.mixer.Sound(config.INCORRECT_SUBMIT_MUSIC_PATH))
+                self.incorrect_submit_music_channel.play(pygame.mixer.Sound(constants.INCORRECT_SUBMIT_MUSIC_PATH))
 
             self.ticket_transcript_channel.stop()
             pygame.mixer.music.unload()
 
-        if self.accept_button and event.ui_element == self.accept_button:
 
+        if self.accept_button and event.ui_element == self.accept_button:
             self._generate_ticket()
         
 
@@ -243,7 +243,7 @@ class ShiftLoop:
         self.caller_popup_window, self.accept_button, self.popup_window_countdown = main_loop_elements.caller_popup_window_func(self.manager)
         self.popup_window_close_timer = 0
 
-        self.incoming_call_channel.play(pygame.mixer.Sound(config.INCOMING_CALL_MUSIC_PATH), loops=-1)
+        self.incoming_call_channel.play(pygame.mixer.Sound(constants.INCOMING_CALL_MUSIC_PATH), loops=-1)
         self.incoming_call_channel.set_volume(0.3) 
 
     
@@ -345,7 +345,7 @@ class ShiftLoop:
 
     def _reset_ticket_ui(self):
 
-        self.randomized_ticket_interval = random.uniform(config.MIN_CALL_INTERVAL, config.MAX_CALL_INTERVAL)
+        self.randomized_ticket_interval = random.uniform(constants.MIN_CALL_INTERVAL, constants.MAX_CALL_INTERVAL)
 
         self.ticket_title_tbox.set_text("")
         self.ticket_entry_tbox.set_text("AWAITING TICKET...")
@@ -403,7 +403,7 @@ class ShiftReport:
         running = True
         while running:
 
-            time_delta = self.pygame_renderer.clock.tick(config.FPS) / config.MILLISECOND_PER_SECOND
+            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
