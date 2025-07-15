@@ -4,16 +4,8 @@ import pygame_gui
 import init
 import constants
 import elements.threats_elements as threat_element
+from queries import SqliteQueries
 
-
-
-def threats_queries(cursor):
-
-    cursor.execute('SELECT name FROM threats')
-    threat_list_results = cursor.fetchall()
-    threat_list = [threat_list_result[0] for threat_list_result in threat_list_results]
-
-    return threat_list
 
 
 
@@ -38,7 +30,7 @@ class ThreatManagement():
 
     def _init_gameplay_elements(self):
 
-        self.threat_list = threats_queries(self.cursor)
+        self.threat_list = SqliteQueries(self.cursor).threat_list_query()
 
     def _init_ui_elements(self):
 
@@ -104,8 +96,7 @@ class ThreatManagement():
 
         self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
 
-        self.cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [self.selected_threat])
-        description, indicators, countermeasures, image_path = self.cursor.fetchone()
+        description, indicators, countermeasures, image_path = SqliteQueries(self.cursor).threat_selection_query(self.selected_threat)
 
         self.selected_threat_title_tbox.set_text(f"<b>{self.selected_threat}</b>")
         self.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{description}")
@@ -165,7 +156,7 @@ class ThreatManagement():
         self.cursor.execute('DELETE FROM threats WHERE name=?', [self.selected_threat])
         self.connect.commit()
 
-        updated_threat_list = threats_queries(self.cursor)
+        updated_threat_list = SqliteQueries(self.cursor).threat_list_query()
 
         return updated_threat_list
 
@@ -261,7 +252,7 @@ class ThreatCreation():
         if event.ui_element == self.back_button:
 
             self.back_button_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
-            self.updated_threat_list = threats_queries(self.cursor)
+            self.updated_threat_list = SqliteQueries(self.cursor).threat_list_query()
 
             self.running = False
         
