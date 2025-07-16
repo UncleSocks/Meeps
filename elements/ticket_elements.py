@@ -28,13 +28,18 @@ def create_ticket_button_func(manager):
                                                  text="+", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
+    return create_button
+    
+
+def delete_ticket_button_func(manager):
+
     delete_button_rect = pygame.Rect(0, 0, 45, 30)
     delete_button_rect.bottomleft = (280, -470)
     delete_button = pygame_gui.elements.UIButton(relative_rect=delete_button_rect,
                                                  text="-", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
-    return create_button, delete_button
+    return delete_button
 
 
 def ticket_entry_slist_misc_func(manager):

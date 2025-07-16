@@ -53,6 +53,16 @@ class SqliteQueries():
         ticket_ids_list = [ticket_ids_result[0] for ticket_ids_result in ticket_ids_results]
 
         return ticket_ids_list
+    
+
+    def ticket_ids_titles_query(self):
+
+        self.cursor.execute('SELECT id, title FROM tickets')
+        ticket_list_results = self.cursor.fetchall()
+        id_list = [ticket_list_result[0] for ticket_list_result in ticket_list_results]
+        ticket_list = [ticket_list_result[1] for ticket_list_result in ticket_list_results]
+
+        return id_list, ticket_list
 
 
     def ticket_query(self, selected_id):
