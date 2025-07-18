@@ -205,3 +205,33 @@ def ticket_confirm_window_func(manager):
                                                                      anchors={'left':'left', 'bottom':'bottom'})
     
     return ticket_confirm_window, ticket_confirm_close_button
+
+
+def ticket_delete_confirm_window_func(manager):
+
+    ticket_delete_confirm_window_rect = pygame.Rect(0, 0, 400, 200)
+    ticket_delete_confirm_window = pygame_gui.elements.UIWindow(rect=ticket_delete_confirm_window_rect, 
+                                                                window_display_title="Meeps Security: Delete Ticket",
+                                                                manager=manager)
+    
+    
+    ticket_delete_confirm_window_label_rect = pygame.Rect(0, -10, 300, 200)
+    ticket_delete_confirm_window_label = pygame_gui.elements.UILabel(relative_rect=ticket_delete_confirm_window_label_rect,
+                                                                     text="Delete selected ticket?",
+                                                                     manager=manager,
+                                                                     container=ticket_delete_confirm_window,
+                                                                     anchors={'center':'center'})
+    
+    ticket_delete_confirm_yes_button_rect = pygame.Rect(10, 10, 100, 40)
+    ticket_delete_confirm_yes_button_rect.bottomright = (185, -10)
+    ticket_delete_confirm_yes_button = pygame_gui.elements.UIButton(relative_rect=ticket_delete_confirm_yes_button_rect,
+                                                                    text="YES", manager=manager, container=ticket_delete_confirm_window,
+                                                                    anchors={'left':'left', 'bottom':'bottom'})
+    
+    ticket_delete_confirm_no_button_rect = pygame.Rect(10, 10, 100, 40)
+    ticket_delete_confirm_no_button_rect.bottomright = (285, -10)
+    ticket_delete_confirm_no_button = pygame_gui.elements.UIButton(relative_rect=ticket_delete_confirm_no_button_rect, 
+                                                                   text="NO", manager=manager, container=ticket_delete_confirm_window,
+                                                                   anchors={'left':'left', 'bottom':'bottom'})
+
+    return ticket_delete_confirm_window, ticket_delete_confirm_yes_button, ticket_delete_confirm_no_button

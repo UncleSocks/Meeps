@@ -5,7 +5,7 @@ import constants
 import init
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
-from game_loops.tickets import ticket_management
+from game_loops.tickets import TicketManagement
 from game_loops.accounts import accounts_management
 from game_loops.threats import ThreatManagement
 
@@ -69,7 +69,7 @@ class MainMenu:
                     button_action_map = {
 
                         self.start_button: lambda: shift_introduction(self.connect, self.cursor), 
-                        self.ticket_management_button: lambda: ticket_management(self.connect, self.cursor),
+                        self.ticket_management_button: lambda: TicketManagement(self.connect, self.cursor).ticket_management_loop(),
                         self.account_management_button: lambda: accounts_management(self.connect, self.cursor),
                         self.threat_entries_button: lambda: ThreatManagement(self.connect, self.cursor).threat_management_loop(),
                         self.quit_button: lambda: self._quit()

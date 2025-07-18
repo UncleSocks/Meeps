@@ -20,6 +20,7 @@ THREAT_DATABASE_IMAGE_PATH = 'assets/images/general/threat_database.png'
 THREAT_CREATE_IMAGE_PATH = 'assets/images/general/add_threat.png'
 
 TICKET_MANAGEMENT_IMAGE_PATH = 'assets/images/general/ticket_mngr.png'
+NEW_TICKET_IMAGE_PATH = 'assets/images/general/new_ticket.png'
 
 MENU_BUTTON_MUSIC_PATH = 'assets/sounds/menu_button.mp3'
 INCOMING_CALL_MUSIC_PATH = 'assets/sounds/incoming_call_2.mp3'

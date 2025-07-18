@@ -55,14 +55,13 @@ class SqliteQueries():
         return ticket_ids_list
     
 
-    def ticket_ids_titles_query(self):
+    def ticket_titles_query(self):
 
-        self.cursor.execute('SELECT id, title FROM tickets')
-        ticket_list_results = self.cursor.fetchall()
-        id_list = [ticket_list_result[0] for ticket_list_result in ticket_list_results]
-        ticket_list = [ticket_list_result[1] for ticket_list_result in ticket_list_results]
+        self.cursor.execute('SELECT title FROM tickets')
+        ticket__titlelist_results = self.cursor.fetchall()
+        ticket_title_list = [ticket_list_result[0] for ticket_list_result in ticket__titlelist_results]
 
-        return id_list, ticket_list
+        return ticket_title_list
 
 
     def ticket_query(self, selected_id):
@@ -73,6 +72,14 @@ class SqliteQueries():
         title, current_ticket, answer, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = self.cursor.fetchone()
 
         return title, current_ticket, answer, caller_name, caller_org, caller_email, caller_contact, caller_picture_file
+    
+
+    def ticket_account_query(self, selected_ticket_id):
+
+        self.cursor.execute('SELECT t.title, t.entry, a.name, a.organization, a.email, a.contact FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?', [selected_ticket_id])
+        ticket_title, ticket_entry, account_name, account_organization, account_email, account_contact = self.cursor.fetchone()
+        
+        return ticket_title, ticket_entry, account_name, account_organization, account_email, account_contact
     
 
     def ticket_transcript_query(self, selected_id):
@@ -97,3 +104,29 @@ class SqliteQueries():
         description, indicators, countermeasures, image_file = self.cursor.fetchone()
 
         return description, indicators, countermeasures, image_file
+    
+
+    def threat_ticket_selection_query(self, selected_threat):
+
+        self.cursor.execute('SELECT description, indicators, countermeasures FROM threats WHERE name=?', [selected_threat])
+        description, indicators, countermeasures = self.cursor.fetchone()
+
+        return description, indicators, countermeasures
+    
+    def ticket_caller_id_query(self, selected_caller):
+
+        self.cursor.execute('SELECT id FROM accounts WHERE name=?', [selected_caller])
+        selected_caller_id = int(self.cursor.fetchone()[0])
+
+        return selected_caller_id
+    
+    
+    def account_list_query(self):
+
+        self.cursor.execute('SELECT id, name FROM accounts')
+        account_list_results = self.cursor.fetchall()
+        
+        account_id_list = [account_list_result[0] for account_list_result in account_list_results]
+        account_name_list = [account_list_result[1] for account_list_result in account_list_results]
+
+        return account_id_list, account_name_list

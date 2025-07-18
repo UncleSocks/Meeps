@@ -69,6 +69,7 @@ class ThreatManagement():
         while self.running:
 
             self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+
             events = pygame.event.get()
             self._handle_events(events)
             self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
@@ -111,6 +112,7 @@ class ThreatManagement():
 
             self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
             self.back_button_music_channel.set_volume(0.2)
+
             self.running = False
 
         if event.ui_element == self.create_button:
@@ -118,9 +120,10 @@ class ThreatManagement():
             self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
 
             threat_create = ThreatCreation(self.connect, self.cursor)
-            updated_threat_list = threat_create.threat_creation_loop()
+            self.threat_list = threat_create.threat_creation_loop()
+
             self.threat_entry_slist.kill()
-            self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, updated_threat_list)
+            self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, self.threat_list)
 
         if event.ui_element == self.delete_button and self.selected_threat is not None:
 
@@ -136,9 +139,9 @@ class ThreatManagement():
 
                 self.delete_button_music_channel.play(pygame.mixer.Sound(constants.DELETE_BUTTON__MUSIC_PATH))
 
-                updated_threat_list = self._delete_threat()
+                self.threat_list = self._delete_threat()
                 self.threat_entry_slist.kill()
-                self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, updated_threat_list)
+                self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, self.threat_list)
 
                 self.threat_delete_confirm_window.kill()
 
@@ -224,6 +227,7 @@ class ThreatCreation():
         while self.running:
 
             self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            
             events = pygame.event.get()
             self._handle_events(events)
             self.pygame_renderer.ui_renderer(self.manager, self.time_delta)

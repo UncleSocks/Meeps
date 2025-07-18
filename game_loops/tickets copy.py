@@ -59,7 +59,8 @@ def ticket_management(connect, cursor):
         ticket_manager_image = ticket_elements.ticket_manager_image_func(manager, "assets/images/general/ticket_mngr.png")
         ticket_information_label = ticket_elements.ticket_information_label_func(manager)
 
-        create_button, delete_button = ticket_elements.create_ticket_button_func(manager)
+        create_button = ticket_elements.create_ticket_button_func(manager)
+        delete_button = ticket_elements.delete_ticket_button_func(manager)
         ticket_entry_title_tbox = ticket_elements.ticket_entry_slist_misc_func(manager)
         ticket_entry_slist = ticket_elements.ticket_entry_slist_func(manager, ticket_list)
         selected_ticket_title_tbox, selected_ticket_description_tbox = ticket_elements.selected_ticket_tbox_func(manager)
