@@ -120,13 +120,38 @@ class SqliteQueries():
 
         return selected_caller_id
     
-    
-    def account_list_query(self):
+    def ticket_title_caller_id_query(self, selected_account_id):
 
-        self.cursor.execute('SELECT id, name FROM accounts')
-        account_list_results = self.cursor.fetchall()
+        self.cursor.execute('SELECT title FROM tickets WHERE caller_id=?', [selected_account_id])
+        assigned_tickets_result = self.cursor.fetchall()
+
+        assigned_ticket_list = [assigned_ticket_title[0] for assigned_ticket_title in assigned_tickets_result]
         
-        account_id_list = [account_list_result[0] for account_list_result in account_list_results]
-        account_name_list = [account_list_result[1] for account_list_result in account_list_results]
+        return assigned_ticket_list
+    
+    
+    def account_name_list_query(self):
 
-        return account_id_list, account_name_list
+        self.cursor.execute('SELECT name FROM accounts')
+        account_name_list_results = self.cursor.fetchall()
+
+        account_name_list = [account_name_list_result[0] for account_name_list_result in account_name_list_results]
+
+        return account_name_list
+    
+
+    def account_id_query(self):
+
+        self.cursor.execute('SELECT id FROM accounts')
+        account_id_list_results = self.cursor.fetchall()
+
+        account_id_list = [account_id_list_result[0] for account_id_list_result in account_id_list_results]
+
+        return account_id_list
+    
+    def account_details_query(self, selected_account_id):
+
+        self.cursor.execute('SELECT name, organization, email, contact, picture FROM accounts WHERE id=?', [selected_account_id])
+        account_name, account_organization, account_email, account_contact, account_picture_path = self.cursor.fetchone()
+
+        return account_name, account_organization, account_email, account_contact, account_picture_path

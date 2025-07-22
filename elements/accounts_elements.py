@@ -20,7 +20,7 @@ def account_manager_image_func(manager, image_path):
     return account_manager_image
 
 
-def create_delete_button_func(manager):
+def create_button_func(manager):
 
     create_button_rect = pygame.Rect(0, 0, 45, 30)
     create_button_rect.bottomleft = (320, -470)
@@ -28,13 +28,18 @@ def create_delete_button_func(manager):
                                                  text="+", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
+    return create_button
+
+
+def delete_button_fun(manager):
+    
     delete_button_rect = pygame.Rect(0, 0, 45, 30)
     delete_button_rect.bottomleft = (280, -470)
     delete_button = pygame_gui.elements.UIButton(relative_rect=delete_button_rect,
                                                  text="-", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
     
-    return create_button, delete_button
+    return delete_button
 
 
 def account_entry_slist_misc_func(manager):
@@ -213,3 +218,40 @@ def account_confirm_window_func(manager):
                                                                      anchors={'left':'left', 'bottom':'bottom'})
     
     return account_confirm_window, account_confirm_close_button
+
+
+def account_delete_confirm_window_func(manager):
+
+    account_delete_confirm_window_rect = pygame.Rect(0, 0, 400, 200)
+    account_delete_confirm_window = pygame_gui.elements.UIWindow(rect=account_delete_confirm_window_rect, 
+                                                                window_display_title="Meeps Security: Delete Threat",
+                                                                manager=manager)
+    
+    
+    account_delete_confirm_window_label_rect = pygame.Rect(0, -10, 300, 200)
+    account_delete_confirm_window_label = pygame_gui.elements.UILabel(relative_rect=account_delete_confirm_window_label_rect,
+                                                                     text="Delete selected account?",
+                                                                     manager=manager,
+                                                                     container=account_delete_confirm_window,
+                                                                     anchors={'center':'center'})
+    
+    account_delete_confirm_window_warning_label_rect = pygame.Rect(0, -40, 350, 200)
+    account_delete_confirm_window_warning_label = pygame_gui.elements.UILabel(relative_rect=account_delete_confirm_window_warning_label_rect,
+                                                                     text="[!] This will delete associated tickets.",
+                                                                     manager=manager,
+                                                                     container=account_delete_confirm_window,
+                                                                     anchors={'center':'center'})
+    
+    account_delete_confirm_yes_button_rect = pygame.Rect(10, 10, 100, 40)
+    account_delete_confirm_yes_button_rect.bottomright = (185, -10)
+    account_delete_confirm_yes_button = pygame_gui.elements.UIButton(relative_rect=account_delete_confirm_yes_button_rect,
+                                                                    text="YES", manager=manager, container=account_delete_confirm_window,
+                                                                    anchors={'left':'left', 'bottom':'bottom'})
+    
+    account_delete_confirm_no_button_rect = pygame.Rect(10, 10, 100, 40)
+    account_delete_confirm_no_button_rect.bottomright = (285, -10)
+    account_delete_confirm_no_button = pygame_gui.elements.UIButton(relative_rect=account_delete_confirm_no_button_rect, 
+                                                                   text="NO", manager=manager, container=account_delete_confirm_window,
+                                                                   anchors={'left':'left', 'bottom':'bottom'})
+
+    return account_delete_confirm_window, account_delete_confirm_yes_button, account_delete_confirm_no_button

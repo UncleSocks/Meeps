@@ -13,7 +13,7 @@ def ticket_transcript_generator(id, ticket):
 
     engine = pyttsx3.init()
     ticket_transcript_filename = f'assets/sounds/{id}_transcript.wav'
-    ticket_transcript_filepath = engine.save_to_file(ticket, ticket_transcript_filename)
+    engine.save_to_file(ticket, ticket_transcript_filename)
 
     engine.runAndWait()
 
@@ -206,7 +206,8 @@ class TicketCreation():
     def _init_gameplay_elements(self):
 
         self.threat_list = SqliteQueries(self.cursor).threat_list_query()
-        self.account_id_list, self.account_name_list = SqliteQueries(self.cursor).account_list_query()
+        self.account_name_list = SqliteQueries(self.cursor).account_name_list_query()
+        self.account_id_list = SqliteQueries(self.cursor).account_id_query()
 
     def _init_ui_elements(self):
 
@@ -290,8 +291,6 @@ class TicketCreation():
             self.running = False
         
         if event.ui_element == self.create_button and self.selected_threat is not None and self.ticket_title is not None and self.ticket_entry is not None and self.new_ticket_confirm_window is False:
-
-            print("here")
 
             if self.selected_caller is None:
                 selected_caller_id = 1
