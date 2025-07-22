@@ -46,7 +46,7 @@ def shift_introduction(connect, cursor):
                 
             manager.process_events(event)
 
-        pygame_renderer.ui_renderer(manager, time_delta)
+        pygame_renderer.ui_renderer(time_delta)
 
 
 class ShiftLoop:
@@ -150,7 +150,7 @@ class ShiftLoop:
 
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
 
     def _handle_events(self, events):
@@ -411,4 +411,4 @@ class ShiftReport:
 
                 self.manager.process_events(event)
 
-            self.pygame_renderer.ui_renderer(self.manager, time_delta)
+            self.pygame_renderer.ui_renderer(time_delta)

@@ -91,7 +91,7 @@ class TicketManagement():
             self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
 
 
@@ -253,7 +253,7 @@ class TicketCreation():
 
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
         return self.updated_ticket_title_list
 
@@ -276,9 +276,16 @@ class TicketCreation():
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 self._handle_button_pressed(event)
 
-            self._handle_ticket_entry_content()
-
+            self._get_ticket_entry_content()
             self.manager.process_events(event)
+
+        
+    def _handle_threat_selection(self):
+
+        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+        print(self.selected_threat)
+        threat_description, threat_indicators, threat_countermeasures = SqliteQueries(self.cursor).threat_ticket_selection_query(self.selected_threat)
+        self.threat_description_tbox.set_text(f'<b>{self.selected_threat.upper()}</b>\n<b>Description</b>:\n{threat_description}\n<b>Indicators:\n</b>{threat_indicators}\n<b>Countermeasures:</b>\n{threat_countermeasures}')
 
 
     def _handle_button_pressed(self, event):
@@ -290,13 +297,13 @@ class TicketCreation():
             
             self.running = False
         
-        if event.ui_element == self.create_button and self.selected_threat is not None and self.ticket_title is not None and self.ticket_entry is not None and self.new_ticket_confirm_window is False:
-
-            if self.selected_caller is None:
-                selected_caller_id = 1
-
-            else:
-                selected_caller_id = SqliteQueries(self.cursor).ticket_caller_id_query(self.selected_caller)
+        if event.ui_element == self.create_button and all([
+            self.selected_threat,
+            self.ticket_title,
+            self.ticket_entry,
+        ]):
+            
+            selected_caller_id = 1 if self.selected_caller is None else SqliteQueries(self.cursor).ticket_caller_id_query(self.selected_caller)
 
             self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
 
@@ -319,24 +326,18 @@ class TicketCreation():
 
             if event.ui_element == self.new_ticket_close_button:
 
-                self.ticket_title_text_entry.set_text("")
-                self.ticket_text_entry.set_text("")
-                self.threat_description_tbox.set_text("SELECT A THREAT")
-
-                self.new_ticket_confirm_window.hide()
-
+                self._reset_ticket_entry_content()
+                self.new_ticket_confirm_window.kill()
                 self._init_state_variables()
 
-        
-    def _handle_threat_selection(self):
 
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
-        print(self.selected_threat)
-        threat_description, threat_indicators, threat_countermeasures = SqliteQueries(self.cursor).threat_ticket_selection_query(self.selected_threat)
-        self.threat_description_tbox.set_text(f'<b>{self.selected_threat.upper()}</b>\n<b>Description</b>:\n{threat_description}\n<b>Indicators:\n</b>{threat_indicators}\n<b>Countermeasures:</b>\n{threat_countermeasures}')
-
-
-    def _handle_ticket_entry_content(self):
+    def _get_ticket_entry_content(self):
 
         self.ticket_title = self.ticket_title_text_entry.get_text()
         self.ticket_entry = self.ticket_text_entry.get_text()
+
+    def _reset_ticket_entry_content(self):
+
+        self.ticket_title_text_entry.set_text("")
+        self.ticket_text_entry.set_text("")
+        self.threat_description_tbox.set_text("SELECT A THREAT")

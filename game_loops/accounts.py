@@ -75,7 +75,7 @@ class AccountManagement:
             self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
 
     def _handle_events(self, events):
@@ -231,7 +231,7 @@ class AccountCreation():
 
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
         return self.updated_account_name_list
 

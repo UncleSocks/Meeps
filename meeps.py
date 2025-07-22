@@ -1,8 +1,8 @@
 import pygame
 import pygame_gui
 
-import constants
 import init
+import constants
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
 from game_loops.tickets import TicketManagement
@@ -11,6 +11,7 @@ from game_loops.threats import ThreatManagement
 
 
 
+    
 class MainMenu:
 
     def __init__(self):
@@ -83,7 +84,7 @@ class MainMenu:
 
                 self.manager.process_events(event)
 
-            self.pygame_renderer.ui_renderer(self.manager, time_delta)
+            self.pygame_renderer.ui_renderer(time_delta)
 
 
     def _quit(self) -> None:

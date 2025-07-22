@@ -63,6 +63,7 @@ class ThreatManagement():
         self.delete_button_music_channel = pygame.mixer.Channel(2)
         self.back_button_music_channel = pygame.mixer.Channel(3)
 
+
     def threat_management_loop(self):
 
         self.running = True
@@ -72,7 +73,7 @@ class ThreatManagement():
 
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
 
     def _handle_events(self, events):
@@ -230,7 +231,7 @@ class ThreatCreation():
             
             events = pygame.event.get()
             self._handle_events(events)
-            self.pygame_renderer.ui_renderer(self.manager, self.time_delta)
+            self.pygame_renderer.ui_renderer(self.time_delta)
 
         return self.updated_threat_list
 
@@ -245,8 +246,7 @@ class ThreatCreation():
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 self._handle_button_pressed(event)
 
-            self._handle_threat_entry_content()
-
+            self._get_threat_entry_content()
             self.manager.process_events(event)
 
 
@@ -260,7 +260,12 @@ class ThreatCreation():
 
             self.running = False
         
-        if event.ui_element == self.add_button and self.threat_name is not None and self.threat_description is not None and self.threat_indicators is not None and self.threat_countermeasures is not None:
+        if event.ui_element == self.add_button and all([
+            self.threat_name,
+            self.threat_description,
+            self.threat_indicators,
+            self.threat_countermeasures
+        ]):
 
             self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
 
@@ -268,7 +273,9 @@ class ThreatCreation():
             last_id = self.cursor.fetchone()[0]
             new_id = last_id + 1
 
-            new_threat_entry = (new_id, self.threat_name, self.threat_description, self.threat_indicators, self.threat_countermeasures, self.threat_image_path)
+            new_threat_entry = (new_id, self.threat_name, self.threat_description, self.threat_indicators, 
+                                self.threat_countermeasures, self.threat_image_path)
+            
             self.cursor.execute('INSERT INTO threats VALUES (?, ?, ?, ?, ?, ?)', new_threat_entry)
             self.connect.commit()
 
@@ -282,20 +289,23 @@ class ThreatCreation():
 
             if event.ui_element == self.confirm_close_button:
 
-                self.threat_entry_name.set_text("")
-                self.threat_entry_description.set_text("")
-                self.threat_entry_indicators.set_text("")
-                self.threat_entry_countermeasures.set_text("")
-                self.threat_entry_image_path.set_text("")
-
+                self.__reset_threat_content()
                 self.confirm_window.hide()
-
                 self._init_threat_entry_variables()
 
-    def _handle_threat_entry_content(self):
+
+    def _get_threat_entry_content(self):
 
         self.threat_name = self.threat_entry_name.get_text()
         self.threat_description = self.threat_entry_description.get_text()
         self.threat_indicators = self.threat_entry_indicators.get_text()
         self.threat_countermeasures = self.threat_entry_countermeasures.get_text()
         self.threat_image_path = self.threat_entry_image_path.get_text()
+
+    def __reset_threat_content(self):
+
+        self.threat_entry_name.set_text("")
+        self.threat_entry_description.set_text("")
+        self.threat_entry_indicators.set_text("")
+        self.threat_entry_countermeasures.set_text("")
+        self.threat_entry_image_path.set_text("") 
