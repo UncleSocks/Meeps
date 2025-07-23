@@ -289,7 +289,7 @@ class ThreatCreation():
 
             if event.ui_element == self.confirm_close_button:
 
-                self.__reset_threat_content()
+                self._reset_threat_content()
                 self.confirm_window.hide()
                 self._init_threat_entry_variables()
 
@@ -302,7 +302,7 @@ class ThreatCreation():
         self.threat_countermeasures = self.threat_entry_countermeasures.get_text()
         self.threat_image_path = self.threat_entry_image_path.get_text()
 
-    def __reset_threat_content(self):
+    def _reset_threat_content(self):
 
         self.threat_entry_name.set_text("")
         self.threat_entry_description.set_text("")
