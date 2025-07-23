@@ -212,9 +212,8 @@ class ShiftLoop:
         if event.ui_element == self.back_button:
 
             self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
-            self.back_button_music_channel.stop()
-
             self.ticket_transcript_channel.stop() if self.ticket_transcript_channel else None
+            self.background_music_channel.stop()
 
             pygame.mixer.music.unload()
             self.running = False
