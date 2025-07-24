@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 
 import init
+import sound_manager
 import constants
 import elements.accounts_elements as account_elements
 from queries import SqliteQueries
@@ -11,7 +12,6 @@ from queries import SqliteQueries
 class AccountManagement:
 
     def __init__(self, connect, cursor):
-
         self.connect = connect
         self.cursor = cursor
 
@@ -23,19 +23,16 @@ class AccountManagement:
 
 
     def _init_pygame(self):
-
         self.pygame_renderer = init.PygameRenderer()
         self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
 
     def _init_gameplay_elements(self):
-
         self.account_name_list = SqliteQueries(self.cursor).account_name_list_query()
         self.account_id_list = SqliteQueries(self.cursor).account_id_query()
         self.assigned_ticket_list = []
 
     def _init_ui_elements(self):
-
         self.back_button = account_elements.back_button_func(self.manager)
         self.create_button = account_elements.create_button_func(self.manager)
         self.delete_button = account_elements.delete_button_fun(self.manager)
@@ -50,25 +47,13 @@ class AccountManagement:
         self.account_details_label, self.selected_account_description_tbox = account_elements.account_details(self.manager)
 
     def _init_state_variables(self):
-
         self.selected_account = None
         self.account_delete_confirm_window = False
 
     def _init_music(self):
-
-        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
-        self.delete_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.add_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-
-        self.menu_button_music_channel = pygame.mixer.Channel(0)
-        self.delete_button_music_channel = pygame.mixer.Channel(1)
-        self.add_button_music_channel = pygame.mixer.Channel(2)
-        self.back_button_music_channel = pygame.mixer.Channel(3)
-
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
     def account_management_loop(self):
-
         self.running = True
         while self.running:
 
@@ -77,9 +62,7 @@ class AccountManagement:
             self._handle_events(events)
             self.pygame_renderer.ui_renderer(self.time_delta)
 
-
     def _handle_events(self, events):
-
         for event in events:
 
             if event.type == pygame.QUIT:
@@ -97,8 +80,7 @@ class AccountManagement:
 
 
     def _handle_account_selection(self):
-
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+        self.button_sound_manager.play_sfx('menu_button')
 
         id_index_find = self.account_name_list.index(self.selected_account)
         self.selected_account_id = self.account_id_list[id_index_find]
@@ -111,17 +93,17 @@ class AccountManagement:
 
 
     def _handle_button_pressed(self, event):
-
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
+            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
             pygame.mixer.music.unload()
 
             self.running = False
 
         if event.ui_element == self.create_button:
 
-            self.add_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
 
             account_create = AccountCreation(self.connect, self.cursor)
             self.account_name_list = account_create.account_creation_loop()
@@ -133,7 +115,7 @@ class AccountManagement:
 
         if event.ui_element == self.delete_button and self.selected_account is not None:
 
-            self.delete_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
             self.account_delete_confirm_window, self.account_delete_confirm_yes_button, self.account_delete_no_button = account_elements.account_delete_confirm_window_func(self.manager)
 
 
@@ -143,7 +125,7 @@ class AccountManagement:
 
             if event.ui_element == self.account_delete_confirm_yes_button:
 
-                self.delete_button_music_channel.play(pygame.mixer.Sound(constants.DELETE_BUTTON__MUSIC_PATH))
+                self.button_sound_manager.play_sfx('delete_button')
 
                 self.account_name_list = self._delete_account()
                 self.account_entry_slist.kill()
@@ -153,12 +135,11 @@ class AccountManagement:
 
             if event.ui_element == self.account_delete_no_button:
 
-                self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+                self.button_sound_manager.play_sfx('back_button')
                 self.account_delete_confirm_window.kill()
 
 
     def _delete_account(self):
-
         self.cursor.execute('DELETE FROM accounts WHERE id=?', [self.selected_account_id])
         self.connect.commit()
         
@@ -214,13 +195,7 @@ class AccountCreation():
         self.account_confirm_window = False
 
     def _init_music(self):
-
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-
-        self.back_button_music_channel = pygame.mixer.Channel(3)
-        self.create_button_music_channel = pygame.mixer.Channel(4)
-
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
     def account_creation_loop(self):
 
@@ -254,7 +229,7 @@ class AccountCreation():
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
             self.updated_account_name_list = SqliteQueries(self.cursor).account_name_list_query()
 
             self.running = False
@@ -267,7 +242,7 @@ class AccountCreation():
             self.new_account_picture_path
         ]):
             
-            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
 
             self.cursor.execute('SELECT MAX(id) FROM accounts')
             last_account_id = self.cursor.fetchone()[0]

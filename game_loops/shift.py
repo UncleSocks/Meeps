@@ -4,6 +4,7 @@ import pygame
 import pygame_gui
 
 import constants
+import sound_manager
 import init
 import elements.main_loop_elements as main_loop_elements
 from queries import SqliteQueries
@@ -96,22 +97,14 @@ class ShiftLoop:
 
     
     def _init_music(self):
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
         self.background_music = pygame.mixer.music.load(constants.BACKGROUND_MUSIC_PATH)
         self.incoming_call_music = pygame.mixer.music.load(constants.INCOMING_CALL_MUSIC_PATH)
-        self.list_click_music = pygame.mixer.music.load(constants.LIST_CLICK_MUSIC_PATH)
-        self.incorrect_submit_music = pygame.mixer.music.load(constants.INCORRECT_SUBMIT_MUSIC_PATH)
-        self.correct_submit_music = pygame.mixer.music.load(constants.CORRECT_SUBMIT_MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
 
-        self.incoming_call_channel = pygame.mixer.Channel(0)
-        self.background_music_channel = pygame.mixer.Channel(1)  
-        self.list_click_music_channel = pygame.mixer.Channel(2)
-        self.incorrect_submit_music_channel = pygame.mixer.Channel(3)
-        self.correct_submit_music_channel = pygame.mixer.Channel(4)
+        self.incoming_call_channel = pygame.mixer.Channel(4)
+        self.background_music_channel = pygame.mixer.Channel(5)  
 
-        self.back_button_music_channel = pygame.mixer.Channel(5)
-        self.back_button_music_channel.set_volume(0.2)
 
 
     def _init_state_variables(self):
@@ -191,7 +184,7 @@ class ShiftLoop:
 
     def _handle_threat_selection(self, selected_threat):
 
-        self.list_click_music_channel.play(pygame.mixer.Sound(constants.LIST_CLICK_MUSIC_PATH))
+        self.button_sound_manager.play_sfx('list_button')
 
         description, indicators, countermeasures, image_file = SqliteQueries(self.cursor).threat_selection_query(selected_threat)
 
@@ -211,7 +204,7 @@ class ShiftLoop:
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
             self.ticket_transcript_channel.stop() if self.ticket_transcript_channel else None
             self.background_music_channel.stop()
 
@@ -223,11 +216,11 @@ class ShiftLoop:
             self._reset_ticket_ui()
 
             if selected_threat == answer:
-                self.correct_submit_music_channel.play(pygame.mixer.Sound(constants.CORRECT_SUBMIT_MUSIC_PATH))
+                self.button_sound_manager.play_sfx('correct_submit')
                 self.total_score += 1
 
             else:
-                self.incorrect_submit_music_channel.play(pygame.mixer.Sound(constants.INCORRECT_SUBMIT_MUSIC_PATH))
+                self.button_sound_manager.play_sfx('incorrect_submit')
 
             self.ticket_transcript_channel.stop()
             pygame.mixer.music.unload()

@@ -3,6 +3,7 @@ import pygame_gui
 import pyttsx3
 
 import init
+import sound_manager
 import constants
 import elements.ticket_elements as ticket_elements
 from queries import SqliteQueries
@@ -71,16 +72,7 @@ class TicketManagement():
         self.ticket_delete_confirm_window = False
 
     def _init_music(self):
-
-        self.menu_button_music = pygame.mixer.music.load(constants.LIST_CLICK_MUSIC_PATH)
-        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.delete_button_music = pygame.mixer.music.load(constants.DELETE_BUTTON__MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-
-        self.menu_button_music_channel = pygame.mixer.Channel(0)
-        self.create_button_music_channel = pygame.mixer.Channel(1)
-        self.delete_button_music_channel = pygame.mixer.Channel(2)
-        self.back_button_music_channel = pygame.mixer.Channel(3)
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
 
     def ticket_management_loop(self):
@@ -115,7 +107,7 @@ class TicketManagement():
 
     def _handle_ticket_selection(self):
 
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+        self.button_sound_manager.play_sfx('menu_button')
 
         id_index_find = self.ticket_title_list.index(self.selected_ticket)
         self.selected_ticket_id = self.ticket_id_list[id_index_find]
@@ -131,14 +123,15 @@ class TicketManagement():
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
+            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
             pygame.mixer.music.unload()
             
             self.running = False
 
         if event.ui_element == self.create_button:
 
-            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
             
             ticket_create = TicketCreation(self.connect, self.cursor)
             self.ticket_title_list = ticket_create.ticket_creation_loop()
@@ -150,7 +143,7 @@ class TicketManagement():
 
         if event.ui_element == self.delete_button and self.selected_ticket is not None:
 
-            self.delete_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
             self.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, self.ticket_delete_confirm_no_window = ticket_elements.ticket_delete_confirm_window_func(self.manager)
 
         if self.ticket_delete_confirm_window:
@@ -159,7 +152,7 @@ class TicketManagement():
 
             if event.ui_element == self.ticket_delete_confirm_yes_button:
 
-                self.delete_button_music_channel.play(pygame.mixer.Sound(constants.DELETE_BUTTON__MUSIC_PATH))
+                self.button_sound_manager.play_sfx('delete_button')
 
                 self.ticket_title_list = self._delete_tickets()
                 self.ticket_entry_slist.kill()
@@ -169,7 +162,8 @@ class TicketManagement():
 
             if event.ui_element == self.ticket_delete_confirm_no_window:
 
-                self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+                self.button_sound_manager.play_sfx('back_button')
+                self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
                 self.ticket_delete_confirm_window.kill()
 
 
@@ -234,14 +228,7 @@ class TicketCreation():
         self.new_ticket_confirm_window = False
 
     def _init_music(self):
-
-        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
-        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-
-        self.menu_button_music_channel = pygame.mixer.Channel(0)
-        self.create_button_music_channel = pygame.mixer.Channel(1)
-        self.back_button_music_channel = pygame.mixer.Channel(2)
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
     
     def ticket_creation_loop(self):
@@ -282,8 +269,8 @@ class TicketCreation():
         
     def _handle_threat_selection(self):
 
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
-        print(self.selected_threat)
+        self.button_sound_manager.play_sfx('menu_button')
+        
         threat_description, threat_indicators, threat_countermeasures = SqliteQueries(self.cursor).threat_ticket_selection_query(self.selected_threat)
         self.threat_description_tbox.set_text(f'<b>{self.selected_threat.upper()}</b>\n<b>Description</b>:\n{threat_description}\n<b>Indicators:\n</b>{threat_indicators}\n<b>Countermeasures:</b>\n{threat_countermeasures}')
 
@@ -292,7 +279,9 @@ class TicketCreation():
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
+            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
+
             self.updated_ticket_title_list = SqliteQueries(self.cursor).ticket_titles_query()
             
             self.running = False
@@ -305,7 +294,7 @@ class TicketCreation():
             
             selected_caller_id = 1 if self.selected_caller is None else SqliteQueries(self.cursor).ticket_caller_id_query(self.selected_caller)
 
-            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
 
             self.cursor.execute('SELECT MAX(id) FROM tickets')
             last_ticket_id = self.cursor.fetchone()[0]

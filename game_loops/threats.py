@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 
 import init
+import sound_manager
 import constants
 import elements.threats_elements as threat_element
 from queries import SqliteQueries
@@ -52,16 +53,7 @@ class ThreatManagement():
         self.threat_delete_confirm_window = False
         
     def _init_music(self):
-
-        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
-        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.delete_button_music = pygame.mixer.music.load(constants.DELETE_BUTTON__MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-
-        self.menu_button_music_channel = pygame.mixer.Channel(0)
-        self.create_button_music_channel = pygame.mixer.Channel(1)
-        self.delete_button_music_channel = pygame.mixer.Channel(2)
-        self.back_button_music_channel = pygame.mixer.Channel(3)
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
 
     def threat_management_loop(self):
@@ -96,7 +88,7 @@ class ThreatManagement():
 
     def _handle_threat_selection(self):
 
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+        self.button_sound_manager.play_sfx('menu_button')
 
         description, indicators, countermeasures, image_path = SqliteQueries(self.cursor).threat_selection_query(self.selected_threat)
 
@@ -111,14 +103,14 @@ class ThreatManagement():
 
         if event.ui_element == self.back_button:
 
-            self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
-            self.back_button_music_channel.set_volume(0.2)
+            self.button_sound_manager.play_sfx('back_button')
+            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
 
             self.running = False
 
         if event.ui_element == self.create_button:
 
-            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
 
             threat_create = ThreatCreation(self.connect, self.cursor)
             self.threat_list = threat_create.threat_creation_loop()
@@ -128,7 +120,7 @@ class ThreatManagement():
 
         if event.ui_element == self.delete_button and self.selected_threat is not None:
 
-            self.delete_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('menu_button')
             self.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
             
 
@@ -138,7 +130,7 @@ class ThreatManagement():
 
             if event.ui_element == self.threat_delete_confirm_yes_button:
 
-                self.delete_button_music_channel.play(pygame.mixer.Sound(constants.DELETE_BUTTON__MUSIC_PATH))
+                self.button_sound_manager.play_sfx('delete_button')
 
                 self.threat_list = self._delete_threat()
                 self.threat_entry_slist.kill()
@@ -148,7 +140,7 @@ class ThreatManagement():
 
             if event.ui_element == self.threat_delete_confirm_no_button:
                 
-                self.back_button_music_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+                self.button_sound_manager.play_sfx('back_button')
                 self.threat_delete_confirm_window.kill()
 
 
@@ -201,14 +193,7 @@ class ThreatCreation():
         self.updated_threat_list = None
 
     def _init_music(self):
-
-        self.create_button_music = pygame.mixer.music.load(constants.CREATE_BUTTON_MUSIC_PATH)
-        self.back_button_music = pygame.mixer.music.load(constants.BACK_BUTTON_MUSIC_PATH)
-
-        self.create_button_music_channel = pygame.mixer.Channel(3)
-
-        self.back_button_channel = pygame.mixer.Channel(4)
-        self.back_button_channel.set_volume(0.2)
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
             
     def _init_threat_entry_variables(self):
@@ -255,7 +240,7 @@ class ThreatCreation():
 
         if event.ui_element == self.back_button:
 
-            self.back_button_channel.play(pygame.mixer.Sound(constants.BACK_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('back_button')
             self.updated_threat_list = SqliteQueries(self.cursor).threat_list_query()
 
             self.running = False
@@ -267,7 +252,7 @@ class ThreatCreation():
             self.threat_countermeasures
         ]):
 
-            self.create_button_music_channel.play(pygame.mixer.Sound(constants.CREATE_BUTTON_MUSIC_PATH))
+            self.button_sound_manager.play_sfx('modify_button')
 
             self.cursor.execute('SELECT MAX(id) FROM threats')
             last_id = self.cursor.fetchone()[0]

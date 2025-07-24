@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 
 import init
+import sound_manager
 import constants
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
@@ -49,8 +50,7 @@ class MainMenu:
 
     def _init_music(self):
 
-        self.menu_button_music = pygame.mixer.music.load(constants.MENU_BUTTON_MUSIC_PATH)
-        self.menu_button_music_channel = pygame.mixer.Channel(0)
+        self.button_sound_manager = sound_manager.ButtonSoundManager()
 
 
     def main_menu_loop(self) -> None:
@@ -80,7 +80,7 @@ class MainMenu:
                     
     def _handle_button_pressed(self, event):
 
-        self.menu_button_music_channel.play(pygame.mixer.Sound(constants.MENU_BUTTON_MUSIC_PATH))
+        self.button_sound_manager.play_sfx('menu_button')
 
         menu_button_action_map = {
 
@@ -97,7 +97,7 @@ class MainMenu:
             button_action_trigger()
 
 
-    def _quit(self) -> None:
+    def _quit(self):
 
         self.running = False
         self.connect.close()
