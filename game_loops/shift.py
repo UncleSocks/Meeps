@@ -98,13 +98,8 @@ class ShiftLoop:
     
     def _init_music(self):
         self.button_sound_manager = sound_manager.ButtonSoundManager()
-
-        self.background_music = pygame.mixer.music.load(constants.BACKGROUND_MUSIC_PATH)
-        self.incoming_call_music = pygame.mixer.music.load(constants.INCOMING_CALL_MUSIC_PATH)
-
-        self.incoming_call_channel = pygame.mixer.Channel(4)
-        self.background_music_channel = pygame.mixer.Channel(5)  
-
+        self.incoming_call_manager = sound_manager.LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, 1)
+        self.background_music_manager = sound_manager.BackgroundMusicManager(constants.BACKGROUND_MUSIC_PATH)
 
 
     def _init_state_variables(self):
@@ -119,7 +114,7 @@ class ShiftLoop:
         self.caller_popup_window = None
         self.caller_profile_image = None
         self.popup_button_accepted = False
-        self.ticket_transcript_channel = None
+        self.ticket_transcript = None
 
         self.selected_threat = None
         self.answer = None
@@ -133,7 +128,8 @@ class ShiftLoop:
 
     def shift_loop(self):
 
-        self.background_music_channel.play(pygame.mixer.Sound(constants.BACKGROUND_MUSIC_PATH), loops=-1)
+        self.background_music_manager.load_music()
+        self.background_music_manager.play_music()
 
         self.running = True
         while self.running:
@@ -205,8 +201,8 @@ class ShiftLoop:
         if event.ui_element == self.back_button:
 
             self.button_sound_manager.play_sfx('back_button')
-            self.ticket_transcript_channel.stop() if self.ticket_transcript_channel else None
-            self.background_music_channel.stop()
+            self.ticket_transcript.stop_transcript() if self.ticket_transcript else None
+            self.background_music_manager.stop_music()
 
             pygame.mixer.music.unload()
             self.running = False
@@ -222,8 +218,11 @@ class ShiftLoop:
             else:
                 self.button_sound_manager.play_sfx('incorrect_submit')
 
-            self.ticket_transcript_channel.stop()
+            self.ticket_transcript.stop_transcript()
             pygame.mixer.music.unload()
+
+            self.background_music_manager.load_music()
+            self.background_music_manager.play_music()
 
 
         if self.accept_button and event.ui_element == self.accept_button:
@@ -232,11 +231,14 @@ class ShiftLoop:
 
     def _display_caller_popup_window(self):
 
+        self.background_music_manager.stop_music()
+        pygame.mixer.music.unload()
+
         self.caller_popup_window, self.accept_button, self.popup_window_countdown = main_loop_elements.caller_popup_window_func(self.manager)
         self.popup_window_close_timer = 0
 
-        self.incoming_call_channel.play(pygame.mixer.Sound(constants.INCOMING_CALL_MUSIC_PATH), loops=-1)
-        self.incoming_call_channel.set_volume(0.3) 
+        self.incoming_call_manager.play_loop()
+        self.incoming_call_manager.adjust_loop_volume(0.3)
 
     
     def _caller_popup_window_countdown(self):
@@ -259,12 +261,12 @@ class ShiftLoop:
             self.ticket_timer = 0
             self.missed_calls += 1
 
-            self.incoming_call_channel.stop()
+            self.incoming_call_manager.stop_loop()
 
 
     def _generate_ticket(self):
 
-        self.incoming_call_channel.stop()
+        self.incoming_call_manager.stop_loop()
         self.main_sla_timer = 0
         self.selected_threat = None
 
@@ -289,10 +291,10 @@ class ShiftLoop:
         self.caller_popup_window = None
 
         ticket_transcript_path = SqliteQueries(self.cursor).ticket_transcript_query(self.selected_id)
-        pygame.mixer.music.load(ticket_transcript_path)
-
-        self.ticket_transcript_channel = pygame.mixer.Channel(6)
-        self.ticket_transcript_channel.play(pygame.mixer.Sound(ticket_transcript_path))
+       
+        self.ticket_transcript = sound_manager.TicketTranscriptManager(ticket_transcript_path)
+        self.ticket_transcript.load_transcript()
+        self.ticket_transcript.play_transcript()
 
         return self.answer
 
@@ -323,7 +325,7 @@ class ShiftLoop:
 
     def _shift_report(self):
 
-        self.background_music_channel.stop()
+        self.background_music_manager.stop_music()
 
         run_shift_report = ShiftReport(self.total_score, self.total_tickets, self.missed_calls, self.missed_tickets)
         
