@@ -25,6 +25,9 @@ NEW_TICKET_IMAGE_PATH = 'assets/images/general/new_ticket.png'
 ACCOUNT_MANAGEMENT_IMAGE_PATH = 'assets/images/general/account_manager.png'
 ADD_ACCOUNT_IMAGE_PATH = 'assets/images/general/add_account.png'
 
+BUTTON_SFX_CHANNEL = 0
+INCOMMING_CALL_CHANNEL = 1
+
 MENU_BUTTON_MUSIC_PATH = 'assets/sounds/menu_button.mp3'
 INCOMING_CALL_MUSIC_PATH = 'assets/sounds/incoming_call_2.mp3'
 BACKGROUND_MUSIC_PATH = 'assets/sounds/background2.mp3'

@@ -3,17 +3,6 @@ import constants
 
 
 
-MENU_BUTTON_SFX_CHANNEL = 0
-BACK_BUTTON_SFX_CHANNEL = 1
-MODIFY_BUTTON_SFX_CHANNEL = 2
-DELETE_BUTTON_SFX_CHANNEL = 2
-LIST_BUTTON_SFX_CHANNEL = 2
-CORRECT_SUBMIT_SFX_CHANNEL = 3
-INCORRECT_SUBMIT_SFX_CHANNEL = 3
-
-BACKGROUND_MUSIC_CHANNEL = 4
-INCOMMING_CALL_CHANNEL = 5
-
 
 class ButtonSoundManager():
 
@@ -31,32 +20,21 @@ class ButtonSoundManager():
 
         }
 
-        self.button_sfx_channels = {
-
-            'menu_button': pygame.mixer.Channel(MENU_BUTTON_SFX_CHANNEL),
-            'back_button': pygame.mixer.Channel(BACK_BUTTON_SFX_CHANNEL),
-            'modify_button': pygame.mixer.Channel(MODIFY_BUTTON_SFX_CHANNEL),
-            'delete_button': pygame.mixer.Channel(DELETE_BUTTON_SFX_CHANNEL),
-            'list_button': pygame.mixer.Channel(LIST_BUTTON_SFX_CHANNEL),
-            'correct_submit': pygame.mixer.Channel(CORRECT_SUBMIT_SFX_CHANNEL),
-            'incorrect_submit': pygame.mixer.Channel(INCORRECT_SUBMIT_SFX_CHANNEL)
-
-        }
+        self.button_sfx_channel = pygame.mixer.Channel(constants.BUTTON_SFX_CHANNEL)
 
     def play_sfx(self, button_pressed: str):
-        return self.button_sfx_channels[button_pressed].play(self.button_sfx[button_pressed])
+        return self.button_sfx_channel.play(self.button_sfx[button_pressed])
 
-    def stop_sfx(self, button_pressed: str):
-        return self.button_sfx_channels[button_pressed].stop()
+    def stop_sfx(self):
+        return self.button_sfx_channel.stop()
 
-    def adjust_sfx_volume(self, button_pressed: str, volume: int):
-        return self.button_sfx_channels[button_pressed].set_volume(volume)
+    def adjust_sfx_volume(self, volume: int):
+        return self.button_sfx_channel.set_volume(volume)
     
 
 class LoopingSoundManager():
 
     def __init__(self, sound_path, channel):
-
         self.looping_sound = pygame.mixer.Sound(sound_path)
         self.looping_channel = pygame.mixer.Channel(channel)
 
@@ -73,7 +51,6 @@ class LoopingSoundManager():
 class BackgroundMusicManager():
 
     def __init__(self, music_path):
-
         self.music_path = music_path
 
     def load_music(self):
@@ -85,14 +62,13 @@ class BackgroundMusicManager():
     def stop_music(self):
         return pygame.mixer.music.stop()
     
-    def adjust_music_volue(self, volume):
+    def adjust_music_volume(self, volume):
         return pygame.mixer.music.set_volume(volume) 
     
 
 class TicketTranscriptManager():
 
     def __init__(self, transcript_path):
-
         self.transcript_path = transcript_path
 
     def load_transcript(self):

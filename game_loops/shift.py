@@ -98,7 +98,7 @@ class ShiftLoop:
     
     def _init_music(self):
         self.button_sound_manager = sound_manager.ButtonSoundManager()
-        self.incoming_call_manager = sound_manager.LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, 1)
+        self.incoming_call_manager = sound_manager.LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, constants.INCOMMING_CALL_CHANNEL)
         self.background_music_manager = sound_manager.BackgroundMusicManager(constants.BACKGROUND_MUSIC_PATH)
 
 
