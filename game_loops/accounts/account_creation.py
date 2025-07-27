@@ -58,17 +58,16 @@ class AccountCreationUIManager():
 
     def build_ui(self):
         self.back_button = account_elements.back_button_func(self.manager)
-        self.add_account_image = account_elements.add_account_image_func(self.manager, constants.ADD_ACCOUNT_IMAGE_PATH)
-
+        self.add_account_button = account_elements.add_new_account_button_func(self.manager)
+        
         self.account_name_label, self.new_account_name_tentry = account_elements.new_account_name_tentry_func(self.manager)
         self.account_organization_label, self.new_account_organization_tentry = account_elements.new_account_organization_func(self.manager)
         self.account_email_label, self.new_account_email_tentry = account_elements.new_account_email_func(self.manager)
         self.account_contact_label, self.new_account_contact_tentry = account_elements.new_account_contact_func(self.manager)
         self.account_picture_path_label, self.new_account_picture_path_tentry = account_elements.new_account_picture_path_func(self.manager)
         
+        self.add_account_image = account_elements.add_account_image_func(self.manager, constants.ADD_ACCOUNT_IMAGE_PATH)
         self.new_account_image_border = account_elements.new_account_image_border_func(self.manager)
-
-        self.add_account_button = account_elements.add_new_account_button_func(self.manager)
 
     def refresh_creation_page(self):
         self.new_account_name_tentry.set_text("")
