@@ -27,6 +27,10 @@ ADD_ACCOUNT_IMAGE_PATH = 'assets/images/general/add_account.png'
 
 BUTTON_SFX_CHANNEL = 0
 INCOMMING_CALL_CHANNEL = 1
+BACK_BUTTON_SFX = 'back_button'
+MENU_BUTTON_SFX = 'menu_button'
+MODIFY_BUTTON_SFX = 'modify_button'
+DELETE_BUTTON_SFX = 'delete_button'
 
 MENU_BUTTON_MUSIC_PATH = 'assets/sounds/menu_button.mp3'
 INCOMING_CALL_MUSIC_PATH = 'assets/sounds/incoming_call_2.mp3'

@@ -110,6 +110,12 @@ class SqliteQueries():
 
         return account_id_list
     
+    def max_account_id_query(self):
+        self.cursor.execute('SELECT MAX(id) FROM accounts')
+        last_account_id = self.cursor.fetchone()[0]
+
+        return last_account_id
+    
     def account_details_query(self, selected_account_id):
 
         self.cursor.execute('SELECT name, organization, email, contact, picture FROM accounts WHERE id=?', [selected_account_id])

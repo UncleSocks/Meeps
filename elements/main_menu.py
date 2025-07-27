@@ -2,6 +2,10 @@ import pygame
 import pygame_gui
 
 
+
+
+
+
 def main_title_image_func(manager, image_path):
 
     main_title_image_rect = pygame.Rect(165, 80, 500, 190)

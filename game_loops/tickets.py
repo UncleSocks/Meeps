@@ -124,7 +124,6 @@ class TicketManagement():
         if event.ui_element == self.back_button:
 
             self.button_sound_manager.play_sfx('back_button')
-            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
             pygame.mixer.music.unload()
             
             self.running = False
@@ -163,7 +162,6 @@ class TicketManagement():
             if event.ui_element == self.ticket_delete_confirm_no_window:
 
                 self.button_sound_manager.play_sfx('back_button')
-                self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
                 self.ticket_delete_confirm_window.kill()
 
 
@@ -280,7 +278,6 @@ class TicketCreation():
         if event.ui_element == self.back_button:
 
             self.button_sound_manager.play_sfx('back_button')
-            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
 
             self.updated_ticket_title_list = SqliteQueries(self.cursor).ticket_titles_query()
             

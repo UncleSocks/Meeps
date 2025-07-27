@@ -104,7 +104,6 @@ class ThreatManagement():
         if event.ui_element == self.back_button:
 
             self.button_sound_manager.play_sfx('back_button')
-            self.button_sound_manager.adjust_sfx_volume('back_button', 0.2)
 
             self.running = False
 
