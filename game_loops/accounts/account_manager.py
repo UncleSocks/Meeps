@@ -1,5 +1,6 @@
 import pygame
 import pygame_gui
+from dataclasses import dataclass
 
 import constants
 import init
@@ -9,6 +10,14 @@ from .account_creation import AccountCreationController
 import elements.accounts_elements as account_elements
 
 
+
+@dataclass
+class AccountDetails:
+    name: str = ""
+    organization: str = ""
+    email: str = ""
+    contact: str = ""
+    picture_path: str = ""
 
 
 class AccountUIManager():
@@ -44,10 +53,9 @@ class AccountStateManager():
         self.connect = connect
         self.cursor = cursor
         self.query = SqliteQueries(self.cursor)
-        self.init_account_variables()
+        self.account_variables()
 
-    def init_account_variables(self):
-
+    def account_variables(self):
         self.account_name_list = self.fetch_account_names()
         self.account_id_list = self.fetch_account_ids()
         self.assigned_ticket_list = []
@@ -69,9 +77,9 @@ class AccountStateManager():
 
     def fetch_account_details(self):
         selected_account_id = self._identify_selected_account_id()
-        account_name, account_organization, account_email, \
-            account_contact, account_picture_path = self.query.account_details_query(selected_account_id)
-        return account_name, account_organization, account_email, account_contact, account_picture_path
+        account_details = self.query.account_details_query(selected_account_id)
+        account = AccountDetails(*account_details)
+        return account
     
     def fetch_assigned_tickets(self):
         selected_account_id = self._identify_selected_account_id()
@@ -101,16 +109,17 @@ class AccountEventHandler():
     def handle_account_selection(self, selected_account):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
         self.state.selected_account = selected_account
+        self._update_account_textbox()
 
-        account_name, account_organization, account_email, \
-            account_contact, account_picture_path = self.state.fetch_account_details()
+    def _update_account_textbox(self):
+        account = self.state.fetch_account_details()
         
         self.ui.selected_account_description_tbox.set_text(
-            f"<b>Name:</b> {account_name}\n"
-            f"<b>Organization:</b> {account_organization}\n"
-            f"<b>Email:</b> {account_email}\n"
-            f"<b>Contact:</b> {account_contact}\n"
-            f"<b>Picture Filename:</b> {account_picture_path}"
+            f"<b>Name:</b> {account.name}\n"
+            f"<b>Organization:</b> {account.organization}\n"
+            f"<b>Email:</b> {account.email}\n"
+            f"<b>Contact:</b> {account.contact}\n"
+            f"<b>Picture Filename:</b> {account.picture_path}"
         )
 
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()

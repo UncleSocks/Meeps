@@ -1,5 +1,6 @@
 import pygame
 import pygame_gui
+from dataclasses import dataclass
 
 import init
 import sound_manager
@@ -7,6 +8,46 @@ import constants
 import elements.accounts_elements as account_elements
 from queries import SqliteQueries
 
+
+
+@dataclass
+class AccountDetails:
+    id: int = 0
+    name: str = ""
+    organization: str = ""
+    email: str = ""
+    contact: str = ""
+    picture_path: str = ""
+
+
+class AccountCreationStateManager():
+
+    def __init__(self, connect, cursor):
+        self.connect = connect
+        self.cursor = cursor
+        self.query = SqliteQueries(self.cursor)
+        self.account = AccountDetails()
+
+    def fetch_account_names(self):
+        account_name_list = self.query.account_name_list_query()
+        return account_name_list
+    
+    def _fetch_new_account_id(self):
+        max_id = self.query.max_account_id_query()
+        account_id = max_id + 1
+        return account_id
+    
+    def add_new_account(self):
+        self.account.id = self._fetch_new_account_id()
+        new_account_entry = (self.account.id,
+                             self.account.name,
+                             self.account.organization,
+                             self.account.email,
+                             self.account.contact,
+                             self.account.picture_path)
+        
+        self.cursor.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)', new_account_entry)
+        self.connect.commit()
 
 
 class AccountCreationUIManager():
@@ -37,40 +78,6 @@ class AccountCreationUIManager():
         self.new_account_picture_path_tentry.set_text("")
 
 
-class AccountCreationStateManager():
-
-    def __init__(self, connect, cursor):
-        self.connect = connect
-        self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
-        self.init_account_variables()
-
-    def init_account_variables(self):
-
-        self.new_account_id = 0
-        self.new_account_name = None
-        self.new_account_organization = None
-        self.new_account_email = None
-        self.new_account_contact = None
-        self.new_account_picture_path = None
-
-    def fetch_account_names(self):
-        account_name_list = self.query.account_name_list_query()
-        return account_name_list
-    
-    def _fetch_new_account_id(self):
-        max_id = self.query.max_account_id_query()
-        self.new_account_id = max_id + 1
-    
-    def add_new_account(self):
-        self._fetch_new_account_id()
-        new_account_entry = (self.new_account_id, self.new_account_name, self.new_account_organization, 
-                        self.new_account_email, self.new_account_contact, self.new_account_picture_path)
-        
-        self.cursor.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)', new_account_entry)
-        self.connect.commit()
-
-
 class AccountCreationEventHandler():
 
     def __init__(self, pygame_manager, state_manager: AccountCreationStateManager, ui_manager: AccountCreationUIManager):
@@ -91,7 +98,7 @@ class AccountCreationEventHandler():
         if self.account_confirm_window and event.ui_element == self.account_confirm_close_button:
             self.ui.refresh_creation_page()
             self.account_confirm_window.kill()
-            self.state.init_account_variables()
+            self.state.account = AccountDetails()
 
     def _handle_back_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
@@ -101,11 +108,11 @@ class AccountCreationEventHandler():
         self._get_new_account_details()
 
         if not all([
-            self.state.new_account_name,
-            self.state.new_account_organization,
-            self.state.new_account_email,
-            self.state.new_account_contact,
-            self.state.new_account_picture_path
+            self.state.account.name,
+            self.state.account.organization,
+            self.state.account.email,
+            self.state.account.contact,
+            self.state.account.picture_path
         ]):
             return
 
@@ -116,13 +123,13 @@ class AccountCreationEventHandler():
         self.account_confirm_window.show()
 
     def _get_new_account_details(self):
-        self.state.new_account_name = self.ui.new_account_name_tentry.get_text()
-        self.state.new_account_organization = self.ui.new_account_organization_tentry.get_text()
-        self.state.new_account_email = self.ui.new_account_email_tentry.get_text()
-        self.state.new_account_contact = self.ui.new_account_contact_tentry.get_text()
+        self.state.account.name = self.ui.new_account_name_tentry.get_text()
+        self.state.account.organization = self.ui.new_account_organization_tentry.get_text()
+        self.state.account.email = self.ui.new_account_email_tentry.get_text()
+        self.state.account.contact = self.ui.new_account_contact_tentry.get_text()
 
-        self.state.new_account_picture_path = self.ui.new_account_picture_path_tentry.get_text()
-        account_elements.new_account_image_func(self.manager, self.state.new_account_picture_path)
+        self.state.account.picture_path = self.ui.new_account_picture_path_tentry.get_text()
+        account_elements.new_account_image_func(self.manager, self.state.account.picture_path)
 
 
 class AccountCreationController():
