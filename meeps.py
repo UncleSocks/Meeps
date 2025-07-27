@@ -7,10 +7,8 @@ import constants
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
 from game_loops.tickets import TicketManagement
-#from game_loops.accounts import AccountManagement
+from game_loops.accounts.account_management import AccountManagementController
 from game_loops.threats import ThreatManagement
-
-from game_loops.accounts.account_manager import AccountManagementController
 
 
 
