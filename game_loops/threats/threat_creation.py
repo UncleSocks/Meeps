@@ -9,6 +9,7 @@ import elements.threats_elements as threat_element
 from queries import SqliteQueries
 
 
+
 @dataclass
 class ThreatDetails:
     id: int = 0
