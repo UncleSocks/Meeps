@@ -32,13 +32,13 @@ class AccountCreationStateManager():
         account_name_list = self.query.account_name_list_query()
         return account_name_list
     
-    def _fetch_new_account_id(self):
+    def _generate_new_account_id(self):
         max_id = self.query.max_account_id_query()
         account_id = max_id + 1
         return account_id
     
     def add_new_account(self):
-        self.account.id = self._fetch_new_account_id()
+        self.account.id = self._generate_new_account_id()
         new_account_entry = (self.account.id,
                              self.account.name,
                              self.account.organization,

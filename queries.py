@@ -27,12 +27,12 @@ class SqliteQueries():
 
     def ticket_query(self, selected_id):
 
-        self.cursor.execute('SELECT t.title, t.entry, t.answer, a.name, a.organization, a.email, a.contact, a.picture FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?',
+        self.cursor.execute('SELECT t.title, t.entry, t.threat_id, a.name, a.organization, a.email, a.contact, a.picture FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?',
                     [selected_id])
         
-        title, current_ticket, answer, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = self.cursor.fetchone()
+        title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = self.cursor.fetchone()
 
-        return title, current_ticket, answer, caller_name, caller_org, caller_email, caller_contact, caller_picture_file
+        return title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file
     
 
     def ticket_account_query(self, selected_ticket_id):
@@ -49,6 +49,22 @@ class SqliteQueries():
         ticket_transcript_path = self.cursor.fetchone()[0]
 
         return ticket_transcript_path
+    
+    def max_threat_id_query(self):
+        self.cursor.execute('SELECT MAX(id) FROM threats')
+        last_threat_id = self.cursor.fetchone()[0]
+        return last_threat_id
+
+    def threat_ids_query(self):
+        self.cursor.execute('SELECT id FROM threats')
+        threat_ids_results = self.cursor.fetchall()
+        threat_id_list = [threat_ids_result[0] for threat_ids_result in threat_ids_results]
+        return threat_id_list
+    
+    def threat_id_name_query(self):
+        self.cursor.execute('SELECT id, name FROM threats')
+        threat_id_name_list = self.cursor.fetchall()
+        return threat_id_name_list
 
 
     def threat_list_query(self):
@@ -59,12 +75,12 @@ class SqliteQueries():
 
         return threat_list
     
-    def threat_selection_query(self, selected_threat):
+    def threat_selection_query(self, selected_threat_id):
 
-        self.cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [selected_threat])
-        description, indicators, countermeasures, image_file = self.cursor.fetchone()
+        self.cursor.execute('SELECT name, description, indicators, countermeasures, image FROM threats WHERE id=?', [selected_threat_id])
+        name, description, indicators, countermeasures, image_file = self.cursor.fetchone()
 
-        return description, indicators, countermeasures, image_file
+        return name, description, indicators, countermeasures, image_file
     
 
     def threat_ticket_selection_query(self, selected_threat):
@@ -110,10 +126,14 @@ class SqliteQueries():
 
         return account_id_list
     
+    def account_id_name_list(self):
+        self.cursor.execute('SELECT id, name FROM accounts')
+        account_id_name_list = self.cursor.fetchall()
+        return account_id_name_list
+    
     def max_account_id_query(self):
         self.cursor.execute('SELECT MAX(id) FROM accounts')
         last_account_id = self.cursor.fetchone()[0]
-
         return last_account_id
     
     def account_details_query(self, selected_account_id):

@@ -1,7 +1,7 @@
 
 FPS = 60
 CURRENT_VERSION = 'v2025.0.1 BETA'
-DATABASE_FILE = 'data.db'
+DATABASE_FILE = 'data2.db'
 
 WINDOW_CAPTION = 'MEEPS SECURITY Responder.exe'
 WINDOW_ICON_PATH = 'assets/images/general/icon.png'

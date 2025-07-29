@@ -20,6 +20,48 @@ class AccountDetails:
     picture_path: str = ""
 
 
+class AccountStateManager():
+
+    def __init__(self, connect, cursor):
+        self.connect = connect
+        self.cursor = cursor
+        self.query = SqliteQueries(self.cursor)
+        self.account_variables()
+
+    def account_variables(self):
+        self.account_name_list = self.fetch_account_names()
+        self.account_id_name_map = self.account_id_name_mapper()
+        self.assigned_ticket_list = []
+        self.selected_account = None
+
+    def account_id_name_mapper(self):
+        account_id_name_list = self.query.account_id_name_list()
+        account_id_name_map = {account[1]: account[0] for account in account_id_name_list}
+        return account_id_name_map
+
+    def fetch_account_names(self):
+        account_name_list = self.query.account_name_list_query()
+        return account_name_list
+
+    def fetch_account_details(self):
+        selected_account_id = self.account_id_name_map[self.selected_account]
+        account_details = self.query.account_details_query(selected_account_id)
+        account = AccountDetails(*account_details)
+        return account
+    
+    def fetch_assigned_tickets(self):
+        selected_account_id = self.account_id_name_map[self.selected_account]
+        assigned_tickets_list = self.query.ticket_title_caller_id_query(selected_account_id)
+        return assigned_tickets_list
+    
+    def delete_selected_account(self):
+        selected_account_id = self.account_id_name_map[self.selected_account]
+        self.cursor.execute('DELETE FROM accounts WHERE id=?', [selected_account_id])        
+        self.cursor.execute('DELETE FROM tickets WHERE caller_id=?', [selected_account_id])
+        self.connect.commit()
+        return
+    
+
 class AccountUIManager():
 
     def __init__(self, manager, account_name_list, assigned_ticket_list):
@@ -47,62 +89,12 @@ class AccountUIManager():
         self.assigned_ticket_slist.set_item_list(assigned_ticket_list)
 
 
-class AccountStateManager():
-
-    def __init__(self, connect, cursor):
-        self.connect = connect
-        self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
-        self.account_variables()
-
-    def account_variables(self):
-        self.account_name_list = self.fetch_account_names()
-        self.account_id_list = self.fetch_account_ids()
-        self.assigned_ticket_list = []
-        self.selected_account = None
-
-    def _identify_selected_account_id(self):
-        self.account_id_list = self.fetch_account_ids()
-        id_index_find = self.account_name_list.index(self.selected_account)
-        selected_account_id = self.account_id_list[id_index_find]
-        return selected_account_id
-
-    def fetch_account_names(self):
-        account_name_list = self.query.account_name_list_query()
-        return account_name_list
-    
-    def fetch_account_ids(self):
-        account_id_list = self.query.account_id_query()
-        return account_id_list
-
-    def fetch_account_details(self):
-        selected_account_id = self._identify_selected_account_id()
-        account_details = self.query.account_details_query(selected_account_id)
-        account = AccountDetails(*account_details)
-        return account
-    
-    def fetch_assigned_tickets(self):
-        selected_account_id = self._identify_selected_account_id()
-        assigned_tickets_list = self.query.ticket_title_caller_id_query(selected_account_id)
-        return assigned_tickets_list
-    
-    def delete_selected_account(self):
-        selected_account_id = self._identify_selected_account_id()
-        self.cursor.execute('DELETE FROM accounts WHERE id=?', [selected_account_id])        
-        self.cursor.execute('DELETE FROM tickets WHERE caller_id=?', [selected_account_id])
-        self.connect.commit()
-
-        updated_account_name_list = self.fetch_account_names()
-
-        return updated_account_name_list
-    
-
 class AccountEventHandler():
 
     def __init__(self, pygame_manager, state_manager: AccountStateManager, ui_manager: AccountUIManager):
         self.manager = pygame_manager
-        self.ui = ui_manager
         self.state = state_manager
+        self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
         self.account_delete_confirm_window = None
 
@@ -150,6 +142,7 @@ class AccountEventHandler():
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.account_name_list = AccountCreationController(self.state.connect, self.state.cursor).account_creation_loop()
         self.ui.refresh_account_list(self.state.account_name_list)
+        self.state.account_id_name_map = self.state.account_id_name_mapper()
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -160,8 +153,10 @@ class AccountEventHandler():
         
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
-        self.state.account_name_list = self.state.delete_selected_account()
+        self.state.delete_selected_account()
+        self.state.account_name_list = self.state.fetch_account_names()
         self.ui.refresh_account_list(self.state.account_name_list)
+        self.state.account_id_name_map = self.state.account_id_name_mapper()
 
         self.account_delete_confirm_window.kill()
 

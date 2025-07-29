@@ -73,6 +73,8 @@ class ShiftLoop:
         self.ticket_ids_list = SqliteQueries(self.cursor).ticket_ids_query()
         self.total_tickets = len(self.ticket_ids_list)
         self.threat_list = SqliteQueries(self.cursor).threat_list_query()
+        self.threat_id_name_list = SqliteQueries(self.cursor).threat_id_name_query()
+        self.threat_id_name_map = {threat[1]: threat[0] for threat in self.threat_id_name_list}
 
         self.randomized_ticket_interval = random.uniform(constants.MIN_CALL_INTERVAL, constants.MAX_CALL_INTERVAL)
 
@@ -210,8 +212,8 @@ class ShiftLoop:
         if event.ui_element == self.submit_button and self.ticket_presence and selected_threat is not None:
 
             self._reset_ticket_ui()
-
-            if selected_threat == answer:
+            selected_threat_id = self.threat_id_name_map[self.selected_threat]
+            if selected_threat_id == answer:
                 self.button_sound_manager.play_sfx('correct_submit')
                 self.total_score += 1
 
@@ -271,8 +273,8 @@ class ShiftLoop:
         self.selected_threat = None
 
         self.selected_id = self.ticket_ids_list[0]
-        title, current_ticket, answer, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = SqliteQueries(self.cursor).ticket_query(self.selected_id)
-        self.answer = answer
+        title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = SqliteQueries(self.cursor).ticket_query(self.selected_id)
+        self.answer = threat_id
         caller_picture = f'assets/images/accounts/{caller_picture_file}'
 
         ticket_title_text = f'<b>ID#{self.selected_id} | {title}</b>'
