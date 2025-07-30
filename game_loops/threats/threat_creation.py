@@ -38,7 +38,7 @@ class ThreatCreationStateManager():
         return threat_id
     
     def add_new_threat(self):
-        self.threat_id = self._generate_new_threat_id()
+        self.threat.id = self._generate_new_threat_id()
         new_threat_entry = (self.threat.id,
                             self.threat.name,
                             self.threat.description,

@@ -6,9 +6,10 @@ import sound_manager
 import constants
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
-from game_loops.tickets import TicketManagement
+#from game_loops.tickets import TicketManagement
 from game_loops.accounts.account_management import AccountManagementController
 from game_loops.threats.threat_management import ThreatManagementController
+from game_loops.tickets_s.ticket_management import TicketManagementController
 
 
 
@@ -85,7 +86,7 @@ class MainMenu:
         menu_button_action_map = {
 
             self.start_button: lambda: shift_introduction(self.connect, self.cursor),
-            self.ticket_management_button: lambda: TicketManagement(self.connect, self.cursor).ticket_management_loop(),
+            self.ticket_management_button: lambda: TicketManagementController(self.connect, self.cursor).ticket_management_loop(),
             self.account_management_button: lambda: AccountManagementController(self.connect, self.cursor).account_management_loop(),
             self.threat_management_button: lambda: ThreatManagementController(self.connect, self.cursor).threat_management_loop(),
             self.quit_button: lambda: self._quit()

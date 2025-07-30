@@ -15,10 +15,16 @@ class SqliteQueries():
 
         return ticket_ids_list
     
+    def max_ticket_id_query(self):
+        self.cursor.execute('SELECT MAX(id) FROM tickets')
+        last_ticket_id = self.cursor.fetchone()[0]
+        return last_ticket_id
+    
 
     def ticket_titles_query(self):
         self.cursor.execute('SELECT title FROM tickets')
-        ticket_title_list = self.cursor.fetchall()
+        ticket_title_result = self.cursor.fetchall()
+        ticket_title_list = [ticket[0] for ticket in ticket_title_result]
         return ticket_title_list
     
     def ticket_id_title_list(self):
@@ -52,6 +58,13 @@ class SqliteQueries():
 
         return ticket_transcript_path
     
+    def ticket_threat_selection_query(self, selected_threat_id):
+
+        self.cursor.execute('SELECT name, description, indicators, countermeasures, image FROM threats WHERE name=?', [selected_threat_id])
+        name, description, indicators, countermeasures, image_file = self.cursor.fetchone()
+
+        return name, description, indicators, countermeasures, image_file
+    
     def max_threat_id_query(self):
         self.cursor.execute('SELECT MAX(id) FROM threats')
         last_threat_id = self.cursor.fetchone()[0]
@@ -77,20 +90,20 @@ class SqliteQueries():
 
         return threat_list
     
-    def threat_selection_query(self, selected_threat_id):
+    def threat_selection_query(self, selected_threat):
 
-        self.cursor.execute('SELECT name, description, indicators, countermeasures, image FROM threats WHERE id=?', [selected_threat_id])
-        name, description, indicators, countermeasures, image_file = self.cursor.fetchone()
+        self.cursor.execute('SELECT description, indicators, countermeasures, image FROM threats WHERE name=?', [selected_threat])
+        description, indicators, countermeasures, image_file = self.cursor.fetchone()
 
-        return name, description, indicators, countermeasures, image_file
+        return description, indicators, countermeasures, image_file
     
 
-    def threat_ticket_selection_query(self, selected_threat):
+    def threat_ticket_selection_query(self, selected_threat_id):
 
-        self.cursor.execute('SELECT description, indicators, countermeasures FROM threats WHERE name=?', [selected_threat])
-        description, indicators, countermeasures = self.cursor.fetchone()
+        self.cursor.execute('SELECT name, description, indicators, countermeasures FROM threats WHERE id=?', [selected_threat_id])
+        name, description, indicators, countermeasures = self.cursor.fetchone()
 
-        return description, indicators, countermeasures
+        return name, description, indicators, countermeasures
     
     def ticket_caller_id_query(self, selected_caller):
 

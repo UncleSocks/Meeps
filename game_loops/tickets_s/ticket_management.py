@@ -7,6 +7,7 @@ import constants
 import init
 import sound_manager
 from queries import SqliteQueries
+from .ticket_creation import TicketCreationController
 import elements.ticket_elements as ticket_elements
 
 
@@ -27,6 +28,7 @@ class TicketStateManager():
         self.connect = connect
         self.cursor = cursor
         self.query = SqliteQueries(self.cursor)
+        self.ticket_variables()
 
     def ticket_variables(self):
         self.ticket_title_list = self.query.ticket_titles_query()
@@ -114,7 +116,7 @@ class TicketEventHandler():
             self._handle_create_button()
 
         if event.ui_element == self.ui.delete_button and self.state.selected_ticket is not None:
-            self._handle_delete_button
+            self._handle_delete_button()
 
         if self.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_yes_button:
             self._handle_confirm_yes_button()
@@ -128,7 +130,7 @@ class TicketEventHandler():
     
     def _handle_create_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        #self.state.ticket_title_list = TicketCreationController(self.state.connect, self.state.cursor).ticket_creation_loop()
+        self.state.ticket_title_list = TicketCreationController(self.state.connect, self.state.cursor).ticket_creation_loop()
         self.ui.refresh_ticket_list(self.state.ticket_title_list)
         self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
 
@@ -170,11 +172,12 @@ class TicketManagementController():
         while running:
 
             time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.ge()
+            events = pygame.event.get()
 
             for event in events:
                 if not self._handle_events(event):
                     running = False
+
             self.pygame_renderer.ui_renderer(time_delta)
 
     def _handle_events(self, event):
@@ -189,7 +192,7 @@ class TicketManagementController():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_action = self.event_handler.handle_button_pressed(event)
 
-            if button_action == 'exitt':
+            if button_action == 'exit':
                 return False
             
         self.manager.process_events(event)
