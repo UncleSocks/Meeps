@@ -17,12 +17,14 @@ class SqliteQueries():
     
 
     def ticket_titles_query(self):
-
         self.cursor.execute('SELECT title FROM tickets')
-        ticket__titlelist_results = self.cursor.fetchall()
-        ticket_title_list = [ticket_list_result[0] for ticket_list_result in ticket__titlelist_results]
-
+        ticket_title_list = self.cursor.fetchall()
         return ticket_title_list
+    
+    def ticket_id_title_list(self):
+        self.cursor.execute('SELECT id, title FROM tickets')
+        ticket_id_title_list = self.cursor.fetchall()
+        return ticket_id_title_list
 
 
     def ticket_query(self, selected_id):

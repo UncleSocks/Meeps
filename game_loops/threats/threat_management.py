@@ -31,15 +31,8 @@ class ThreatStateManager():
     
     def threat_variables(self):
         self.threat_name_list = self.fetch_threat_names()
-        self.threat_id_list = self.fetch_threat_ids()
         self.threat_id_name_map = self.threat_id_name_mapper()
         self.selected_threat = None
-
-    def _identify_select_threat_id(self):
-        self.threat_id_list = self.fetch_threat_ids()
-        id_index_find = self.threat_name_list.index(self.selected_threat)
-        selected_threat_id = self.threat_id_list[id_index_find]
-        return selected_threat_id
     
     def threat_id_name_mapper(self):
         threat_id_name_list = self.query.threat_id_name_query()
@@ -49,10 +42,6 @@ class ThreatStateManager():
     def fetch_threat_names(self):
         threat_name_list = self.query.threat_list_query()
         return threat_name_list
-    
-    def fetch_threat_ids(self):
-        threat_id_list = self.query.threat_ids_query()
-        return threat_id_list
 
     def fetch_threat_details(self):
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
@@ -70,8 +59,8 @@ class ThreatStateManager():
 
 class ThreatUIManager():
 
-    def __init__(self, manager, threat_list):
-        self.manager = manager
+    def __init__(self, pygame_manager, threat_list):
+        self.manager = pygame_manager
         self.build_ui(threat_list)
 
     def build_ui(self, threat_list):
