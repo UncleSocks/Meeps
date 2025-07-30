@@ -45,7 +45,7 @@ class ThreatStateManager():
 
     def fetch_threat_details(self):
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        threat_details = self.query.threat_selection_query(selected_threat_id)
+        threat_details = self.query.threat_management_selection_query(selected_threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
     

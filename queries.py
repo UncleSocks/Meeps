@@ -97,6 +97,13 @@ class SqliteQueries():
 
         return description, indicators, countermeasures, image_file
     
+    def threat_management_selection_query(self, selected_threat_id):
+
+        self.cursor.execute('SELECT name, description, indicators, countermeasures, image FROM threats WHERE id=?', [selected_threat_id])
+        name, description, indicators, countermeasures, image_file = self.cursor.fetchone()
+
+        return name, description, indicators, countermeasures, image_file
+    
 
     def threat_ticket_selection_query(self, selected_threat_id):
 
