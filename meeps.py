@@ -6,11 +6,9 @@ import sound_manager
 import constants
 import elements.main_menu as main_menu_element
 from game_loops.shift import shift_introduction
-#from game_loops.tickets import TicketManagement
+from game_loops.tickets.ticket_management import TicketManagementController
 from game_loops.accounts.account_management import AccountManagementController
 from game_loops.threats.threat_management import ThreatManagementController
-from game_loops.tickets_s.ticket_management import TicketManagementController
-
 
 
     
