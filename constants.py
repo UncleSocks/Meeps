@@ -44,3 +44,5 @@ CREATE_BUTTON_MUSIC_PATH = 'assets/sounds/add_button.mp3'
 DELETE_BUTTON__MUSIC_PATH = 'assets/sounds/delete_button.mp3'
 
 BACKGROUND_COLOR_RGB = 0,0,0 #RGB values for black.
+
+EXIT_ACTION = 'exit'

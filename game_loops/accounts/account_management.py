@@ -136,7 +136,7 @@ class AccountEventHandler():
 
     def _handle_back_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return 'exit'
+        return constants.EXIT_ACTION
     
     def _handle_create_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -204,7 +204,7 @@ class AccountManagementController():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_action = self.event_handler.handle_button_pressed(event)
 
-            if button_action == 'exit':
+            if button_action == constants.EXIT_ACTION:
                 return False
             
         self.manager.process_events(event)
