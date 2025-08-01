@@ -33,6 +33,7 @@ class AccountStateManager():
         self.account_id_name_map = self.account_id_name_mapper()
         self.assigned_ticket_list = []
         self.selected_account = None
+        self.account_delete_confirm_window = False
 
     def account_id_name_mapper(self):
         account_id_name_list = self.query.account_id_name_list()
@@ -96,7 +97,6 @@ class AccountEventHandler():
         self.state = state_manager
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
-        self.account_delete_confirm_window = None
 
     def handle_account_selection(self, selected_account):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
@@ -128,10 +128,10 @@ class AccountEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_account is not None:
             self._handle_delete_button()
 
-        if self.account_delete_confirm_window and event.ui_element == self.confirm_delete_yes_button:
+        if self.state.account_delete_confirm_window and event.ui_element == self.confirm_delete_yes_button:
             self._handle_confirm_yes_button()
 
-        if self.account_delete_confirm_window and event.ui_element == self.confirm_delete_no_button:
+        if self.state.account_delete_confirm_window and event.ui_element == self.confirm_delete_no_button:
             self._handle_confirm_no_button()
 
     def _handle_back_button(self):
@@ -146,10 +146,10 @@ class AccountEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.account_delete_confirm_window, self.confirm_delete_yes_button, \
+        self.state.account_delete_confirm_window, self.confirm_delete_yes_button, \
             self.confirm_delete_no_button = account_elements.account_delete_confirm_window_func(self.manager)
         
-        self.account_delete_confirm_window.show()
+        self.state.account_delete_confirm_window.show()
         
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
@@ -158,11 +158,11 @@ class AccountEventHandler():
         self.ui.refresh_account_list(self.state.account_name_list)
         self.state.account_id_name_map = self.state.account_id_name_mapper()
 
-        self.account_delete_confirm_window.kill()
+        self.state.account_delete_confirm_window.kill()
 
     def _handle_confirm_no_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.account_delete_confirm_window.kill()
+        self.state.account_delete_confirm_window.kill()
 
     
 class AccountManagementController():

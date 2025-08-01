@@ -110,7 +110,6 @@ class MainMenuController():
         pygame.quit()
 
 
-
 if __name__ == "__main__":
     main_menu = MainMenuController()
     main_menu.main_menu_loop()

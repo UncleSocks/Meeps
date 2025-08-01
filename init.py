@@ -8,27 +8,21 @@ import constants
 
 
 def database_init(database):
-
     connect = sqlite3.connect(database, timeout=10)
     cursor = connect.cursor()
-
     return connect, cursor
-
 
 
 class PygameRenderer:
 
     def __init__(self):
-
         pygame.init()
         self.window_surface, self.background = self.window_init()
-
         self.manager = pygame_gui.UIManager((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT), constants.THEME_PATH)
         self.clock = pygame.time.Clock()
         
     
     def window_init(self):
-
         pygame.display.set_caption(constants.WINDOW_CAPTION)
 
         window_icon_load = pygame.image.load(constants.WINDOW_ICON_PATH)
@@ -43,7 +37,6 @@ class PygameRenderer:
 
     
     def ui_renderer(self, time_delta):
-
         self.manager.update(time_delta)
         self.window_surface.blit(self.background, (0,0))
         self.manager.draw_ui(self.window_surface)

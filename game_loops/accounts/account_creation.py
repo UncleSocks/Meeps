@@ -27,6 +27,7 @@ class AccountCreationStateManager():
         self.cursor = cursor
         self.query = SqliteQueries(self.cursor)
         self.account = AccountDetails()
+        self.account_confirm_window = False
 
     def fetch_account_names(self):
         account_name_list = self.query.account_name_list_query()
@@ -85,8 +86,6 @@ class AccountCreationEventHandler():
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
 
-        self.account_confirm_window = None
-
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
             return self._handle_back_button()
@@ -94,9 +93,9 @@ class AccountCreationEventHandler():
         if event.ui_element == self.ui.add_account_button:
             self._handle_add_button()
 
-        if self.account_confirm_window and event.ui_element == self.account_confirm_close_button:
+        if self.state.account_confirm_window and event.ui_element == self.account_confirm_close_button:
             self.ui.refresh_creation_page()
-            self.account_confirm_window.kill()
+            self.state.account_confirm_window.kill()
             self.state.account = AccountDetails()
 
     def _handle_back_button(self):
@@ -118,8 +117,8 @@ class AccountCreationEventHandler():
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_account()
 
-        self.account_confirm_window, self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
-        self.account_confirm_window.show()
+        self.state.account_confirm_window, self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
+        self.state.account_confirm_window.show()
 
     def _get_new_account_details(self):
         self.state.account.name = self.ui.new_account_name_tentry.get_text()

@@ -257,7 +257,8 @@ class ShiftLoop:
             self.caller_popup_window.hide()
             self.caller_popup_window = None
 
-            self.selected_id = random.choice(self.ticket_ids_list)
+            self.selected_id = self.ticket_ids_list[0]
+            print(self.selected_id)
             self.ticket_ids_list.remove(self.selected_id)
 
             self.ticket_timer = 0
@@ -273,6 +274,7 @@ class ShiftLoop:
         self.selected_threat = None
 
         self.selected_id = self.ticket_ids_list[0]
+        print(self.selected_id)
         title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = SqliteQueries(self.cursor).ticket_query(self.selected_id)
         self.answer = threat_id
         caller_picture = f'assets/images/accounts/{caller_picture_file}'

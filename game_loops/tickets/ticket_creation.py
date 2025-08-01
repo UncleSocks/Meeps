@@ -17,7 +17,7 @@ class TicketDetails:
     title: str = ""
     entry: str = ""
     threat_id: int = 0
-    account_id: int = 0
+    account_id: int = 1
     transcript: str = ""
 
 @dataclass
@@ -43,6 +43,7 @@ class TicketCreationStateManager():
         self.account_list = self.fetch_account_list()
         self.threat_id_name_map = self.threat_id_name_mapper()
         self.account_id_name_map = self.account_id_name_mapper()
+        self.ticket_confirm_window = False
 
     def threat_id_name_mapper(self):
         threat_id_name_list = self.query.threat_id_name_query()
@@ -129,8 +130,6 @@ class TicketCreationEventHandler():
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
 
-        self.ticket_confirm_window = None
-
     def handle_threat_selection(self, selected_threat):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
         self.state.ticket.threat_id = self.state.threat_id_name_map[selected_threat]
@@ -155,9 +154,9 @@ class TicketCreationEventHandler():
         if event.ui_element == self.ui.add_ticket_button:
             self._handle_add_button()
 
-        if self.ticket_confirm_window and event.ui_element == self.ticket_confirm_close_button:
+        if self.state.ticket_confirm_window and event.ui_element == self.ticket_confirm_close_button:
             self.ui.refresh_creation_page()
-            self.ticket_confirm_window.kill()
+            self.state.ticket_confirm_window.kill()
             self.state.ticket = TicketDetails()
 
     def _handle_back_button(self):
@@ -178,7 +177,7 @@ class TicketCreationEventHandler():
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_ticket()
 
-        self.ticket_confirm_window, \
+        self.state.ticket_confirm_window, \
             self.ticket_confirm_close_button = ticket_elements.ticket_confirm_window_func(self.manager)
 
     def _get_new_ticket_details(self):

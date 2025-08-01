@@ -33,6 +33,7 @@ class ThreatStateManager():
         self.threat_name_list = self.fetch_threat_names()
         self.threat_id_name_map = self.threat_id_name_mapper()
         self.selected_threat = None
+        self.threat_delete_confirm_window = False
     
     def threat_id_name_mapper(self):
         threat_id_name_list = self.query.threat_id_name_query()
@@ -87,7 +88,6 @@ class ThreatEventHandler():
         self.state = state_manager
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
-        self.threat_delete_confirm_window = None
 
     def handle_threat_selection(self, selected_threat):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
@@ -113,10 +113,10 @@ class ThreatEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_threat is not None:
             self._handle_delete_button()
 
-        if self.threat_delete_confirm_window and event.ui_element == self.threat_delete_confirm_yes_button:
+        if self.state.threat_delete_confirm_window and event.ui_element == self.threat_delete_confirm_yes_button:
             self._handle_confirm_yes_button()
 
-        if self.threat_delete_confirm_window and event.ui_element == self.threat_delete_confirm_no_button:
+        if self.state.threat_delete_confirm_window and event.ui_element == self.threat_delete_confirm_no_button:
             self._handle_confirm_no_window()
 
         
@@ -132,10 +132,10 @@ class ThreatEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, \
+        self.state.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, \
             self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
         
-        self.threat_delete_confirm_window.show()
+        self.state.threat_delete_confirm_window.show()
 
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
@@ -144,11 +144,11 @@ class ThreatEventHandler():
         self.ui.refresh_threat_list(self.state.threat_name_list)
         self.state.threat_id_name_map = self.state.threat_id_name_mapper()
 
-        self.threat_delete_confirm_window.kill()
+        self.state.threat_delete_confirm_window.kill()
 
     def _handle_confirm_no_window(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.threat_delete_confirm_window.kill()
+        self.state.threat_delete_confirm_window.kill()
 
 
 class ThreatManagementController():

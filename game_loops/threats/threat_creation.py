@@ -27,6 +27,7 @@ class ThreatCreationStateManager():
         self.cursor = cursor
         self.query = SqliteQueries(self.cursor)
         self.threat = ThreatDetails()
+        self.threat_confirm_window = False
 
     def fetch_threat_names(self):
         threat_name_list = self.query.threat_list_query()
@@ -81,8 +82,6 @@ class ThreatCreationEventHandler():
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
 
-        self.threat_confirm_window = None
-
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
             return self._handle_back_button()
@@ -90,9 +89,9 @@ class ThreatCreationEventHandler():
         if event.ui_element == self.ui.add_threat_button:
             self._handle_add_button()
 
-        if self.threat_confirm_window and event.ui_element == self.threat_confirm_close_button:
+        if self.state.threat_confirm_window and event.ui_element == self.threat_confirm_close_button:
             self.ui.refresh_creation_page()
-            self.threat_confirm_window.kill()
+            self.state.threat_confirm_window.kill()
             self.state.threat = ThreatDetails()
 
     def _handle_back_button(self):
@@ -114,8 +113,8 @@ class ThreatCreationEventHandler():
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_threat()
 
-        self.threat_confirm_window, self.threat_confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
-        self.threat_confirm_window.show()
+        self.state.threat_confirm_window, self.threat_confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
+        self.state.threat_confirm_window.show()
 
     def _get_new_threat_details(self):
         self.state.threat.name = self.ui.threat_entry_name.get_text()

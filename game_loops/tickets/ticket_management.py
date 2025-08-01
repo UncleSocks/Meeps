@@ -33,6 +33,7 @@ class TicketStateManager():
         self.ticket_title_list = self.query.ticket_titles_query()
         self.ticket_title_id_map = self.ticket_id_title_mapper()
         self.selected_ticket = None
+        self.ticket_delete_confirm_window = False
 
     def ticket_id_title_mapper(self):
         ticket_id_title_list = self.query.ticket_id_title_list()
@@ -88,7 +89,7 @@ class TicketEventHandler():
         self.state = state_manager
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
-        self.ticket_delete_confirm_window = None
+        #self.ticket_delete_confirm_window = None
 
     def handle_ticket_selection(self, selected_ticket):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
@@ -117,10 +118,10 @@ class TicketEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_ticket is not None:
             self._handle_delete_button()
 
-        if self.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_yes_button:
+        if self.state.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_yes_button:
             self._handle_confirm_yes_button()
 
-        if self.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_no_button:
+        if self.state.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_no_button:
             self._handle_confirm_no_button()
 
     def _handle_back_button(self):
@@ -135,7 +136,7 @@ class TicketEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
+        self.state.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
             self.ticket_delete_confirm_no_button = ticket_elements.ticket_delete_confirm_window_func(self.manager)
         
     def _handle_confirm_yes_button(self):
@@ -145,11 +146,11 @@ class TicketEventHandler():
         self.ui.refresh_ticket_list(self.state.ticket_title_list)
         self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
 
-        self.ticket_delete_confirm_window.kill()
+        self.state.ticket_delete_confirm_window.kill()
 
     def _handle_confirm_no_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.ticket_delete_confirm_window.kill()
+        self.state.ticket_delete_confirm_window.kill()
 
 
 class TicketManagementController():
