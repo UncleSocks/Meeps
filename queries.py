@@ -36,11 +36,17 @@ class SqliteQueries():
     def ticket_query(self, selected_id):
 
         self.cursor.execute('SELECT t.title, t.entry, t.threat_id, a.name, a.organization, a.email, a.contact, a.picture FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?',
-                    [selected_id])
-        
+                    [selected_id])       
         title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = self.cursor.fetchone()
 
         return title, current_ticket, threat_id, caller_name, caller_org, caller_email, caller_contact, caller_picture_file
+    
+    def ticket_detail_query(self, selected_id):
+        self.cursor.execute('SELECT t.title, t.entry, t.threat_id, t.transcript_path, a.name, a.organization, a.email, a.contact, a.picture FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?',
+                    [selected_id])       
+        
+        title, current_ticket, threat_id, transcript_path, caller_name, caller_org, caller_email, caller_contact, caller_picture_file = self.cursor.fetchone()
+        return title, current_ticket, threat_id, transcript_path, caller_name, caller_org, caller_email, caller_contact, caller_picture_file
     
 
     def ticket_account_query(self, selected_ticket_id):

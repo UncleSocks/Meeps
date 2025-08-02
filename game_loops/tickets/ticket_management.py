@@ -59,9 +59,11 @@ class TicketStateManager():
 
 class TicketUIManager():
 
-    def __init__(self, pygame_manager, ticket_list):
+    def __init__(self, pygame_manager, state_manager: TicketStateManager):
         self.manager = pygame_manager
-        self.build_ui(ticket_list)
+        self.state = state_manager
+        self.ticket_list = self.state.ticket_title_list
+        self.build_ui(self.ticket_list)
 
     def build_ui(self, ticket_list):
         self.back_button = ticket_elements.back_button_func(self.manager)
@@ -78,6 +80,10 @@ class TicketUIManager():
         self.account_details_label = ticket_elements.account_details_label_func(self.manager)
         self.selected_ticket_account_tbox = ticket_elements.selected_ticket_account_func(self.manager)
 
+    def display_confirm_window(self):
+        self.state.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
+            self.ticket_delete_confirm_no_button = ticket_elements.ticket_delete_confirm_window_func(self.manager)
+
     def refresh_ticket_list(self, updated_ticket_list):
         self.ticket_entry_slist.set_item_list(updated_ticket_list)
 
@@ -89,7 +95,6 @@ class TicketEventHandler():
         self.state = state_manager
         self.ui = ui_manager
         self.button_sfx = sound_manager.ButtonSoundManager()
-        #self.ticket_delete_confirm_window = None
 
     def handle_ticket_selection(self, selected_ticket):
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
@@ -118,10 +123,10 @@ class TicketEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_ticket is not None:
             self._handle_delete_button()
 
-        if self.state.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_yes_button:
+        if self.state.ticket_delete_confirm_window and event.ui_element == self.ui.ticket_delete_confirm_yes_button:
             self._handle_confirm_yes_button()
 
-        if self.state.ticket_delete_confirm_window and event.ui_element == self.ticket_delete_confirm_no_button:
+        if self.state.ticket_delete_confirm_window and event.ui_element == self.ui.ticket_delete_confirm_no_button:
             self._handle_confirm_no_button()
 
     def _handle_back_button(self):
@@ -136,8 +141,7 @@ class TicketEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.state.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
-            self.ticket_delete_confirm_no_button = ticket_elements.ticket_delete_confirm_window_func(self.manager)
+        self.ui.display_confirm_window()
         
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
@@ -164,7 +168,7 @@ class TicketManagementController():
         self.window_surface = self.pygame_renderer.window_surface
 
         self.state = TicketStateManager(self.connect, self.cursor)
-        self.ui = TicketUIManager(self.manager, self.state.ticket_title_list)
+        self.ui = TicketUIManager(self.manager, self.state)
         self.event_handler = TicketEventHandler(self.manager, self.state, self.ui)
 
     def ticket_management_loop(self):

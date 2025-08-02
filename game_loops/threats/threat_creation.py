@@ -53,8 +53,9 @@ class ThreatCreationStateManager():
 
 class ThreatCreationUIManager():
 
-    def __init__(self, pygame_manager):
+    def __init__(self, pygame_manager, state_manager: ThreatCreationStateManager):
         self.manager = pygame_manager
+        self.state = state_manager
         self.build_ui()
 
     def build_ui(self):
@@ -66,6 +67,17 @@ class ThreatCreationUIManager():
         self.threat_entry_name, self.threat_entry_description, self.threat_entry_indicators, \
             self.threat_entry_countermeasures, self.threat_entry_image_path = threat_element.threat_entry_func(self.manager)
         
+    def capture_new_threat_details(self):
+        self.state.threat.name = self.threat_entry_name.get_text()
+        self.state.threat.description = self.threat_entry_description.get_text()
+        self.state.threat.indicators = self.threat_entry_indicators.get_text()
+        self.state.threat.countermeasures = self.threat_entry_countermeasures.get_text()
+        self.state.threat.image_path = self.threat_entry_image_path.get_text()
+
+    def display_confirm_window(self):
+        self.state.threat_confirm_window, \
+            self.threat_confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
+    
     def refresh_creation_page(self):
         self.threat_entry_name.set_text("")
         self.threat_entry_description.set_text("")
@@ -89,7 +101,7 @@ class ThreatCreationEventHandler():
         if event.ui_element == self.ui.add_threat_button:
             self._handle_add_button()
 
-        if self.state.threat_confirm_window and event.ui_element == self.threat_confirm_close_button:
+        if self.state.threat_confirm_window and event.ui_element == self.ui.threat_confirm_close_button:
             self.ui.refresh_creation_page()
             self.state.threat_confirm_window.kill()
             self.state.threat = ThreatDetails()
@@ -99,7 +111,7 @@ class ThreatCreationEventHandler():
         return constants.EXIT_ACTION
     
     def _handle_add_button(self):
-        self._get_new_threat_details()
+        self.ui.capture_new_threat_details()
 
         if not all([
             self.state.threat.name,
@@ -112,16 +124,7 @@ class ThreatCreationEventHandler():
         
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_threat()
-
-        self.state.threat_confirm_window, self.threat_confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
-        self.state.threat_confirm_window.show()
-
-    def _get_new_threat_details(self):
-        self.state.threat.name = self.ui.threat_entry_name.get_text()
-        self.state.threat.description = self.ui.threat_entry_description.get_text()
-        self.state.threat.indicators = self.ui.threat_entry_indicators.get_text()
-        self.state.threat.countermeasures = self.ui.threat_entry_countermeasures.get_text()
-        self.state.threat.image_path = self.ui.threat_entry_image_path.get_text()
+        self.ui.display_confirm_window()
 
 
 class ThreatCreationController():
@@ -135,7 +138,7 @@ class ThreatCreationController():
         self.window_surface = self.pygame_renderer.window_surface
 
         self.state = ThreatCreationStateManager(self.connect, self.cursor)
-        self.ui = ThreatCreationUIManager(self.manager)
+        self.ui = ThreatCreationUIManager(self.manager, self.state)
         self.event_handler = ThreatCreationEventHandler(self.manager, self.state, self.ui)
 
     def threat_creation_loop(self):

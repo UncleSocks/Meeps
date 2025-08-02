@@ -99,9 +99,12 @@ class TicketCreationStateManager():
 
 class TicketCreationUIManager():
 
-    def __init__(self, pygame_manager, threat_list, account_list):
+    def __init__(self, pygame_manager, state_manger: TicketCreationStateManager):
         self.manager = pygame_manager
-        self.build_ui(threat_list, account_list)
+        self.state = state_manger
+        self.threat_list = self.state.threat_list
+        self.account_list = self.state.account_list
+        self.build_ui(self.threat_list, self.account_list)
 
     def build_ui(self, threat_list, account_list):
         self.back_button = ticket_elements.back_button_func(self.manager)
@@ -115,6 +118,22 @@ class TicketCreationUIManager():
         
         self.caller_dropdown_label, \
             self.caller_dropdown = ticket_elements.caller_dropdown_func(self.manager, account_list)
+
+    def capture_new_ticket_details(self):
+        self.state.ticket.title = self.ticket_title_text_entry.get_text()
+        self.state.ticket.entry = self.ticket_text_entry.get_text()
+
+    def display_threat_textbox(self, threat):
+        self.threat_description_tbox.set_text(
+            f"<b>{threat.name.upper()}</b>\n"
+            f"<b>Description</b>:\n{threat.description}\n"
+            f"<b>Indicators:\n</b>{threat.indicators}\n"
+            f"<b>Countermeasures:</b>\n{threat.countermeasures}"
+        )
+
+    def display_confirm_window(self):
+        self.state.ticket_confirm_window, \
+            self.ticket_confirm_close_button = ticket_elements.ticket_confirm_window_func(self.manager)
         
     def refresh_creation_page(self):
         self.ticket_title_text_entry.set_text("")
@@ -137,12 +156,7 @@ class TicketCreationEventHandler():
 
     def _updated_threat_textbox(self):
         threat = self.state.fetch_threat_details()
-        self.ui.threat_description_tbox.set_text(
-            f"<b>{threat.name.upper()}</b>\n"
-            f"<b>Description</b>:\n{threat.description}\n"
-            f"<b>Indicators:\n</b>{threat.indicators}\n"
-            f"<b>Countermeasures:</b>\n{threat.countermeasures}"
-        )
+        self.ui.display_threat_textbox(threat)
 
     def handle_account_dropdown(self, selected_account):
         self.state.ticket.account_id = self.state.account_id_name_map[selected_account]
@@ -154,7 +168,7 @@ class TicketCreationEventHandler():
         if event.ui_element == self.ui.add_ticket_button:
             self._handle_add_button()
 
-        if self.state.ticket_confirm_window and event.ui_element == self.ticket_confirm_close_button:
+        if self.state.ticket_confirm_window and event.ui_element == self.ui.ticket_confirm_close_button:
             self.ui.refresh_creation_page()
             self.state.ticket_confirm_window.kill()
             self.state.ticket = TicketDetails()
@@ -164,7 +178,7 @@ class TicketCreationEventHandler():
         return constants.EXIT_ACTION
     
     def _handle_add_button(self):
-        self._get_new_ticket_details()
+        self.ui.capture_new_ticket_details()
 
         if not all([
             self.state.ticket.title,
@@ -176,13 +190,7 @@ class TicketCreationEventHandler():
         
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_ticket()
-
-        self.state.ticket_confirm_window, \
-            self.ticket_confirm_close_button = ticket_elements.ticket_confirm_window_func(self.manager)
-
-    def _get_new_ticket_details(self):
-        self.state.ticket.title = self.ui.ticket_title_text_entry.get_text()
-        self.state.ticket.entry = self.ui.ticket_text_entry.get_text()
+        self.ui.display_confirm_window()
 
 
 class TicketCreationController():
@@ -196,7 +204,7 @@ class TicketCreationController():
         self.window_surface = self.pygame_renderer.window_surface
 
         self.state = TicketCreationStateManager(self.connect, self.cursor)
-        self.ui = TicketCreationUIManager(self.manager, self.state.threat_list, self.state.account_list)
+        self.ui = TicketCreationUIManager(self.manager, self.state)
         self.event_handler = TicketCreationEventHandler(self.manager, self.state, self.ui)
 
     def ticket_creation_loop(self):

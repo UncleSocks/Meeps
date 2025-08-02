@@ -65,9 +65,12 @@ class AccountStateManager():
 
 class AccountUIManager():
 
-    def __init__(self, manager, account_name_list, assigned_ticket_list):
+    def __init__(self, manager, state_manager: AccountStateManager):
         self.manager = manager
-        self.build_ui(account_name_list, assigned_ticket_list)
+        self.state = state_manager
+        self.account_name_list = self.state.account_name_list
+        self.assigned_ticket_list = self.state.assigned_ticket_list
+        self.build_ui(self.account_name_list, self.assigned_ticket_list)
 
     def build_ui(self, account_name_list, assigned_ticket_list):
         self.back_button = account_elements.back_button_func(self.manager)
@@ -82,6 +85,10 @@ class AccountUIManager():
 
         self.account_manager_image = account_elements.account_manager_image_func(self.manager, constants.ACCOUNT_MANAGEMENT_IMAGE_PATH)
         self.account_details_label, self.selected_account_description_tbox = account_elements.account_details(self.manager)
+
+    def display_confirm_window(self):
+        self.state.account_delete_confirm_window, self.confirm_delete_yes_button, \
+            self.confirm_delete_no_button = account_elements.account_delete_confirm_window_func(self.manager)
 
     def refresh_account_list(self, updated_account_list):
         self.account_entry_slist.set_item_list(updated_account_list)
@@ -117,7 +124,6 @@ class AccountEventHandler():
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()
         self.ui.refresh_assigned_tickets(self.state.assigned_ticket_list)
 
-
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
             return self._handle_back_button()
@@ -128,10 +134,10 @@ class AccountEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_account is not None:
             self._handle_delete_button()
 
-        if self.state.account_delete_confirm_window and event.ui_element == self.confirm_delete_yes_button:
+        if self.state.account_delete_confirm_window and event.ui_element == self.ui.confirm_delete_yes_button:
             self._handle_confirm_yes_button()
 
-        if self.state.account_delete_confirm_window and event.ui_element == self.confirm_delete_no_button:
+        if self.state.account_delete_confirm_window and event.ui_element == self.ui.confirm_delete_no_button:
             self._handle_confirm_no_button()
 
     def _handle_back_button(self):
@@ -146,10 +152,7 @@ class AccountEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.state.account_delete_confirm_window, self.confirm_delete_yes_button, \
-            self.confirm_delete_no_button = account_elements.account_delete_confirm_window_func(self.manager)
-        
-        self.state.account_delete_confirm_window.show()
+        self.ui.display_confirm_window()
         
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
@@ -176,7 +179,7 @@ class AccountManagementController():
         self.window_surface  = self.pygame_renderer.window_surface
 
         self.state = AccountStateManager(self.connect, self.cursor)
-        self.ui = AccountUIManager(self.manager, self.state.account_name_list, self.state.assigned_ticket_list)
+        self.ui = AccountUIManager(self.manager, self.state)
         self.event_handler = AccountEventHandler(self.manager, self.state, self.ui)
 
     def account_management_loop(self):

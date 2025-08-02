@@ -53,8 +53,9 @@ class AccountCreationStateManager():
 
 class AccountCreationUIManager():
 
-    def __init__(self, manager):
-        self.manager = manager
+    def __init__(self, pygame_manager, state_manager: AccountCreationStateManager):
+        self.manager = pygame_manager
+        self.state = state_manager
         self.build_ui()
 
     def build_ui(self):
@@ -69,6 +70,19 @@ class AccountCreationUIManager():
         
         self.add_account_image = account_elements.add_account_image_func(self.manager, constants.ADD_ACCOUNT_IMAGE_PATH)
         self.new_account_image_border = account_elements.new_account_image_border_func(self.manager)
+
+    def capture_new_account_details(self):
+        self.state.account.name = self.new_account_name_tentry.get_text()
+        self.state.account.organization = self.new_account_organization_tentry.get_text()
+        self.state.account.email = self.new_account_email_tentry.get_text()
+        self.state.account.contact = self.new_account_contact_tentry.get_text()
+
+        self.state.account.picture_path = self.new_account_picture_path_tentry.get_text()
+        account_elements.new_account_image_func(self.manager, self.state.account.picture_path)
+
+    def display_confirm_window(self):
+        self.state.account_confirm_window, \
+            self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
 
     def refresh_creation_page(self):
         self.new_account_name_tentry.set_text("")
@@ -93,7 +107,7 @@ class AccountCreationEventHandler():
         if event.ui_element == self.ui.add_account_button:
             self._handle_add_button()
 
-        if self.state.account_confirm_window and event.ui_element == self.account_confirm_close_button:
+        if self.state.account_confirm_window and event.ui_element == self.ui.account_confirm_close_button:
             self.ui.refresh_creation_page()
             self.state.account_confirm_window.kill()
             self.state.account = AccountDetails()
@@ -103,7 +117,7 @@ class AccountCreationEventHandler():
         return constants.EXIT_ACTION
 
     def _handle_add_button(self):
-        self._get_new_account_details()
+        self.ui.capture_new_account_details()
 
         if not all([
             self.state.account.name,
@@ -116,18 +130,7 @@ class AccountCreationEventHandler():
 
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
         self.state.add_new_account()
-
-        self.state.account_confirm_window, self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
-        self.state.account_confirm_window.show()
-
-    def _get_new_account_details(self):
-        self.state.account.name = self.ui.new_account_name_tentry.get_text()
-        self.state.account.organization = self.ui.new_account_organization_tentry.get_text()
-        self.state.account.email = self.ui.new_account_email_tentry.get_text()
-        self.state.account.contact = self.ui.new_account_contact_tentry.get_text()
-
-        self.state.account.picture_path = self.ui.new_account_picture_path_tentry.get_text()
-        account_elements.new_account_image_func(self.manager, self.state.account.picture_path)
+        self.ui.display_confirm_window()
 
 
 class AccountCreationController():
@@ -141,7 +144,7 @@ class AccountCreationController():
         self.window_surface  = self.pygame_renderer.window_surface
 
         self.state = AccountCreationStateManager(self.connect, self.cursor)
-        self.ui = AccountCreationUIManager(self.manager)
+        self.ui = AccountCreationUIManager(self.manager, self.state)
         self.event_handler = AccountCreationEventHandler(self.manager, self.state, self.ui)
 
     def account_creation_loop(self):
