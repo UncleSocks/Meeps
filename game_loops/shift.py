@@ -202,7 +202,7 @@ class ShiftLoop:
 
         if event.ui_element == self.back_button:
 
-            self.button_sound_manager.play_sfx('back_button')
+            self.button_sound_manager.play_sfx(constants.BACK_BUTTON_SFX)
             self.ticket_transcript.stop_transcript() if self.ticket_transcript else None
             self.background_music_manager.stop_music()
 

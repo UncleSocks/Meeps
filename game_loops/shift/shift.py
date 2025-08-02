@@ -41,28 +41,38 @@ class ShiftStateManager():
         self.query = SqliteQueries(self.cursor)
         self.ticket_interval = self.randomize_ticket_interval()
         self.shift_variables()
-        self.timer_variabbles()
-        self.score_variables()
 
     def shift_variables(self):
         self.ticket_title_list = self.fetch_tickets()
         self.total_tickets = self.identify_total_tickets()
         self.threat_list = self.fetch_threats()
         self.threat_id_name_map = self.threat_id_name_mapper()
+        self._ticket_variables()
+        self._popup_variables()
+        self._timer_variabbles()
+        self._score_variables()
 
+    def _ticket_variables(self):
         self.selected_ticket_id = 0
+        self.ticket_present = False
         self.ticket_answer = None
+        self.ticket_transcript = None
+        self.ticket_account_picture = None
         self.selected_threat = None
 
-    def timer_variabbles(self):
+    def _popup_variables(self):
+        self.popup_window = False
+        self.popup_accept_button = False
+    
+    def _timer_variabbles(self):
         self.ticket_generate_timer = 0
-        self.ticket_sla_timer = 0
-        self.popup_close_timer = 0
 
         self.max_ticket_sla = 180
         self.max_popup_sla = 15
+        self.ticket_sla_timer = 0
+        self.popup_sla_timer = 0
 
-    def score_variables(self):
+    def _score_variables(self):
         self.total_score = 0
         self.missed_calls = 0
         self.missed_tickets = 0
@@ -139,8 +149,6 @@ class ShiftEventHandler():
         self.state = state_manager
         self.ui = ui_manager
         self._init_sounds()
-
-    def _
         
     def _init_sounds(self):
         self.button_sfx = sound_manager.ButtonSoundManager()
