@@ -129,7 +129,7 @@ class AccountEventHandler():
             return self._handle_back_button()
 
         if event.ui_element == self.ui.create_button:
-            self._handle_create_button()
+            return self._handle_create_button()
 
         if event.ui_element == self.ui.delete_button and self.state.selected_account is not None:
             self._handle_delete_button()
@@ -146,9 +146,7 @@ class AccountEventHandler():
     
     def _handle_create_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.state.account_name_list = AccountCreationController(self.state.connect, self.state.cursor).account_creation_loop()
-        self.ui.refresh_account_list(self.state.account_name_list)
-        self.state.account_id_name_map = self.state.account_id_name_mapper()
+        return constants.CREATE_ACTION
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -207,8 +205,17 @@ class AccountManagementController():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_action = self.event_handler.handle_button_pressed(event)
 
-            if button_action == constants.EXIT_ACTION:
+            if button_action == constants.CREATE_ACTION:
+                account_creation_page = AccountCreationController(self.state.connect, self.state.cursor)
+                self.state.account_name_list = account_creation_page.account_creation_loop()
+                self._handle_creation_return()
+
+            elif button_action == constants.EXIT_ACTION:
                 return False
             
         self.manager.process_events(event)
         return True
+    
+    def _handle_creation_return(self):
+        self.ui.refresh_account_list(self.state.account_name_list)
+        self.state.account_id_name_map = self.state.account_id_name_mapper()

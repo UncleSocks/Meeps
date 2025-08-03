@@ -114,7 +114,7 @@ class ThreatEventHandler():
             return self._handle_back_button()
         
         if event.ui_element == self.ui.create_button:
-            self._handle_create_button()
+            return self._handle_create_button()
 
         if event.ui_element == self.ui.delete_button and self.state.selected_threat is not None:
             self._handle_delete_button()
@@ -132,9 +132,7 @@ class ThreatEventHandler():
     
     def _handle_create_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.state.threat_name_list = ThreatCreationController(self.state.connect, self.state.cursor).threat_creation_loop()
-        self.ui.refresh_threat_list(self.state.threat_name_list)
-        self.state.threat_id_name_map = self.state.threat_id_name_mapper()
+        return constants.CREATE_ACTION
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -193,8 +191,17 @@ class ThreatManagementController():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_action = self.event_handler.handle_button_pressed(event)
 
-            if button_action == 'exit':
+            if button_action == constants.CREATE_ACTION:
+                threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
+                self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
+                self._handle_creation_return()
+
+            elif button_action == constants.EXIT_ACTION:
                 return False
             
         self.manager.process_events(event)
         return True
+    
+    def _handle_creation_return(self):
+        self.ui.refresh_threat_list(self.state.threat_name_list)
+        self.state.threat_id_name_map = self.state.threat_id_name_mapper()

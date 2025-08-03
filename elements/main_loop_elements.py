@@ -17,7 +17,12 @@ def introduction_tbox_func(manager, introduction_text):
     introduction_tbox = pygame_gui.elements.UITextBox(relative_rect=introduction_tbox_rect, 
                                                       manager=manager, html_text=introduction_text,
                                                       anchors={'center':'center'})
-    return introduction_tbox
+    
+    continue_button_rect = pygame.Rect(0, 485, 150, 50)
+    continue_button = pygame_gui.elements.UIButton(relative_rect=continue_button_rect,
+                                                        text="CONTINUE", manager=manager,
+                                                        anchors={'centerx':'centerx'})
+    return introduction_tbox, continue_button
 
 
 def continue_button_func(manager):

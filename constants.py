@@ -32,6 +32,8 @@ MENU_BUTTON_SFX = 'menu_button'
 MODIFY_BUTTON_SFX = 'modify_button'
 DELETE_BUTTON_SFX = 'delete_button'
 LIST_BUTTON_SFX = 'list_button'
+CORRECT_SUBMIT_SFX = 'correct_submit'
+INCORRECT_SUBMIT_SFX = 'incorrect_submit'
 
 MENU_BUTTON_MUSIC_PATH = 'assets/sounds/menu_button.mp3'
 INCOMING_CALL_MUSIC_PATH = 'assets/sounds/incoming_call_2.mp3'
@@ -46,7 +48,9 @@ DELETE_BUTTON__MUSIC_PATH = 'assets/sounds/delete_button.mp3'
 
 BACKGROUND_COLOR_RGB = 0,0,0 #RGB values for black.
 
+CONTINUE_SHIFT_ACTION = 'continue'
 EXIT_ACTION = 'exit'
+CREATE_ACTION = 'create'
 
 THREAT_ASSETS_PATH = 'assets/images/threats/'
 ACCOUNT_ASSETS_PATH = 'assets/images/accounts/'
