@@ -9,7 +9,7 @@ import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 from .account_creation import AccountCreationController
-import elements.accounts_elements as account_elements
+import elements.accounts_elements as ae
 
 
 
@@ -71,29 +71,29 @@ class AccountUIManager:
         self.state = state_manager
         self.draw_management_ui()
 
-    def draw_management_ui(self, account_name_list, assigned_ticket_list):
-        self.account_manager_image = account_elements.account_manager_image_func(self.manager, 
-                                                                                 constants.ACCOUNT_MANAGEMENT_IMAGE_PATH)
+    def draw_management_ui(self):
+        self.account_manager_image = ae.account_manager_image_func(self.manager, 
+                                                                   constants.ACCOUNT_MANAGEMENT_IMAGE_PATH)
         self._draw_buttons()
-        self._draw_account_elements(account_name_list)
-        self._draw_ticket_elements(assigned_ticket_list)
+        self._draw_account_elements()
+        self._draw_ticket_elements()
 
     def _draw_buttons(self):
-        self.back_button = account_elements.back_button_func(self.manager)
-        self.create_button = account_elements.create_button_func(self.manager)
-        self.delete_button = account_elements.delete_button_fun(self.manager)
+        self.back_button = ae.back_button_func(self.manager)
+        self.create_button = ae.create_button_func(self.manager)
+        self.delete_button = ae.delete_button_fun(self.manager)
 
     def _draw_account_elements(self):
-        self.account_entry_title_tbox = account_elements.account_entry_slist_misc_func(self.manager)
-        self.account_entry_slist = account_elements.account_entry_slist_func(self.manager, 
-                                                                             self.state.account_name_list)
+        self.account_entry_title_tbox = ae.account_entry_slist_misc_func(self.manager)
+        self.account_entry_slist = ae.account_entry_slist_func(self.manager, 
+                                                               self.state.account_name_list)
         self.account_details_label, \
-            self.selected_account_description_tbox = account_elements.account_details(self.manager)
+            self.selected_account_description_tbox = ae.account_details(self.manager)
 
     def _draw_ticket_elements(self):
-        self.assigned_ticket_label = account_elements.assigned_ticket_label_func(self.manager)
-        self.assigned_ticket_slist = account_elements.assigned_tickets(self.manager, 
-                                                                       self.state.assigned_ticket_list)
+        self.assigned_ticket_label = ae.assigned_ticket_label_func(self.manager)
+        self.assigned_ticket_slist = ae.assigned_tickets(self.manager, 
+                                                         self.state.assigned_ticket_list)
 
     def format_account_details(self, account: AccountDetails) -> str:
         formatted_account_details = (
@@ -107,7 +107,7 @@ class AccountUIManager:
 
     def display_confirm_window(self) -> None:
         self.state.account_delete_confirm_window, self.confirm_delete_yes_button, \
-            self.confirm_delete_no_button = account_elements.account_delete_confirm_window_func(self.manager)
+            self.confirm_delete_no_button = ae.account_delete_confirm_window_func(self.manager)
 
     def refresh_account_list(self, updated_account_list) -> None:
         self.account_entry_slist.set_item_list(updated_account_list)
