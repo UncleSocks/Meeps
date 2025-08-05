@@ -46,7 +46,7 @@ class AccountStateManager:
         account_name_list = self.query.account_name_list_query()
         return account_name_list
 
-    def fetch_account_details(self):
+    def fetch_account_details(self) -> tuple:
         selected_account_id = self.account_id_name_map[self.selected_account]
         account_details = self.query.account_details_query(selected_account_id)
         account = AccountDetails(*account_details)
@@ -179,7 +179,7 @@ class AccountManagementController:
             events = pygame.event.get()
 
             for event in events:
-                if not self._handle_events(event):
+                if self._handle_events(event) == ManagementButtonAction.EXIT:
                     running = False
 
             self.pygame_renderer.ui_renderer(time_delta)
@@ -236,4 +236,4 @@ class AccountManagementController:
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return False
+        return ManagementButtonAction.EXIT
