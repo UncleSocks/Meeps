@@ -169,7 +169,6 @@ class ThreatManagementController():
     def threat_management_loop(self):
         running = True
         while running:
-
             time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             events = pygame.event.get()
 

@@ -1,3 +1,5 @@
+from enum import Enum
+
 
 FPS = 60
 CURRENT_VERSION = 'v2025.0.1 BETA'
@@ -51,6 +53,16 @@ BACKGROUND_COLOR_RGB = 0,0,0 #RGB values for black.
 CONTINUE_SHIFT_ACTION = 'continue'
 EXIT_ACTION = 'exit'
 CREATE_ACTION = 'create'
+DELETE_ACTION = 'delete'
+CONFIRM_DELETE_ACTION = 'confirm_delete'
+CANCEL_DELETE_ACTION = 'cancel_delete'
 
 THREAT_ASSETS_PATH = 'assets/images/threats/'
 ACCOUNT_ASSETS_PATH = 'assets/images/accounts/'
+
+class ManagementButtonAction(Enum):
+    EXIT = 'exit'
+    CREATE = 'create'
+    DELETE = 'delete'
+    CONFIRM_DELETE = 'confirm_delete'
+    CANCEL_DELETE = 'cancel_delete'

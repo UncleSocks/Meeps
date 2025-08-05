@@ -166,18 +166,15 @@ class ShiftLoop:
         if not self.ticket_ids_list and not self.ticket_presence:
             self._shift_report()
 
-        else:
 
-            if self.caller_popup_window:
-                self._caller_popup_window_countdown()
+        if self.caller_popup_window:
+            self._caller_popup_window_countdown()
 
-            else:
-                self.manager.draw_ui(self.pygame_renderer.window_surface)
 
-            if self.ticket_presence and self.caller_popup_window is None:
-                self._ticket_sla_counter()
+        if self.ticket_presence and self.caller_popup_window is None:
+            self._ticket_sla_counter()
 
-            self._difficulty_update_logic()
+        self._difficulty_update_logic()
 
 
     def _handle_threat_selection(self, selected_threat):

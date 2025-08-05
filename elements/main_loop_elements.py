@@ -11,7 +11,7 @@ def back_button_func(manager):
     return back_button
 
 
-def introduction_tbox_func(manager, introduction_text):
+def introduction_tbox(manager, introduction_text):
 
     introduction_tbox_rect = pygame.Rect(0, 0, 450, 300)
     introduction_tbox = pygame_gui.elements.UITextBox(relative_rect=introduction_tbox_rect, 
@@ -23,6 +23,16 @@ def introduction_tbox_func(manager, introduction_text):
                                                         text="CONTINUE", manager=manager,
                                                         anchors={'centerx':'centerx'})
     return introduction_tbox, continue_button
+
+
+def introduction_tbox_func(manager, introduction_text):
+
+    introduction_tbox_rect = pygame.Rect(0, 0, 450, 300)
+    introduction_tbox = pygame_gui.elements.UITextBox(relative_rect=introduction_tbox_rect, 
+                                                      manager=manager, html_text=introduction_text,
+                                                      anchors={'center':'center'})
+
+    return introduction_tbox
 
 
 def continue_button_func(manager):

@@ -5,7 +5,8 @@ import init
 import sound_manager
 import constants
 import elements.main_menu as main_menu_element
-from game_loops.shift import shift_introduction
+#from game_loops.shift import shift_introduction
+from game_loops.shift_s.shift import ShiftController
 from game_loops.tickets.ticket_management import TicketManagementController
 from game_loops.accounts.account_management import AccountManagementController
 from game_loops.threats.threat_management import ThreatManagementController
@@ -50,14 +51,13 @@ class MainMenuEventHandler():
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
 
         main_menu_button_action_map = {
-            self.ui.start_button: lambda: shift_introduction(self.connect, self.cursor),
+            self.ui.start_button: lambda: ShiftController(self.connect, self.cursor).shift_loop(),
             self.ui.ticket_management_button: lambda: TicketManagementController(self.connect, self.cursor).ticket_management_loop(),
             self.ui.account_management_button: lambda: AccountManagementController(self.connect, self.cursor).account_management_loop(),
             self.ui.threat_management_button: lambda: ThreatManagementController(self.connect, self.cursor).threat_management_loop(),
         }
 
         button_action_trigger = main_menu_button_action_map.get(event.ui_element)
-        
         if not button_action_trigger:
             return
         
@@ -81,7 +81,6 @@ class MainMenuController():
     def main_menu_loop(self):
         running = True
         while running:
-
             time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             events = pygame.event.get()
 

@@ -144,10 +144,9 @@ class ThreatCreationController():
     def threat_creation_loop(self):
         running = True
         while running:
-
             time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-
             events = pygame.event.get()
+            
             for event in events:
                 if not self._handle_events(event):
                     running = False

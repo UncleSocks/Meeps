@@ -20,7 +20,7 @@ class AccountDetails:
     picture_path: str = ""
 
 
-class AccountStateManager():
+class AccountStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -60,10 +60,9 @@ class AccountStateManager():
         self.cursor.execute('DELETE FROM accounts WHERE id=?', [selected_account_id])        
         self.cursor.execute('DELETE FROM tickets WHERE caller_id=?', [selected_account_id])
         self.connect.commit()
-        return
     
 
-class AccountUIManager():
+class AccountUIManager:
 
     def __init__(self, manager, state_manager: AccountStateManager):
         self.manager = manager
@@ -92,12 +91,13 @@ class AccountUIManager():
 
     def refresh_account_list(self, updated_account_list):
         self.account_entry_slist.set_item_list(updated_account_list)
+        self.state.account_id_name_map = self.state.account_id_name_mapper()
 
     def refresh_assigned_tickets(self, assigned_ticket_list):
         self.assigned_ticket_slist.set_item_list(assigned_ticket_list)
 
 
-class AccountEventHandler():
+class AccountEventHandler:
 
     def __init__(self, pygame_manager, state_manager: AccountStateManager, ui_manager: AccountUIManager):
         self.manager = pygame_manager
@@ -132,13 +132,13 @@ class AccountEventHandler():
             return self._handle_create_button()
 
         if event.ui_element == self.ui.delete_button and self.state.selected_account is not None:
-            self._handle_delete_button()
+            return self._handle_delete_button()
 
         if self.state.account_delete_confirm_window and event.ui_element == self.ui.confirm_delete_yes_button:
-            self._handle_confirm_yes_button()
+            return self._handle_confirm_yes_button()
 
         if self.state.account_delete_confirm_window and event.ui_element == self.ui.confirm_delete_no_button:
-            self._handle_confirm_no_button()
+            return self._handle_confirm_no_button()
 
     def _handle_back_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
@@ -150,23 +150,18 @@ class AccountEventHandler():
 
     def _handle_delete_button(self):
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ui.display_confirm_window()
+        return constants.DELETE_ACTION
         
     def _handle_confirm_yes_button(self):
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
-        self.state.delete_selected_account()
-        self.state.account_name_list = self.state.fetch_account_names()
-        self.ui.refresh_account_list(self.state.account_name_list)
-        self.state.account_id_name_map = self.state.account_id_name_mapper()
-
-        self.state.account_delete_confirm_window.kill()
+        return constants.CONFIRM_DELETE_ACTION
 
     def _handle_confirm_no_button(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.state.account_delete_confirm_window.kill()
+        return constants.CANCEL_DELETE_ACTION
 
     
-class AccountManagementController():
+class AccountManagementController:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -183,7 +178,6 @@ class AccountManagementController():
     def account_management_loop(self):
         running = True
         while running:
-
             time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
             events = pygame.event.get()
 
@@ -208,14 +202,22 @@ class AccountManagementController():
             if button_action == constants.CREATE_ACTION:
                 account_creation_page = AccountCreationController(self.state.connect, self.state.cursor)
                 self.state.account_name_list = account_creation_page.account_creation_loop()
-                self._handle_creation_return()
+                self.ui.refresh_account_list(self.state.account_name_list)
+
+            elif button_action == constants.DELETE_ACTION:
+                self.ui.display_confirm_window()
+
+            elif button_action == constants.CONFIRM_DELETE_ACTION:
+                self.state.account_delete_confirm_window.kill()
+                self.state.delete_selected_account()
+                self.state.account_name_list = self.state.fetch_account_names()
+                self.ui.refresh_account_list(self.state.account_name_list)
+
+            elif button_action == constants.CANCEL_DELETE_ACTION:
+                self.state.account_delete_confirm_window.kill()
 
             elif button_action == constants.EXIT_ACTION:
                 return False
             
         self.manager.process_events(event)
         return True
-    
-    def _handle_creation_return(self):
-        self.ui.refresh_account_list(self.state.account_name_list)
-        self.state.account_id_name_map = self.state.account_id_name_mapper()
