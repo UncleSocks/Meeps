@@ -2,11 +2,32 @@ import pygame
 import pygame_gui
 
 
+
+class AccountElementCreator:
+
+    def __init__(self, pygame_manager):
+        self.manager = pygame_manager
+
+    def create_button_element(self, button_dimension, text_content):
+        button_element = pygame_gui.elements.UIButton(relative_rect=button_dimension, 
+                                                      text=text_content, manager=self.manager,
+                                                      anchors={'bottom':'bottom', 'left':'left'})
+        return button_element
+    
+    def create_textbox_element(self, textbox_dimension, text_content):
+        textbot_element = pygame_gui.elements.UITextBox(relative_rect=textbox_dimension, 
+                                                        html_text=text_content, manager=self.manager,
+                                                        anchors={'bottom':'bottom', 'left':'left'})
+        return textbot_element
+    
+
 def back_button_func(manager):
     
     back_button_rect = pygame.Rect(5, 5, 30, 30)
-    back_button = pygame_gui.elements.UIButton(relative_rect=back_button_rect,
-                                                 text="<", manager=manager)
+    back_button_rect.bottomleft = (10, -610)
+    back_button = AccountElementCreator(manager).create_button_element(back_button_rect, "<")
+    #back_button = pygame_gui.elements.UIButton(relative_rect=back_button_rect,
+    #                                             text="<", manager=manager)
     return back_button
 
 

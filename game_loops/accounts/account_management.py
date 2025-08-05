@@ -126,9 +126,8 @@ class AccountEventHandler:
         self.ui = ui_manager
         self.button_sfx = sound_manager
         
-    def handle_account_selection(self, selected_account) -> None:
+    def handle_account_selection(self) -> None:
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
-        self.state.selected_account = selected_account
         self._update_account_textbox()
 
     def _update_account_textbox(self) -> None:
@@ -191,8 +190,8 @@ class AccountManagementController:
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
             and event.ui_element == self.ui.account_entry_slist:
-            selected_account = event.text
-            self.event_handler.handle_account_selection(selected_account)
+            self.state.selected_account = event.text
+            self.event_handler.handle_account_selection()
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_event = self.event_handler.handle_button_pressed(event)
