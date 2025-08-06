@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import init
 from sound_manager import ButtonSoundManager
 import constants
-from constants import ManagementButtonAction
+from constants import ButtonAction
 import elements.accounts_elements as account_elements
 from queries import SqliteQueries
 
@@ -102,14 +102,14 @@ class AccountCreationEventHandler():
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return ManagementButtonAction.EXIT
+            return ButtonAction.EXIT
 
         if event.ui_element == self.ui.add_account_button:
-            return ManagementButtonAction.CREATE
+            return ButtonAction.CREATE
 
         if self.state.account_confirm_window \
             and event.ui_element == self.ui.account_confirm_close_button:
-            return ManagementButtonAction.CONFIRM_CREATE
+            return ButtonAction.CONFIRM_CREATE
 
 
 class AccountCreationController():
@@ -134,7 +134,7 @@ class AccountCreationController():
             events = pygame.event.get()
             
             for event in events:
-                if self._handle_events(event) == ManagementButtonAction.EXIT:
+                if self._handle_events(event) == ButtonAction.EXIT:
                     running = False
 
             self.pygame_renderer.ui_renderer(time_delta)
@@ -149,12 +149,12 @@ class AccountCreationController():
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 button_event = self.event_handler.handle_button_pressed(event)
 
-                if button_event == ManagementButtonAction.EXIT:
+                if button_event == ButtonAction.EXIT:
                     return self._handle_exit_action()
 
                 button_action_map = {
-                    ManagementButtonAction.CREATE: self._handle_create_button,
-                    ManagementButtonAction.CONFIRM_CREATE: self._handle_confirm_button
+                    ButtonAction.CREATE: self._handle_create_button,
+                    ButtonAction.CONFIRM_CREATE: self._handle_confirm_button
                 }
 
                 button_action = button_action_map.get(button_event)
@@ -187,4 +187,4 @@ class AccountCreationController():
 
     def _handle_exit_action(self):
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return ManagementButtonAction.EXIT
+        return ButtonAction.EXIT

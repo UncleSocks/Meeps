@@ -60,14 +60,16 @@ CANCEL_DELETE_ACTION = 'cancel_delete'
 THREAT_ASSETS_PATH = 'assets/images/threats/'
 ACCOUNT_ASSETS_PATH = 'assets/images/accounts/'
 
-class ManagementButtonSfx(Enum):
+class ButtonSfx(Enum):
     BACK_BUTTON = 'back_button'
     MENU_BUTTON = 'menu_button'
     MODIFY_BUTTON = 'modify_button'
     DELETE_BUTTON = 'delete_button'
 
-class ManagementButtonAction(Enum):
+class ButtonAction(Enum):
     EXIT = 'exit'
+    SUBMIT = 'submit'
+    ANSWER = 'answer'
     CREATE = 'create'
     CONFIRM_CREATE = 'confirm_create'
     DELETE = 'delete'

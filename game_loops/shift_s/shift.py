@@ -5,7 +5,9 @@ import pygame
 import pygame_gui
 
 import constants
-import sound_manager
+from constants import ButtonAction
+from sound_manager import ButtonSoundManager, LoopingSoundManager, \
+    BackgroundMusicManager, TicketTranscriptManager
 import init
 import elements.main_loop_elements as main_loop_elements
 from queries import SqliteQueries
@@ -55,11 +57,11 @@ class ShiftStateManager():
         self._score_variables()
 
     def introduction_variables(self):
-        self.introduction_page = False
+        self.introduction_page = None
 
     def _ticket_variables(self):
         self.selected_ticket_id = 0
-        self.ticket_present = False
+        self.ticket_present = None
         self.ticket_answer = None
         self.ticket_transcript = None
         #self.ticket_account_picture = None
@@ -67,7 +69,7 @@ class ShiftStateManager():
         self.selected_threat_id = 0
 
     def _popup_variables(self):
-        self.popup_window = False
+        self.popup_window = None
         #self.popup_accept_button = False
     
     def _timer_variabbles(self):
@@ -122,7 +124,7 @@ class ShiftStateManager():
         threat_details = self.query.threat_management_selection_query(self.selected_threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
-    
+
     def update_difficulty(self):
         mid_difficulty_marker = self.total_tickets / 2
         final_difficulty_marker = mid_difficulty_marker / 2
@@ -133,7 +135,7 @@ class ShiftStateManager():
             self.max_ticket_sla = 120
 
     def reset_ticket_state(self):
-        self.ticket_present = False
+        self.ticket_present = None
         self.ticket_generate_timer = 0
     
 
@@ -156,7 +158,7 @@ class ShiftUIManager():
         self.state.introduction_page.kill()
         self.continue_shift_button.kill()
 
-        self.state.introduction_page = False
+        self.state.introduction_page = None
 
     def build_shift_ui(self, threat_list):
         self.back_button = main_loop_elements.back_button_func(self.manager)
@@ -205,13 +207,12 @@ class ShiftSoundController():
 
     def __init__(self, state_manager: ShiftStateManager):
         self.state = state_manager
-        self.sound = sound_manager
-        self.button_sfx = self.sound.ButtonSoundManager()
-        self.call_sfx = self.sound.LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, constants.INCOMMING_CALL_CHANNEL)
-        self.background_music = self.sound.BackgroundMusicManager(constants.BACKGROUND_MUSIC_PATH)
+        self.button_sfx = ButtonSoundManager()
+        self.call_sfx = LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, constants.INCOMMING_CALL_CHANNEL)
+        self.background_music = BackgroundMusicManager(constants.BACKGROUND_MUSIC_PATH)
 
     def transcribe_ticket(self, ticket_transcript):
-        self.state.ticket_transcript = self.sound.TicketTranscriptManager(ticket_transcript)
+        self.state.ticket_transcript = TicketTranscriptManager(ticket_transcript)
         self.state.ticket_transcript.load_transcript()
         self.state.ticket_transcript.play_transcript()
 
@@ -231,6 +232,80 @@ class ShiftSoundController():
         self.state.ticket_transcript.stop_transcript() if self.state.ticket_transcript else None
         self.background_music.stop_music()
         pygame.mixer.music.unload()
+
+
+class GenerateTicket():
+
+    def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
+                 ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
+        self.manager = pygame_manager
+        self.state = state_manager
+        self.ui = ui_manager
+        self.sound = sound_controller
+        self._restart_state_variables()
+        self._stop_call()
+
+    def _restart_state_variables(self):
+        self.state.ticket_sla_timer = 0
+        self.state.selected_threat = None
+
+    def _stop_call(self):
+        self.sound.call_sfx.stop_loop()
+        self.state.popup_window.hide()
+        self.state.popup_window = None
+
+    def generate_ticket(self):
+        self.state.selected_ticket_id = self.state.ticket_id_list[0]
+        ticket = self.state.fetch_ticket_details()
+        self.ui.display_ticket(self.state.selected_ticket_id, ticket)
+        self._update_ticket_state()
+        self.sound.transcribe_ticket(ticket.transcript)
+        self.state.ticket_answer = ticket.threat
+    
+    def _update_ticket_state(self):
+        self.state.ticket_present = True
+        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
+
+
+class CountdownManager():
+
+    def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
+                 ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
+        self.manager = pygame_manager
+        self.state = state_manager
+        self.ui = ui_manager
+        self.sound = sound_controller
+
+    def ticket_sla_countdown(self, time_delta):
+        ticket_sla_difference = self.state.max_ticket_sla - self.state.ticket_sla_timer
+        self.ui.main_sla_timer_label.set_text('SLA: {:.1f}'.format(max(0, ticket_sla_difference)))                            
+        self.state.ticket_sla_timer += time_delta
+
+        if ticket_sla_difference <= 0:
+            self._ticket_sla_timeout
+
+    def _ticket_sla_timeout(self):
+        self.ui.refresh_ticket()
+        self.state.missed_tickets += 1
+
+    def popup_sla_countdown(self, time_delta):
+        popup_sla_difference = self.state.max_popup_sla - self.state.popup_sla_timer
+        self.ui.popup_countdown.set_text('SLA: {:.1f}'.format(max(0, popup_sla_difference)))
+        self.state.popup_sla_timer += time_delta
+
+        if popup_sla_difference <= 0:
+            self._popup_sla_timeout()
+
+    def _popup_sla_timeout(self):
+        self.state.popup_window.kill()
+        self.state.popup_window = None
+
+        self.state.selected_ticket_id = self.state.ticket_id_list[0]
+        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
+
+        self.state.ticket_sla_timer = 0
+        self.state.missed_calls += 1
+        self.sound.call_sfx.stop_loop()
 
 
 class ShiftEventHandler():
@@ -272,115 +347,18 @@ class ShiftEventHandler():
     
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ButtonAction.EXIT
         
         if self.state.introduction_page and event.ui_element == self.ui.continue_shift_button:
-            return constants.CONTINUE_SHIFT_ACTION
+            return ButtonAction.CONTINUE
         
         if self.state.popup_window and event.ui_element == self.ui.popup_accept_button:
-            #generate_ticket = GenerateTicket(self.manager, self.state, self.ui, self.sound)
-            #generate_ticket.generate_ticket()
-            return "generate"
+            return ButtonAction.ANSWER
         
         if event.ui_element == self.ui.submit_button and self.state.ticket_present \
             and self.state.selected_threat:
-            self._handle_submit_button()
-
-    def _handle_back_button(self):
-        self.sound.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.sound.end_shift_music()
-        return constants.EXIT_ACTION
+            return ButtonAction.SUBMIT
     
-    def _handle_submit_button(self):
-        self.ui.refresh_ticket()
-        self.state.reset_ticket_state()
-        self._check_ticket_answer()
-        self.sound.stop_transcribing_ticket()
-        self.sound.reload_background_music()
-
-    def _check_ticket_answer(self):
-        if self.state.selected_ticket_id == self.state.ticket_answer:
-            self.sound.button_sfx.play_sfx(constants.CORRECT_SUBMIT_SFX)
-            self.state.total_score += 1
-        else:
-            self.sound.button_sfx.play_sfx(constants.INCORRECT_SUBMIT_SFX)
-
-
-class GenerateTicket():
-
-    def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
-                 ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
-        self.manager = pygame_manager
-        self.state = state_manager
-        self.ui = ui_manager
-        self.sound = sound_controller
-        self._restart_state_variables()
-        self._stop_call()
-
-    def _restart_state_variables(self):
-        self.state.ticket_sla_timer = 0
-        self.state.selected_threat = None
-
-    def _stop_call(self):
-        self.sound.call_sfx.stop_loop()
-        self.state.popup_window.hide()
-        self.state.popup_window = False
-
-    def generate_ticket(self):
-        self.state.selected_ticket_id = self.state.ticket_id_list[0]
-        ticket = self.state.fetch_ticket_details()
-        self.ui.display_ticket(self.state.selected_ticket_id, ticket)
-        self._update_ticket_state()
-        self.sound.transcribe_ticket(ticket.transcript)
-        self.state.ticket_answer = ticket.threat
-        return
-    
-    def _update_ticket_state(self):
-        self.state.ticket_present = True
-        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
-
-
-class CountdownManager():
-
-    def __init__(self, time_delta, pygame_manager, state_manager: ShiftStateManager, 
-                 ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
-        self.manager = pygame_manager
-        self.state = state_manager
-        self.ui = ui_manager
-        self.sound = sound_controller
-        self.time_delta = time_delta
-
-    def ticket_sla_countdown(self):
-        ticket_sla_difference = self.state.max_ticket_sla - self.state.ticket_sla_timer
-        self.ui.main_sla_timer_label.set_text('SLA: {:.1f}'.format(max(0, ticket_sla_difference)))                            
-        self.state.ticket_sla_timer += self.time_delta
-
-        if ticket_sla_difference <= 0:
-            self._ticket_sla_timeout
-
-    def _ticket_sla_timeout(self):
-        self.ui.refresh_ticket()
-        self.state.missed_tickets += 1
-
-    def popup_sla_countdown(self):
-        popup_sla_difference = self.state.max_popup_sla - self.state.popup_sla_timer
-        self.ui.popup_countdown.set_text('SLA: {:.1f}'.format(max(0, popup_sla_difference)))
-        self.state.popup_sla_timer += self.time_delta
-
-        if popup_sla_difference <= 0:
-            self._popup_sla_timeout()
-
-    def _popup_sla_timeout(self):
-        self.state.popup_window.kill()
-        self.state.popup_window = False
-
-        self.state.selected_ticket_id = self.state.ticket_id_list[0]
-        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
-
-        self.state.ticket_sla_timer = 0
-        self.state.missed_calls += 1
-        self.sound.call_sfx.stop_loop()
-
 
 class ShiftController():
 
@@ -396,36 +374,40 @@ class ShiftController():
         self.ui = ShiftUIManager(self.manager, self.state)
         self.sound = ShiftSoundController(self.state)
         self.event_handler = ShiftEventHandler(self.manager, self.state, self.ui, self.sound)
+        self.countdown = CountdownManager(self.manager, self.state, self.ui, self.sound)
 
     def shift_loop(self):
         running = True
         while running:
-            self.time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            self.state.ticket_generate_timer += self.time_delta
+            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            self.state.ticket_generate_timer += time_delta
             events = pygame.event.get()
 
             for event in events:
-                if not self._handle_events(event):
+                if self._handle_events(event) == ButtonAction.EXIT:
                     running = False
 
             if self.state.ticket_generate_timer >= self.state.ticket_interval \
-                and not self.state.ticket_present and not self.state.popup_window:
-                self.ui.display_popup_window()
-                self.state.popup_sla_timer = 0
-
-                self.sound.stop_background_music()
-                self.sound.call_sfx.play_loop()
+                and self.state.ticket_present is None and self.state.popup_window is None:
+                self._handle_incoming_call()
 
             if self.state.popup_window:
-                self.popup_sla_countdown()
+                self.countdown.popup_sla_countdown(time_delta)
 
-            if self.state.ticket_present and not self.state.popup_window:
-                self.ticket_sla_countdown()
+            if self.state.ticket_present and self.state.popup_window is None:
+                self.countdown.ticket_sla_countdown(time_delta)
             
             self.state.update_difficulty()
 
 
-            self.pygame_renderer.ui_renderer(self.time_delta)
+            self.pygame_renderer.ui_renderer(time_delta)
+
+    def _handle_incoming_call(self):
+        self.ui.display_popup_window()
+        self.state.popup_sla_timer = 0
+
+        self.sound.stop_background_music()
+        self.sound.call_sfx.play_loop()
 
     def _handle_events(self, event):
         if event.type == pygame.QUIT:
@@ -437,47 +419,49 @@ class ShiftController():
             self.event_handler.handle_threat_selection(selected_threat)
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_action = self.event_handler.handle_button_pressed(event)
-            print(button_action)
-            if button_action == constants.CONTINUE_SHIFT_ACTION:
-                self.ui.destroy_introduction_ui()
-                self.ui.build_shift_ui(self.state.threat_list)
-            if button_action == "generate":
-                generate_ticket = GenerateTicket(self.manager, self.state, self.ui, self.sound)
-                generate_ticket.generate_ticket()
-            if button_action == constants.EXIT_ACTION:
-                return False
+            button_event = self.event_handler.handle_button_pressed(event)
+
+            if button_event == ButtonAction.EXIT:
+                return self._handle_exit_button()
+            
+            button_event_map = {
+                ButtonAction.CONTINUE: self._handle_continue_action,
+                ButtonAction.ANSWER: self._handle_answer_action,
+                ButtonAction.SUBMIT: self._handle_submit_action
+            }
+
+            button_action = button_event_map.get(button_event)
+            if button_action:
+                button_action()
             
         self.manager.process_events(event)
         return True
-            
-    def ticket_sla_countdown(self):
-        ticket_sla_difference = self.state.max_ticket_sla - self.state.ticket_sla_timer
-        self.ui.main_sla_timer_label.set_text('SLA: {:.1f}'.format(max(0, ticket_sla_difference)))                            
-        self.state.ticket_sla_timer += self.time_delta
+    
+    def _handle_continue_action(self):
+        self.ui.destroy_introduction_ui()
+        self.ui.build_shift_ui(self.state.threat_list)
 
-        if ticket_sla_difference <= 0:
-            self._ticket_sla_timeout
-
-    def _ticket_sla_timeout(self):
+    def _handle_answer_action(self):
+        generate_ticket = GenerateTicket(self.manager, self.state, self.ui, self.sound)
+        generate_ticket.generate_ticket()
+    
+    def _handle_submit_action(self):
         self.ui.refresh_ticket()
-        self.state.missed_tickets += 1
+        self.state.reset_ticket_state()
+        self._check_ticket_answer()
+        self.sound.stop_transcribing_ticket()
+        self.sound.reload_background_music()
 
-    def popup_sla_countdown(self):
-        popup_sla_difference = self.state.max_popup_sla - self.state.popup_sla_timer
-        self.ui.popup_countdown.set_text('SLA: {:.1f}'.format(max(0, popup_sla_difference)))
-        self.state.popup_sla_timer += self.time_delta
+    def _check_ticket_answer(self):
+        if self.state.selected_threat_id == self.state.ticket_answer:
+            print(f"Correct {self.state.selected_threat_id}:{self.state.ticket_answer}")
+            self.sound.button_sfx.play_sfx(constants.CORRECT_SUBMIT_SFX)
+            self.state.total_score += 1
+        else:
+            print("Incorrect")
+            self.sound.button_sfx.play_sfx(constants.INCORRECT_SUBMIT_SFX)
 
-        if popup_sla_difference <= 0:
-            self._popup_sla_timeout()
-
-    def _popup_sla_timeout(self):
-        self.state.popup_window.kill()
-        self.state.popup_window = False
-
-        self.state.selected_ticket_id = self.state.ticket_id_list[0]
-        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
-
-        self.state.ticket_sla_timer = 0
-        self.state.missed_calls += 1
-        self.sound.call_sfx.stop_loop()
+    def _handle_exit_button(self):
+        self.sound.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.sound.end_shift_music()
+        return ButtonAction.EXIT

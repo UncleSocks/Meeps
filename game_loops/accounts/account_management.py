@@ -4,7 +4,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 import constants
-from constants import ManagementButtonAction, ManagementButtonSfx
+from constants import ButtonAction
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
@@ -142,28 +142,28 @@ class AccountEventHandler:
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()
         self.ui.refresh_assigned_tickets(self.state.assigned_ticket_list)
 
-    def handle_button_pressed(self, event) -> Optional[ManagementButtonAction]:
+    def handle_button_pressed(self, event) -> Optional[ButtonAction]:
         if event.ui_element == self.ui.back_button:
-            return ManagementButtonAction.EXIT
+            return ButtonAction.EXIT
         
         if event.ui_element == self.ui.create_button:
-            return ManagementButtonAction.CREATE
+            return ButtonAction.CREATE
         
         if event.ui_element == self.ui.delete_button and \
             self.state.selected_account is not None:
-            return ManagementButtonAction.DELETE
+            return ButtonAction.DELETE
         
         if self.state.account_delete_confirm_window and \
             event.ui_element == self.ui.confirm_delete_yes_button:
-            return ManagementButtonAction.CONFIRM_DELETE
+            return ButtonAction.CONFIRM_DELETE
         
         if self.state.account_delete_confirm_window and \
             event.ui_element == self.ui.confirm_delete_no_button:
-            return ManagementButtonAction.CANCEL_DELETE
+            return ButtonAction.CANCEL_DELETE
 
         if self.state.account_delete_warning_window and \
             event.ui_element == self.ui.warning_continue_button:
-            return ManagementButtonAction.CONTINUE     
+            return ButtonAction.CONTINUE     
 
     
 class AccountManagementController:
@@ -188,7 +188,7 @@ class AccountManagementController:
             events = pygame.event.get()
 
             for event in events:
-                if self._handle_events(event) == ManagementButtonAction.EXIT:
+                if self._handle_events(event) == ButtonAction.EXIT:
                     running = False
 
             self.pygame_renderer.ui_renderer(time_delta)
@@ -204,16 +204,16 @@ class AccountManagementController:
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_event = self.event_handler.handle_button_pressed(event)
-            
-            if button_event == ManagementButtonAction.EXIT:
+
+            if button_event == ButtonAction.EXIT:
                 return self._handle_exit_action()
 
             button_action_map = {
-                ManagementButtonAction.CREATE: self._handle_create_action,
-                ManagementButtonAction.DELETE: self._handle_delete_action,
-                ManagementButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
-                ManagementButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action,
-                ManagementButtonAction.CONTINUE: self._handle_continue_action
+                ButtonAction.CREATE: self._handle_create_action,
+                ButtonAction.DELETE: self._handle_delete_action,
+                ButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
+                ButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action,
+                ButtonAction.CONTINUE: self._handle_continue_action
             }    
 
             button_action = button_action_map.get(button_event)
@@ -252,4 +252,4 @@ class AccountManagementController:
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return ManagementButtonAction.EXIT
+        return ButtonAction.EXIT
