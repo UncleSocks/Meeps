@@ -240,6 +240,28 @@ def account_confirm_window_func(manager):
     
     return account_confirm_window, account_confirm_close_button
 
+def account_delete_warning_window(manager):
+    
+    account_delete_warning_rect = pygame.Rect(0, 0, 400, 200)
+    account_delete_warning = pygame_gui.elements.UIWindow(rect=account_delete_warning_rect,
+                                                 window_display_title="MEEPS SECURITY: New Account",
+                                                 manager=manager)
+    
+    account_delete_warning_label_rect = pygame.Rect(0, -10, 300, 200)
+    account_delete_warning_label = pygame_gui.elements.UILabel(relative_rect=account_delete_warning_label_rect, 
+                                                            text="GUEST ACCNOUNT CANNOT BE DELETED", 
+                                                            manager=manager,
+                                                            container=account_delete_warning,
+                                                            anchors={'center':'center'})
+    
+    account_warning_close_button_rect = pygame.Rect(10, 10, 200, 40)
+    account_warning_close_button_rect.bottomright = (285, -10)
+    account_warning_close_button = pygame_gui.elements.UIButton(relative_rect=account_warning_close_button_rect, 
+                                                                     text="OK", manager=manager,container=account_delete_warning,
+                                                                     anchors={'left':'left', 'bottom':'bottom'})
+    
+    return account_delete_warning, account_warning_close_button
+
 
 def account_delete_confirm_window_func(manager):
 

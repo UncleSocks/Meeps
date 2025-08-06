@@ -36,6 +36,7 @@ class AccountStateManager:
         self.assigned_ticket_list = []
         self.selected_account = None
         self.account_delete_confirm_window = None
+        self.account_delete_warning_window = None
 
     def account_id_name_mapper(self) -> dict:
         account_id_name_list = self.query.account_id_name_list()
@@ -108,6 +109,10 @@ class AccountUIManager:
     def display_confirm_window(self) -> None:
         self.state.account_delete_confirm_window, self.confirm_delete_yes_button, \
             self.confirm_delete_no_button = ae.account_delete_confirm_window_func(self.manager)
+        
+    def display_warning_window(self) -> None:
+        self.state.account_delete_warning_window, \
+            self.warning_continue_button = ae.account_delete_warning_window(self.manager)
 
     def refresh_account_list(self, updated_account_list) -> None:
         self.account_entry_slist.set_item_list(updated_account_list)
@@ -154,7 +159,11 @@ class AccountEventHandler:
         
         if self.state.account_delete_confirm_window and \
             event.ui_element == self.ui.confirm_delete_no_button:
-            return ManagementButtonAction.CANCEL_DELETE      
+            return ManagementButtonAction.CANCEL_DELETE
+
+        if self.state.account_delete_warning_window and \
+            event.ui_element == self.ui.warning_continue_button:
+            return ManagementButtonAction.CONTINUE     
 
     
 class AccountManagementController:
@@ -204,6 +213,7 @@ class AccountManagementController:
                 ManagementButtonAction.DELETE: self._handle_delete_action,
                 ManagementButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
                 ManagementButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action,
+                ManagementButtonAction.CONTINUE: self._handle_continue_action
             }    
 
             button_action = button_action_map.get(button_event)
@@ -221,7 +231,10 @@ class AccountManagementController:
 
     def _handle_delete_action(self) -> None:
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ui.display_confirm_window()
+        if self.state.selected_account == 'Guest':
+            self.ui.display_warning_window()
+        else:
+            self.ui.display_confirm_window()
 
     def _handle_confirm_delete_action(self) -> None:
         self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
@@ -233,6 +246,9 @@ class AccountManagementController:
     def _handle_cancel_delete_action(self) -> None:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
         self.state.account_delete_confirm_window.kill()
+
+    def _handle_continue_action(self) -> None:
+        self.state.account_delete_warning_window.kill()
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
