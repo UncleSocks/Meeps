@@ -3,8 +3,9 @@ import pygame_gui
 from dataclasses import dataclass
 
 import init
-import sound_manager
+from sound_manager import ButtonSoundManager
 import constants
+from constants import ManagementButtonAction
 import elements.accounts_elements as account_elements
 from queries import SqliteQueries
 
@@ -98,25 +99,72 @@ class AccountCreationEventHandler():
         self.manager = pygame_manager
         self.state = state_manager
         self.ui = ui_manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ManagementButtonAction.EXIT
 
         if event.ui_element == self.ui.add_account_button:
-            self._handle_add_button()
+            return ManagementButtonAction.CREATE
 
-        if self.state.account_confirm_window and event.ui_element == self.ui.account_confirm_close_button:
-            self.ui.refresh_creation_page()
-            self.state.account_confirm_window.kill()
-            self.state.account = AccountDetails()
+        if self.state.account_confirm_window \
+            and event.ui_element == self.ui.account_confirm_close_button:
+            return ManagementButtonAction.CONFIRM_CREATE
 
-    def _handle_back_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return constants.EXIT_ACTION
 
-    def _handle_add_button(self):
+class AccountCreationController():
+
+    def __init__(self, connect, cursor):
+        self.connect = connect
+        self.cursor = cursor
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
+        self.window_surface  = self.pygame_renderer.window_surface
+        self.button_sfx = ButtonSoundManager()
+
+        self.state = AccountCreationStateManager(self.connect, self.cursor)
+        self.ui = AccountCreationUIManager(self.manager, self.state)
+        self.event_handler = AccountCreationEventHandler(self.manager, self.state, self.ui)
+
+    def account_creation_loop(self):
+        running = True
+        while running:
+            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            events = pygame.event.get()
+            
+            for event in events:
+                if self._handle_events(event) == ManagementButtonAction.EXIT:
+                    running = False
+
+            self.pygame_renderer.ui_renderer(time_delta)
+
+        updated_account_list = self.state.fetch_account_names()
+        return updated_account_list
+
+    def _handle_events(self, event):
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                button_event = self.event_handler.handle_button_pressed(event)
+
+                if button_event == ManagementButtonAction.EXIT:
+                    return self._handle_exit_action()
+
+                button_action_map = {
+                    ManagementButtonAction.CREATE: self._handle_create_button,
+                    ManagementButtonAction.CONFIRM_CREATE: self._handle_confirm_button
+                }
+
+                button_action = button_action_map.get(button_event)
+                if button_action:
+                    button_action()
+            
+            self.manager.process_events(event)
+            return True
+    
+    def _handle_create_button(self) -> None:
         self.ui.capture_new_account_details()
 
         if not all([
@@ -132,45 +180,11 @@ class AccountCreationEventHandler():
         self.state.add_new_account()
         self.ui.display_confirm_window()
 
+    def _handle_confirm_button(self) -> None:
+        self.ui.refresh_creation_page()
+        self.state.account_confirm_window.kill()
+        self.state.account = AccountDetails()
 
-class AccountCreationController():
-
-    def __init__(self, connect, cursor):
-        self.connect = connect
-        self.cursor = cursor
-
-        self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
-        self.window_surface  = self.pygame_renderer.window_surface
-
-        self.state = AccountCreationStateManager(self.connect, self.cursor)
-        self.ui = AccountCreationUIManager(self.manager, self.state)
-        self.event_handler = AccountCreationEventHandler(self.manager, self.state, self.ui)
-
-    def account_creation_loop(self):
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
-            
-            for event in events:
-                if not self._handle_events(event):
-                    running = False
-
-            self.pygame_renderer.ui_renderer(time_delta)
-
-        updated_account_list = self.state.fetch_account_names()
-        return updated_account_list
-
-    def _handle_events(self, event):
-            if event.type == pygame.QUIT:
-                pygame.quit()
-
-            if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                button_action = self.event_handler.handle_button_pressed(event)
-
-                if button_action == constants.EXIT_ACTION:
-                    return False
-            
-            self.manager.process_events(event)
-            return True
+    def _handle_exit_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        return ManagementButtonAction.EXIT

@@ -69,6 +69,7 @@ class ManagementButtonSfx(Enum):
 class ManagementButtonAction(Enum):
     EXIT = 'exit'
     CREATE = 'create'
+    CONFIRM_CREATE = 'confirm_create'
     DELETE = 'delete'
     CONFIRM_DELETE = 'confirm_delete'
     CANCEL_DELETE = 'cancel_delete'
