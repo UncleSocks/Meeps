@@ -61,16 +61,14 @@ class ShiftStateManager():
 
     def _ticket_variables(self):
         self.selected_ticket_id = 0
-        self.ticket_present = None
+        self.ticket_present = False
         self.ticket_answer = None
         self.ticket_transcript = None
-        #self.ticket_account_picture = None
         self.selected_threat = None
         self.selected_threat_id = 0
 
     def _popup_variables(self):
         self.popup_window = None
-        #self.popup_accept_button = False
     
     def _timer_variabbles(self):
         self.ticket_generate_timer = 0
@@ -135,8 +133,19 @@ class ShiftStateManager():
             self.max_ticket_sla = 120
 
     def reset_ticket_state(self):
-        self.ticket_present = None
+        self.ticket_present = False
         self.ticket_generate_timer = 0
+        self.ticket_sla_timer = 0
+        self.popup_window = None
+
+    def update_ticket_state(self):
+        self.ticket_present = True
+        self.selected_threat = None
+        self.popup_window = None
+        self.ticket_sla_timer = 0
+
+    def dequeue_ticket(self):
+        self.selected_ticket_id = self.ticket_id_list.pop(0)
     
 
 class ShiftUIManager():
@@ -242,29 +251,19 @@ class GenerateTicket():
         self.state = state_manager
         self.ui = ui_manager
         self.sound = sound_controller
-        self._restart_state_variables()
-        self._stop_call()
 
-    def _restart_state_variables(self):
-        self.state.ticket_sla_timer = 0
-        self.state.selected_threat = None
+    def generate_ticket(self):
+        self._stop_call()
+        self.state.dequeue_ticket()
+        self.state.update_ticket_state()
+        ticket = self.state.fetch_ticket_details()
+        self.ui.display_ticket(self.state.selected_ticket_id, ticket)
+        self.sound.transcribe_ticket(ticket.transcript)
+        self.state.ticket_answer = ticket.threat
 
     def _stop_call(self):
         self.sound.call_sfx.stop_loop()
         self.state.popup_window.hide()
-        self.state.popup_window = None
-
-    def generate_ticket(self):
-        self.state.selected_ticket_id = self.state.ticket_id_list[0]
-        ticket = self.state.fetch_ticket_details()
-        self.ui.display_ticket(self.state.selected_ticket_id, ticket)
-        self._update_ticket_state()
-        self.sound.transcribe_ticket(ticket.transcript)
-        self.state.ticket_answer = ticket.threat
-    
-    def _update_ticket_state(self):
-        self.state.ticket_present = True
-        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
 
 
 class CountdownManager():
@@ -282,10 +281,12 @@ class CountdownManager():
         self.state.ticket_sla_timer += time_delta
 
         if ticket_sla_difference <= 0:
-            self._ticket_sla_timeout
+            self._ticket_sla_timeout()
 
     def _ticket_sla_timeout(self):
         self.ui.refresh_ticket()
+        self.state.dequeue_ticket()
+        self.state.reset_ticket_state()
         self.state.missed_tickets += 1
 
     def popup_sla_countdown(self, time_delta):
@@ -297,13 +298,9 @@ class CountdownManager():
             self._popup_sla_timeout()
 
     def _popup_sla_timeout(self):
+        self.state.dequeue_ticket()
+        self.state.reset_ticket_state()
         self.state.popup_window.kill()
-        self.state.popup_window = None
-
-        self.state.selected_ticket_id = self.state.ticket_id_list[0]
-        self.state.ticket_id_list.remove(self.state.selected_ticket_id)
-
-        self.state.ticket_sla_timer = 0
         self.state.missed_calls += 1
         self.sound.call_sfx.stop_loop()
 
@@ -388,7 +385,7 @@ class ShiftController():
                     running = False
 
             if self.state.ticket_generate_timer >= self.state.ticket_interval \
-                and self.state.ticket_present is None and self.state.popup_window is None:
+                and not self.state.ticket_present and self.state.popup_window is None:
                 self._handle_incoming_call()
 
             if self.state.popup_window:
