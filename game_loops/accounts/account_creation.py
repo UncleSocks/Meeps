@@ -7,6 +7,7 @@ from sound_manager import ButtonSoundManager
 import constants
 from constants import ButtonAction
 import elements.accounts_elements as account_elements
+import elements.account_elements_s as ae
 from queries import SqliteQueries
 
 
@@ -60,7 +61,7 @@ class AccountCreationUIManager():
         self.build_ui()
 
     def build_ui(self):
-        self.back_button = account_elements.back_button_func(self.manager)
+        self.back_button = ae.BackButton.create_button(self.manager)
         self.add_account_button = account_elements.add_new_account_button_func(self.manager)
         
         self.account_name_label, self.new_account_name_tentry = account_elements.new_account_name_tentry_func(self.manager)

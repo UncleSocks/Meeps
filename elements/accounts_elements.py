@@ -1,34 +1,33 @@
+from enum import Enum
+
 import pygame
 import pygame_gui
 
+from .element_creator import Position, Offset
 
 
-class AccountElementCreator:
 
-    def __init__(self, pygame_manager):
-        self.manager = pygame_manager
+class BackButton(Enum):
+    POS = Position(5, 5, 30, 30)
+    ANCHOR = Offset(10, -610)
+    TEXT = "<"
 
-    def create_button_element(self, button_dimension, text_content):
-        button_element = pygame_gui.elements.UIButton(relative_rect=button_dimension, 
-                                                      text=text_content, manager=self.manager,
-                                                      anchors={'bottom':'bottom', 'left':'left'})
-        return button_element
-    
-    def create_textbox_element(self, textbox_dimension, text_content):
-        textbot_element = pygame_gui.elements.UITextBox(relative_rect=textbox_dimension, 
-                                                        html_text=text_content, manager=self.manager,
-                                                        anchors={'bottom':'bottom', 'left':'left'})
-        return textbot_element
-    
 
+class CreateButton(Enum):
+    POS = Position(0, 0, 45, 30)
+    ANCHOR = Offset(320, -470)
+    TEXT = "+"
+
+
+#Done
 def back_button_func(manager):
     
-    back_button_rect = pygame.Rect(5, 5, 30, 30)
-    back_button_rect.bottomleft = (10, -610)
-    back_button = AccountElementCreator(manager).create_button_element(back_button_rect, "<")
+    back_button_rect = pygame.Rect(*BackButton.POS.value)
+    back_button_rect.bottomleft = (BackButton.ANCHOR.value)
+    #back_button = ElementCreator(manager).create_button_element(back_button_rect, None, BackButton.TEXT.value)
     #back_button = pygame_gui.elements.UIButton(relative_rect=back_button_rect,
     #                                             text="<", manager=manager)
-    return back_button
+    #return back_button
 
 
 def account_manager_image_func(manager, image_path):
@@ -43,8 +42,8 @@ def account_manager_image_func(manager, image_path):
 
 def create_button_func(manager):
 
-    create_button_rect = pygame.Rect(0, 0, 45, 30)
-    create_button_rect.bottomleft = (320, -470)
+    create_button_rect = pygame.Rect(*CreateButton.POS.value)
+    create_button_rect.bottomleft = (CreateButton.ANCHOR.value)
     create_button = pygame_gui.elements.UIButton(relative_rect=create_button_rect,
                                                  text="+", manager=manager,
                                                  anchors={'bottom':'bottom', 'left':'left'})
@@ -244,7 +243,7 @@ def account_delete_warning_window(manager):
     
     account_delete_warning_rect = pygame.Rect(0, 0, 400, 200)
     account_delete_warning = pygame_gui.elements.UIWindow(rect=account_delete_warning_rect,
-                                                 window_display_title="MEEPS SECURITY: New Account",
+                                                 window_display_title="MEEPS SECURITY: Delete Threat",
                                                  manager=manager)
     
     account_delete_warning_label_rect = pygame.Rect(0, -10, 300, 200)
