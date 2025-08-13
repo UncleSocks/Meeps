@@ -61,7 +61,7 @@ class AccountCreationUIManager():
         self.build_ui()
 
     def build_ui(self):
-        self.back_button = ae.BackButton.create_button(self.manager)
+        self.back_button = ae.BackButton(self.manager).draw_button()
         self.add_account_button = account_elements.add_new_account_button_func(self.manager)
         
         self.account_name_label, self.new_account_name_tentry = account_elements.new_account_name_tentry_func(self.manager)
@@ -70,7 +70,7 @@ class AccountCreationUIManager():
         self.account_contact_label, self.new_account_contact_tentry = account_elements.new_account_contact_func(self.manager)
         self.account_picture_path_label, self.new_account_picture_path_tentry = account_elements.new_account_picture_path_func(self.manager)
         
-        self.add_account_image = account_elements.add_account_image_func(self.manager, constants.ADD_ACCOUNT_IMAGE_PATH)
+        self.add_account_image = ae.NewAccountImage(self.manager).draw_image()
         self.new_account_image_border = account_elements.new_account_image_border_func(self.manager)
 
     def capture_new_account_details(self):

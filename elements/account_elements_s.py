@@ -117,3 +117,8 @@ class DeleteYesButton(DrawElement):
     ANCHOR = {'left':'left', 'bottom':'bottom'}
     ANCHOR_CONFIG = AnchorConfig.BOTTOMRIGHT
     ANCHOR_POS = Offset(185, -10)
+
+
+class NewAccountImage(DrawElement):
+    POS = (50, 15, 375, 75)
+    INPUT = constants.ADD_ACCOUNT_IMAGE_PATH
