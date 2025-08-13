@@ -85,18 +85,19 @@ class AccountUIManager:
 
     def _draw_account_elements(self):
         self.account_entry_title_tbox = ae.AccountListTitle(self.manager).draw_textbox()
-        self.account_entry_slist = ae.AccountList(self.manager)
-        self.account_entry_slist.INPUT = self.state.account_name_list
-        self.account_entry_slist = self.account_entry_slist.draw_selectionlist()
+
+        self.account_selection_list = ae.AccountList(self.manager)
+        self.account_selection_list.INPUT = self.state.account_name_list
+        self.account_selection_list = self.account_selection_list.draw_selectionlist()
         
         self.account_details_label = ae.AccountLabel(self.manager).draw_label()
-        self.selected_account_description_tbox = ae.AccountDescriptionTextBox(self.manager).draw_textbox()
+        self.selected_account_description = ae.AccountDescriptionTextBox(self.manager).draw_textbox()
 
     def _draw_ticket_elements(self):
         self.assigned_ticket_label = ae.AssignedTicketLabel(self.manager).draw_label()
-        self.assigned_ticket_slist = ae.AssignedTicketList(self.manager)
-        self.assigned_ticket_slist.INPUT = self.state.assigned_ticket_list
-        self.assigned_ticket_slist = self.assigned_ticket_slist.draw_selectionlist()
+        self.ticket_selection_list = ae.AssignedTicketList(self.manager)
+        self.ticket_selection_list.INPUT = self.state.assigned_ticket_list
+        self.ticket_selection_list = self.ticket_selection_list.draw_selectionlist()
 
     def format_account_details(self, account: AccountDetails) -> str:
         formatted_account_details = (
@@ -139,11 +140,11 @@ class AccountUIManager:
         self.warning_continue_button = self.warning_continue_button.draw_button()
 
     def refresh_account_list(self, updated_account_list) -> None:
-        self.account_entry_slist.set_item_list(updated_account_list)
+        self.account_selection_list.set_item_list(updated_account_list)
         self.state.account_id_name_map = self.state.account_id_name_mapper()
 
     def refresh_assigned_tickets(self, assigned_ticket_list) -> None:
-        self.assigned_ticket_slist.set_item_list(assigned_ticket_list)
+        self.ticket_selection_list.set_item_list(assigned_ticket_list)
 
 
 class AccountEventHandler:
@@ -162,7 +163,7 @@ class AccountEventHandler:
     def _update_account_textbox(self) -> None:
         account = self.state.fetch_account_details()
         account_details = self.ui.format_account_details(account)
-        self.ui.selected_account_description_tbox.set_text(account_details)
+        self.ui.selected_account_description.set_text(account_details)
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()
         self.ui.refresh_assigned_tickets(self.state.assigned_ticket_list)
 
@@ -222,7 +223,7 @@ class AccountManagementController:
             pygame.quit()
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
-            and event.ui_element == self.ui.account_entry_slist:
+            and event.ui_element == self.ui.account_selection_list:
             self.state.selected_account = event.text
             self.event_handler.handle_account_selection()
 
