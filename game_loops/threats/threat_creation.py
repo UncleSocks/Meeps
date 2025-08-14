@@ -3,7 +3,6 @@ import pygame_gui
 from dataclasses import dataclass
 
 import init
-import sound_manager
 from sound_manager import ButtonSoundManager
 import constants
 from constants import ButtonAction
@@ -94,7 +93,6 @@ class ThreatCreationEventHandler():
         self.manager = pygame_manager
         self.state = state_manager
         self.ui = ui_manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
