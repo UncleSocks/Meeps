@@ -9,7 +9,7 @@ import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 from .account_creation import AccountCreationController
-import elements.account_elements_s as ae
+import elements.account_elements as ae
 
 
 

@@ -6,8 +6,7 @@ import init
 from sound_manager import ButtonSoundManager
 import constants
 from constants import ButtonAction
-import elements.accounts_elements as account_elements
-import elements.account_elements_s as ae
+import elements.account_elements as ae
 from queries import SqliteQueries
 
 
