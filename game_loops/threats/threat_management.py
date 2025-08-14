@@ -3,8 +3,9 @@ import pygame_gui
 from dataclasses import dataclass
 
 import constants
+from constants import ButtonAction
 import init
-import sound_manager
+from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 from .threat_creation import ThreatCreationController
 import elements.threats_elements as threat_element
@@ -18,7 +19,7 @@ class ThreatDetails:
     description: str = ""
     indicators: str = ""
     countermeasures: str = ""
-    image_path: str = ""
+    image_file: str = ""
 
 
 class ThreatStateManager():
@@ -79,77 +80,54 @@ class ThreatUIManager():
             self.selected_threat_indicators_tbox, self.selected_threat_countermeasures_tbox, \
                 self.selected_threat_image_path_tbox = threat_element.threat_details_func(self.manager)
         
+    def set_threat_details(self, threat: ThreatDetails) -> str:
+        self.selected_threat_title_tbox.set_text(f"<b>{threat.name}</b>")
+        self.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{threat.description}")
+        self.selected_threat_indicators_tbox.set_text(f"INDICATORS:\n{threat.indicators}")
+        self.selected_threat_countermeasures_tbox.set_text(f"COUNTERMEASURES:\n{threat.countermeasures}")
+        self.selected_threat_image_path_tbox.set_text(f"{threat.image_file}")
+        
     def display_confirm_window(self):
         self.state.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, \
             self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
         
     def refresh_threat_list(self, updated_threat_list):
         self.threat_entry_slist.set_item_list(updated_threat_list)
+        self.state.threat_id_name_map = self.state.threat_id_name_mapper()
 
 
 class ThreatEventHandler():
 
-    def __init__(self, pygame_manager, state_manager: ThreatStateManager, ui_manager: ThreatUIManager):
+    def __init__(self, pygame_manager, state_manager: ThreatStateManager, ui_manager: ThreatUIManager,
+                 sound_manager: ButtonSoundManager):
         self.manager = pygame_manager
         self.state = state_manager
         self.ui = ui_manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
+        self.button_sfx = sound_manager
 
-    def handle_threat_selection(self, selected_threat):
+    def handle_threat_selection(self) -> None:
         self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
-        self.state.selected_threat = selected_threat
         self._update_threat_textbox()
         
-    def _update_threat_textbox(self):
+    def _update_threat_textbox(self) -> None:
         threat = self.state.fetch_threat_details()
-
-        self.ui.selected_threat_title_tbox.set_text(f"<b>{threat.name}</b>")
-        self.ui.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{threat.description}")
-        self.ui.selected_threat_indicators_tbox.set_text(f"INDICATORS:\n{threat.indicators}")
-        self.ui.selected_threat_countermeasures_tbox.set_text(f"COUNTERMEASURES:\n{threat.countermeasures}")
-        self.ui.selected_threat_image_path_tbox.set_text(f"{threat.image_path}")
+        self.ui.set_threat_details(threat)
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ButtonAction.EXIT
         
         if event.ui_element == self.ui.create_button:
-            return self._handle_create_button()
-
+            return ButtonAction.CREATE
+        
         if event.ui_element == self.ui.delete_button and self.state.selected_threat is not None:
-            self._handle_delete_button()
+            return ButtonAction.DELETE
 
         if self.state.threat_delete_confirm_window and event.ui_element == self.ui.threat_delete_confirm_yes_button:
-            self._handle_confirm_yes_button()
+            return ButtonAction.CONFIRM_DELETE
 
         if self.state.threat_delete_confirm_window and event.ui_element == self.ui.threat_delete_confirm_no_button:
-            self._handle_confirm_no_window()
-
-        
-    def _handle_back_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return constants.EXIT_ACTION
-    
-    def _handle_create_button(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        return constants.CREATE_ACTION
-
-    def _handle_delete_button(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ui.display_confirm_window()
-
-    def _handle_confirm_yes_button(self):
-        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
-        self.state.delete_selected_threat()
-        self.state.threat_name_list = self.state.fetch_threat_names()
-        self.ui.refresh_threat_list(self.state.threat_name_list)
-        self.state.threat_id_name_map = self.state.threat_id_name_mapper()
-
-        self.state.threat_delete_confirm_window.kill()
-
-    def _handle_confirm_no_window(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.state.threat_delete_confirm_window.kill()
+            return ButtonAction.CANCEL_DELETE
 
 
 class ThreatManagementController():
@@ -161,10 +139,11 @@ class ThreatManagementController():
         self.pygame_renderer = init.PygameRenderer()
         self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
+        self.button_sfx = ButtonSoundManager()
 
         self.state = ThreatStateManager(self.connect, self.cursor)
         self.ui = ThreatUIManager(self.manager, self.state)
-        self.event_handler = ThreatEventHandler(self.manager, self.state, self.ui)
+        self.event_handler = ThreatEventHandler(self.manager, self.state, self.ui, self.button_sfx)
 
     def threat_management_loop(self):
         running = True
@@ -173,7 +152,7 @@ class ThreatManagementController():
             events = pygame.event.get()
 
             for event in events:
-                if not self._handle_events(event):
+                if self._handle_events(event) == ButtonAction.EXIT:
                     running = False
 
             self.pygame_renderer.ui_renderer(time_delta)
@@ -184,23 +163,50 @@ class ThreatManagementController():
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
             and event.ui_element == self.ui.threat_entry_slist:
-            selected_threat = event.text
-            self.event_handler.handle_threat_selection(selected_threat)
+            self.state.selected_threat = event.text
+            self.event_handler.handle_threat_selection()
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_action = self.event_handler.handle_button_pressed(event)
+            button_event = self.event_handler.handle_button_pressed(event)
 
-            if button_action == constants.CREATE_ACTION:
-                threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
-                self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
-                self._handle_creation_return()
+            if button_event == ButtonAction.EXIT:
+                return self._handle_exit_action()
+            
+            button_action_map = {
+                ButtonAction.CREATE: self._handle_create_action,
+                ButtonAction.DELETE: self._handle_delete_action,
+                ButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
+                ButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action
+            }
 
-            elif button_action == constants.EXIT_ACTION:
-                return False
+            button_action = button_action_map.get(button_event)
+            if button_action:
+                button_action()
             
         self.manager.process_events(event)
         return True
     
-    def _handle_creation_return(self):
+    def _handle_create_action(self) -> None:
+        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
+        self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
         self.ui.refresh_threat_list(self.state.threat_name_list)
-        self.state.threat_id_name_map = self.state.threat_id_name_mapper()
+
+    def _handle_delete_action(self):
+        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.ui.display_confirm_window()
+
+    def _handle_confirm_delete_action(self):
+        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
+        self.state.threat_delete_confirm_window.kill()
+        self.state.delete_selected_threat()
+        self.state.threat_name_list = self.state.fetch_threat_names()
+        self.ui.refresh_threat_list(self.state.threat_name_list)
+
+    def _handle_cancel_delete_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.state.threat_delete_confirm_window.kill()
+
+    def _handle_exit_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        return ButtonAction.EXIT

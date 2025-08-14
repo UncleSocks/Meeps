@@ -3,7 +3,7 @@ from enum import Enum
 
 FPS = 60
 CURRENT_VERSION = 'v2025.0.1 BETA'
-DATABASE_FILE = 'data2.db'
+DATABASE_FILE = 'data.db'
 
 WINDOW_CAPTION = 'MEEPS SECURITY Responder.exe'
 WINDOW_ICON_PATH = 'assets/images/general/icon.png'

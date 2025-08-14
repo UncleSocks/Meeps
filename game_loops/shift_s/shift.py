@@ -385,7 +385,8 @@ class ShiftController():
                     running = False
 
             if self.state.ticket_generate_timer >= self.state.ticket_interval \
-                and not self.state.ticket_present and self.state.popup_window is None:
+                and self.state.ticket_id_list and not self.state.ticket_present \
+                    and self.state.popup_window is None:
                 self._handle_incoming_call()
 
             if self.state.popup_window:
