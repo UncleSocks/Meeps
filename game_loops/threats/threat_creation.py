@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 import init
 import sound_manager
+from sound_manager import ButtonSoundManager
 import constants
+from constants import ButtonAction
 import elements.threats_elements as threat_element
 from queries import SqliteQueries
 
@@ -96,21 +98,69 @@ class ThreatCreationEventHandler():
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ButtonAction.EXIT
 
         if event.ui_element == self.ui.add_threat_button:
-            self._handle_add_button()
+            return ButtonAction.CREATE
 
-        if self.state.threat_confirm_window and event.ui_element == self.ui.threat_confirm_close_button:
-            self.ui.refresh_creation_page()
-            self.state.threat_confirm_window.kill()
-            self.state.threat = ThreatDetails()
+        if self.state.threat_confirm_window \
+            and event.ui_element == self.ui.threat_confirm_close_button:
+            return ButtonAction.CONFIRM_CREATE
 
-    def _handle_back_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return constants.EXIT_ACTION
+
+class ThreatCreationController():
+
+    def __init__(self, connect, cursor):
+        self.connect = connect
+        self.cursor = cursor
+
+        self.pygame_renderer = init.PygameRenderer()
+        self.manager = self.pygame_renderer.manager
+        self.window_surface = self.pygame_renderer.window_surface
+        self.button_sfx = ButtonSoundManager()
+
+        self.state = ThreatCreationStateManager(self.connect, self.cursor)
+        self.ui = ThreatCreationUIManager(self.manager, self.state)
+        self.event_handler = ThreatCreationEventHandler(self.manager, self.state, self.ui)
+
+    def threat_creation_loop(self):
+        running = True
+        while running:
+            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+            events = pygame.event.get()
+            
+            for event in events:
+                if self._handle_events(event) == ButtonAction.EXIT:
+                    running = False
+
+            self.pygame_renderer.ui_renderer(time_delta)
+        
+        updated_threat_list = self.state.fetch_threat_names()
+        return updated_threat_list
+
+    def _handle_events(self, event):
+        if event.type == pygame.QUIT:
+            pygame.quit()
+
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            button_event = self.event_handler.handle_button_pressed(event)
+
+            if button_event == ButtonAction.EXIT:
+                return self._handle_exit_action()
+            
+            button_action_map = {
+                ButtonAction.CREATE: self._handle_create_button,
+                ButtonAction.CONFIRM_CREATE: self._handle_confirm_button
+            }
+            
+            button_action = button_action_map.get(button_event)
+            if button_action:
+                button_action()
+
+        self.manager.process_events(event)
+        return True
     
-    def _handle_add_button(self):
+    def _handle_create_button(self) -> None:
         self.ui.capture_new_threat_details()
 
         if not all([
@@ -126,45 +176,11 @@ class ThreatCreationEventHandler():
         self.state.add_new_threat()
         self.ui.display_confirm_window()
 
+    def _handle_confirm_button(self) -> None:
+        self.ui.refresh_creation_page()
+        self.state.threat_confirm_window.kill()
+        self.state.threat = ThreatDetails()
 
-class ThreatCreationController():
-
-    def __init__(self, connect, cursor):
-        self.connect = connect
-        self.cursor = cursor
-
-        self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
-        self.window_surface = self.pygame_renderer.window_surface
-
-        self.state = ThreatCreationStateManager(self.connect, self.cursor)
-        self.ui = ThreatCreationUIManager(self.manager, self.state)
-        self.event_handler = ThreatCreationEventHandler(self.manager, self.state, self.ui)
-
-    def threat_creation_loop(self):
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
-            
-            for event in events:
-                if not self._handle_events(event):
-                    running = False
-
-            self.pygame_renderer.ui_renderer(time_delta)
-        
-        updated_threat_list = self.state.fetch_threat_names()
-        return updated_threat_list
-
-    def _handle_events(self, event):
-        if event.type == pygame.QUIT:
-            pygame.quit()
-
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_action = self.event_handler.handle_button_pressed(event)
-
-            if button_action == constants.EXIT_ACTION:
-                return False
-            
-        self.manager.process_events(event)
-        return True
+    def _handle_exit_action(self) -> None:
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        return ButtonAction.EXIT
