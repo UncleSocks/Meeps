@@ -137,13 +137,13 @@ class AccountUIManager:
     def display_warning_window(self) -> None:
         self.state.account_delete_warning_window = ae.DeleteWarningWindow(self.manager).draw_window()
 
-        self.delete_warning_label = ae.DeleteWarningLabel(self.manager)
-        self.delete_warning_label.CONTAINER = self.state.account_delete_warning_window
-        self.delete_warning_label.draw_label()
+        delete_warning_label = ae.DeleteWarningLabel(self.manager)
+        delete_warning_label.CONTAINER = self.state.account_delete_warning_window
+        self.delete_warning_label = delete_warning_label.draw_label()
 
-        self.warning_continue_button = ae.DeleteWarningButton(self.manager)
-        self.warning_continue_button.CONTAINER = self.state.account_delete_warning_window
-        self.warning_continue_button = self.warning_continue_button.draw_button()
+        warning_continue_button = ae.DeleteWarningButton(self.manager)
+        warning_continue_button.CONTAINER = self.state.account_delete_warning_window
+        self.warning_continue_button = warning_continue_button.draw_button()
 
     def refresh_account_list(self, updated_account_list) -> None:
         self.account_selection_list.set_item_list(updated_account_list)

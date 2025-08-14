@@ -29,7 +29,7 @@ class AccountCreationStateManager():
         self.cursor = cursor
         self.query = SqliteQueries(self.cursor)
         self.account = AccountDetails()
-        self.account_confirm_window = False
+        self.confirm_window = False
 
     def fetch_account_names(self):
         account_name_list = self.query.account_name_list_query()
@@ -114,8 +114,15 @@ class AccountCreationUIManager():
         self.account_picture = account_picture.draw_image()
 
     def display_confirm_window(self):
-        self.state.account_confirm_window, \
-            self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
+        self.state.confirm_window = ae.ConfirmWindow(self.manager).draw_window()
+
+        confirm_label = ae.ConfirmLabel(self.manager)
+        confirm_label.CONTAINER = self.state.confirm_window
+        self.confirm_label = confirm_label.draw_label()
+
+        confirm_button = ae.ConfirmButton(self.manager)
+        confirm_button.CONTAINER = self.state.confirm_window
+        self.confirm_button = confirm_button.draw_button()
 
     def refresh_creation_page(self):
         self.account_name_entry.set_text("")
@@ -139,8 +146,8 @@ class AccountCreationEventHandler():
         if event.ui_element == self.ui.add_account_button:
             return ButtonAction.CREATE
 
-        if self.state.account_confirm_window \
-            and event.ui_element == self.ui.account_confirm_close_button:
+        if self.state.confirm_window \
+            and event.ui_element == self.ui.confirm_button:
             return ButtonAction.CONFIRM_CREATE
 
 
@@ -214,7 +221,7 @@ class AccountCreationController():
 
     def _handle_confirm_button(self) -> None:
         self.ui.refresh_creation_page()
-        self.state.account_confirm_window.kill()
+        self.state.confirm_window.kill()
         self.state.account = AccountDetails()
 
     def _handle_exit_action(self):
