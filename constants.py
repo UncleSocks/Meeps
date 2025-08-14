@@ -26,6 +26,7 @@ NEW_TICKET_IMAGE_PATH = 'assets/images/general/new_ticket.png'
 
 ACCOUNT_MANAGEMENT_IMAGE_PATH = 'assets/images/general/account_manager.png'
 ADD_ACCOUNT_IMAGE_PATH = 'assets/images/general/add_account.png'
+GUEST_ACCOUNT_IMAGE_PATH = 'assets/images/accounts/guest.png'
 
 BUTTON_SFX_CHANNEL = 0
 INCOMMING_CALL_CHANNEL = 1

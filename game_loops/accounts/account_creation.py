@@ -19,7 +19,7 @@ class AccountDetails:
     organization: str = ""
     email: str = ""
     contact: str = ""
-    picture_path: str = ""
+    picture_file: str = ""
 
 
 class AccountCreationStateManager():
@@ -47,7 +47,7 @@ class AccountCreationStateManager():
                              self.account.organization,
                              self.account.email,
                              self.account.contact,
-                             self.account.picture_path)
+                             self.account.picture_file)
         
         self.cursor.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)', new_account_entry)
         self.connect.commit()
@@ -58,40 +58,71 @@ class AccountCreationUIManager():
     def __init__(self, pygame_manager, state_manager: AccountCreationStateManager):
         self.manager = pygame_manager
         self.state = state_manager
-        self.build_ui()
+        self.draw_account_creation_ui()
 
-    def build_ui(self):
+    def draw_account_creation_ui(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_account_creation_elements()
+        
+    def _draw_images(self):
+        add_account_image = ae.NewAccountImage(self.manager)
+        load_add_account_image = pygame.image.load(constants.ADD_ACCOUNT_IMAGE_PATH)
+        add_account_image.INPUT = load_add_account_image
+        self.add_account_image = add_account_image.draw_image()
+
+    def _draw_buttons(self):
         self.back_button = ae.BackButton(self.manager).draw_button()
-        self.add_account_button = account_elements.add_new_account_button_func(self.manager)
+        self.add_account_button = ae.AddAccountButton(self.manager).draw_button()
+
+    def _draw_account_creation_elements(self):
+        self.account_name_label = ae.NewAccountNameLabel(self.manager).draw_label()
+        self.account_name_entry = ae.NewAccountNameTextEntry(self.manager).draw_textentrybox()
         
-        self.account_name_label, self.new_account_name_tentry = account_elements.new_account_name_tentry_func(self.manager)
-        self.account_organization_label, self.new_account_organization_tentry = account_elements.new_account_organization_func(self.manager)
-        self.account_email_label, self.new_account_email_tentry = account_elements.new_account_email_func(self.manager)
-        self.account_contact_label, self.new_account_contact_tentry = account_elements.new_account_contact_func(self.manager)
-        self.account_picture_path_label, self.new_account_picture_path_tentry = account_elements.new_account_picture_path_func(self.manager)
-        
-        self.add_account_image = ae.NewAccountImage(self.manager).draw_image()
-        self.new_account_image_border = account_elements.new_account_image_border_func(self.manager)
+        self.account_organization_label = ae.NewAccountOrganizationLabel(self.manager).draw_label()
+        self.account_organization_entry = ae.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
+
+        self.account_email_label = ae.NewAccountEmailLabel(self.manager).draw_label()
+        self.account_email_entry = ae.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
+
+        self.account_contact_label = ae.NewAccountContactLabel(self.manager).draw_label()
+        self.account_contact_entry = ae.NewAccountContactTextEntry(self.manager).draw_textentrybox()
+
+        self.account_picture_file_label = ae.NewAccountPictureFileLabel(self.manager).draw_label()
+        self.account_picture_file = ae.NewAccountPictureFileTextEntry(self.manager).draw_textentrybox()
+
+        self.account_picture_border = ae.NewAccountPictureBorder(self.manager).draw_textentrybox()
 
     def capture_new_account_details(self):
-        self.state.account.name = self.new_account_name_tentry.get_text()
-        self.state.account.organization = self.new_account_organization_tentry.get_text()
-        self.state.account.email = self.new_account_email_tentry.get_text()
-        self.state.account.contact = self.new_account_contact_tentry.get_text()
+        self.state.account.name = self.account_name_entry.get_text()
+        self.state.account.organization = self.account_organization_entry.get_text()
+        self.state.account.email = self.account_email_entry.get_text()
+        self.state.account.contact = self.account_contact_entry.get_text()
+        self._set_new_account_image()
 
-        self.state.account.picture_path = self.new_account_picture_path_tentry.get_text()
-        account_elements.new_account_image_func(self.manager, self.state.account.picture_path)
+    def _set_new_account_image(self):
+        self.state.account.picture_file = self.account_picture_file.get_text()
+        account_picture_path = "".join([constants.ACCOUNT_ASSETS_PATH, self.state.account.picture_file])
+        account_picture = ae.NewAccountPicture(self.manager)
+
+        try:
+            account_picture_load = pygame.image.load(account_picture_path)
+        except (pygame.error, FileNotFoundError):
+            account_picture_load = pygame.image.load(constants.GUEST_ACCOUNT_IMAGE_PATH)
+
+        account_picture.INPUT = account_picture_load
+        self.account_picture = account_picture.draw_image()
 
     def display_confirm_window(self):
         self.state.account_confirm_window, \
             self.account_confirm_close_button = account_elements.account_confirm_window_func(self.manager)
 
     def refresh_creation_page(self):
-        self.new_account_name_tentry.set_text("")
-        self.new_account_organization_tentry.set_text("")
-        self.new_account_email_tentry.set_text("")
-        self.new_account_contact_tentry.set_text("")
-        self.new_account_picture_path_tentry.set_text("")
+        self.account_name_entry.set_text("")
+        self.account_organization_entry.set_text("")
+        self.account_email_entry.set_text("")
+        self.account_contact_entry.set_text("")
+        self.account_picture_file.set_text("")
 
 
 class AccountCreationEventHandler():
@@ -173,7 +204,7 @@ class AccountCreationController():
             self.state.account.organization,
             self.state.account.email,
             self.state.account.contact,
-            self.state.account.picture_path
+            self.state.account.picture_file
         ]):
             return
 

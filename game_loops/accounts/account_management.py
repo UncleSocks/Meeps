@@ -73,11 +73,17 @@ class AccountUIManager:
         self.draw_management_ui()
 
     def draw_management_ui(self):
-        self.account_manager_image = ae.TitleImage(self.manager).draw_image()
+        self._draw_images()
         self._draw_buttons()
         self._draw_account_elements()
         self._draw_ticket_elements()
 
+    def _draw_images(self):
+        account_manager_image = ae.TitleImage(self.manager)
+        load_account_manager_image = pygame.image.load(constants.ACCOUNT_MANAGEMENT_IMAGE_PATH)
+        account_manager_image.INPUT = load_account_manager_image
+        self.account_manager_image = account_manager_image.draw_image()
+        
     def _draw_buttons(self):
         self.back_button = ae.BackButton(self.manager).draw_button()
         self.create_button = ae.CreateButton(self.manager).draw_button()
@@ -86,9 +92,9 @@ class AccountUIManager:
     def _draw_account_elements(self):
         self.account_entry_title_tbox = ae.AccountListTitle(self.manager).draw_textbox()
 
-        self.account_selection_list = ae.AccountList(self.manager)
-        self.account_selection_list.INPUT = self.state.account_name_list
-        self.account_selection_list = self.account_selection_list.draw_selectionlist()
+        account_selection_list = ae.AccountList(self.manager)
+        account_selection_list.INPUT = self.state.account_name_list
+        self.account_selection_list = account_selection_list.draw_selectionlist()
         
         self.account_details_label = ae.AccountLabel(self.manager).draw_label()
         self.selected_account_description = ae.AccountDescriptionTextBox(self.manager).draw_textbox()
@@ -112,21 +118,21 @@ class AccountUIManager:
     def display_confirm_window(self) -> None:
         self.state.account_delete_confirm_window = ae.DeleteConfirmWindow(self.manager).draw_window()
 
-        self.confirm_delete_label = ae.DeleteConfirmLabel(self.manager)
-        self.confirm_delete_label.CONTAINER = self.state.account_delete_confirm_window
-        self.confirm_delete_label = self.confirm_delete_label.draw_label()
+        confirm_delete_label = ae.DeleteConfirmLabel(self.manager)
+        confirm_delete_label.CONTAINER = self.state.account_delete_confirm_window
+        self.confirm_delete_label = confirm_delete_label.draw_label()
 
-        self.confirm_delete_warning_label = ae.DeleteConfirmWarningLabel(self.manager)
-        self.confirm_delete_warning_label.CONTAINER = self.state.account_delete_confirm_window
-        self.confirm_delete_warning_label = self.confirm_delete_warning_label.draw_label()
+        confirm_delete_warning_label = ae.DeleteConfirmWarningLabel(self.manager)
+        confirm_delete_warning_label.CONTAINER = self.state.account_delete_confirm_window
+        self.confirm_delete_warning_label = confirm_delete_warning_label.draw_label()
 
-        self.confirm_delete_yes_button = ae.DeleteYesButton(self.manager)
-        self.confirm_delete_yes_button.CONTAINER = self.state.account_delete_confirm_window
-        self.confirm_delete_yes_button = self.confirm_delete_yes_button.draw_button()
+        confirm_delete_yes_button = ae.DeleteYesButton(self.manager)
+        confirm_delete_yes_button.CONTAINER = self.state.account_delete_confirm_window
+        self.confirm_delete_yes_button = confirm_delete_yes_button.draw_button()
 
-        self.confirm_delete_no_button = ae.DeleteNoButton(self.manager)
-        self.confirm_delete_no_button.CONTAINER = self.state.account_delete_confirm_window
-        self.confirm_delete_no_button = self.confirm_delete_no_button.draw_button()
+        confirm_delete_no_button = ae.DeleteNoButton(self.manager)
+        confirm_delete_no_button.CONTAINER = self.state.account_delete_confirm_window
+        self.confirm_delete_no_button = confirm_delete_no_button.draw_button()
         
     def display_warning_window(self) -> None:
         self.state.account_delete_warning_window = ae.DeleteWarningWindow(self.manager).draw_window()

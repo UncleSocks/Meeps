@@ -85,11 +85,10 @@ class DrawElement:
         )
     
     def draw_image(self):
-        image = pygame.image.load(self.INPUT)
         return pygame_gui.elements.UIImage(
             manager=self.manager,
             relative_rect=self.dimension,
-            image_surface=image,
+            image_surface=self.INPUT,
             anchors=self.ANCHOR,
             container=self.CONTAINER
         )
