@@ -2,13 +2,14 @@ import pygame
 import pygame_gui
 from dataclasses import dataclass
 
-from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
+
 import init
-import sound_manager
+import elements.ticket_elements as ticket_elements
+from constants import StateTracker, ButtonAction, \
+    ImagePaths, ButtonSFX
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
-from .ticket_creation import TicketCreationController
-import elements.ticket_elements as ticket_elements
+
 
 
 
@@ -112,7 +113,7 @@ class TicketEventHandler():
         self.manager = pygame_manager
         self.state = state_manager
         self.ui = ui_manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
+        self.button_sfx = ButtonSoundManager()
 
     def handle_ticket_selection(self, selected_ticket):
         self.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)

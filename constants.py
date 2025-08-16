@@ -19,6 +19,34 @@ class WindowConfig(Enum):
     BACKGROUND = 0,0,0 #RGB values for black.
 
 
+class StateTracker(Enum):
+    MAIN_MENU = 'main_menu'
+    SHIFT = 'shift'
+    TICKET_MANAGEMENT = 'ticket_management'
+    TICKET_CREATION = 'ticket_creation'
+    ACCOUNT_MANAGEMENT = 'account_management'
+    ACCOUNT_CREATION = 'account_creation'
+    THREAT_MANAGEMENT = 'threat_management'
+    THREAT_CREATION = 'threat_creation'
+    EXIT = 'exit'
+
+
+class ButtonAction(Enum):
+    EXIT = 'exit'
+    SHIFT = 'shift'
+    TICKET = 'ticket'
+    ACCOUNT = 'account'
+    THREAT = 'threat'
+    SUBMIT = 'submit'
+    ANSWER = 'answer'
+    CREATE = 'create'
+    CONFIRM_CREATE = 'confirm_create'
+    DELETE = 'delete'
+    CONFIRM_DELETE = 'confirm_delete'
+    CANCEL_DELETE = 'cancel_delete'
+    CONTINUE = 'continue'
+
+
 class Timers(Enum):
     MIN_CALL_INTERVAL = 5
     MAX_CALL_INTERVAL = 12
@@ -72,31 +100,3 @@ class ButtonSFX(Enum):
     LIST_BUTTON = 'list_button'
     CORRECT_SUBMISSION = 'correct_submission'
     INCORRECT_SUBMISSION = 'incorrect_submission'
-
-
-class ButtonAction(Enum):
-    EXIT = 'exit'
-    SHIFT = 'shift'
-    TICKET = 'ticket'
-    ACCOUNT = 'account'
-    THREAT = 'threat'
-    SUBMIT = 'submit'
-    ANSWER = 'answer'
-    CREATE = 'create'
-    CONFIRM_CREATE = 'confirm_create'
-    DELETE = 'delete'
-    CONFIRM_DELETE = 'confirm_delete'
-    CANCEL_DELETE = 'cancel_delete'
-    CONTINUE = 'continue'
-
-
-class StateTracker(Enum):
-    MAIN_MENU = 'main_menu'
-    SHIFT = 'shift'
-    TICKET_MANAGEMENT = 'ticket_management'
-    TICKET_CREATION = 'ticket_creation'
-    ACCOUNT_MANAGEMENT = 'account_management'
-    ACCOUNT_CREATION = 'account_creation'
-    THREAT_MANAGEMENT = 'threat_management'
-    THREAT_CREATION = 'threat_creation'
-    EXIT = 'exit'

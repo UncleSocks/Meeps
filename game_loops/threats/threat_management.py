@@ -3,12 +3,12 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import init
+import elements.threats_elements as threat_element
+from constants import StateTracker, ButtonAction, \
+    ImagePaths, ButtonSFX
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
-from .threat_creation import ThreatCreationController
-import elements.threats_elements as threat_element
 
 
 

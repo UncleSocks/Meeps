@@ -2,17 +2,16 @@ import pygame
 import pygame_gui
 
 import init
-from init import PygameRenderer
-import sound_manager
-import constants
-from constants import StateTracker, ButtonSFX, Settings
 import elements.main_menu as main_menu_element
-#from game_loops.shift import shift_introduction
+from constants import Settings, StateTracker, ButtonSFX, ImagePaths
+from sound_manager import ButtonSoundManager
 from game_loops.shift_s.shift import ShiftController
-from game_loops.tickets.ticket_management import TicketManagementController, TicketCreationController
+from game_loops.tickets.ticket_management import TicketManagementController
+from game_loops.tickets.ticket_creation import TicketCreationController
 from game_loops.accounts.account_management import AccountManagementController
 from game_loops.accounts.account_creation import AccountCreationController
-from game_loops.threats.threat_management import ThreatManagementController, ThreatCreationController
+from game_loops.threats.threat_management import ThreatManagementController
+from game_loops.threats.threat_creation import ThreatCreationController
 
 
 
@@ -29,7 +28,7 @@ class MainMenuUIManager():
         self.threat_management_button = main_menu_element.threat_entries_button_func(self.manager)
         self.logoff_button = main_menu_element.quit_button_func(self.manager)
 
-        self.main_title_image = main_menu_element.main_title_image_func(self.manager, constants.TITLE_IMAGE_PATH)
+        self.main_title_image = main_menu_element.main_title_image_func(self.manager, ImagePaths.TITLE.value)
         self.title_slogan = main_menu_element.main_title_slogan_label_func(self.manager)
         self.version = main_menu_element.version_label_func(self.manager, Settings.VERSION.value)
         self.github = main_menu_element.github_label_func(self.manager)
@@ -54,7 +53,7 @@ class MainMenuEventHandler():
         self.connect = connect
         self.cursor = cursor
         self.ui = ui_manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
+        self.button_sfx = ButtonSoundManager()
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.start_button:
@@ -72,21 +71,15 @@ class MainMenuEventHandler():
         if event.ui_element == self.ui.logoff_button:
             return StateTracker.EXIT
 
-    def _handle_logoff_button(self):
-        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        return constants.EXIT_ACTION
     
 
 class MainMenuController():
 
     def __init__(self, connect, cursor, manager):
-        #self.connect, self.cursor = init.database_init(constants.DATABASE_FILE)
-        #self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
         self.connect = connect
         self.cursor = cursor
         self.manager = manager
-        self.button_sfx = sound_manager.ButtonSoundManager()
+        self.button_sfx = ButtonSoundManager()
 
         self.ui = MainMenuUIManager(self.manager)
         self.event_handler = MainMenuEventHandler(self.connect, self.cursor, self.manager, self.ui)
