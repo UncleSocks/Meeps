@@ -3,8 +3,10 @@ import pygame_gui
 from dataclasses import dataclass
 
 import constants
+from constants import ButtonAction, StateTracker
 import init
 import sound_manager
+from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 from .ticket_creation import TicketCreationController
 import elements.ticket_elements as ticket_elements
@@ -80,12 +82,29 @@ class TicketUIManager():
         self.account_details_label = ticket_elements.account_details_label_func(self.manager)
         self.selected_ticket_account_tbox = ticket_elements.selected_ticket_account_func(self.manager)
 
+    def destroy_elements(self):
+        self.back_button.kill()
+        self.ticket_management_image.kill()
+        self.ticket_information_label.kill()
+
+        self.create_button.kill()
+        self.delete_button.kill()
+
+        self.ticket_entry_title_tbox.kill()
+        self.ticket_entry_slist.kill()
+        self.selected_ticket_title_tbox.kill()
+        self.selected_ticket_description_tbox.kill()
+
+        self.account_details_label.kill()
+        self.selected_ticket_account_tbox.kill()
+
     def display_confirm_window(self):
         self.state.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
             self.ticket_delete_confirm_no_button = ticket_elements.ticket_delete_confirm_window_func(self.manager)
 
     def refresh_ticket_list(self, updated_ticket_list):
         self.ticket_entry_slist.set_item_list(updated_ticket_list)
+        self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
 
 
 class TicketEventHandler():
@@ -115,71 +134,48 @@ class TicketEventHandler():
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ButtonAction.EXIT
         
         if event.ui_element == self.ui.create_button:
-            return self._handle_create_button()
+            return ButtonAction.CREATE
 
-        if event.ui_element == self.ui.delete_button and self.state.selected_ticket is not None:
-            self._handle_delete_button()
+        if event.ui_element == self.ui.delete_button \
+            and self.state.selected_ticket is not None:
+            return ButtonAction.DELETE
 
-        if self.state.ticket_delete_confirm_window and event.ui_element == self.ui.ticket_delete_confirm_yes_button:
-            self._handle_confirm_yes_button()
+        if self.state.ticket_delete_confirm_window \
+            and event.ui_element == self.ui.ticket_delete_confirm_yes_button:
+            return ButtonAction.CONFIRM_DELETE
 
-        if self.state.ticket_delete_confirm_window and event.ui_element == self.ui.ticket_delete_confirm_no_button:
-            self._handle_confirm_no_button()
-
-    def _handle_back_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return constants.EXIT_ACTION
-    
-    def _handle_create_button(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        return constants.CREATE_ACTION
-
-    def _handle_delete_button(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ui.display_confirm_window()
-        
-    def _handle_confirm_yes_button(self):
-        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
-        self.state.delete_selected_ticket()
-        self.state.ticket_title_list = self.state.fetch_ticket_titles()
-        self.ui.refresh_ticket_list(self.state.ticket_title_list)
-        self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
-
-        self.state.ticket_delete_confirm_window.kill()
-
-    def _handle_confirm_no_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.state.ticket_delete_confirm_window.kill()
+        if self.state.ticket_delete_confirm_window \
+            and event.ui_element == self.ui.ticket_delete_confirm_no_button:
+            return ButtonAction.CANCEL_DELETE
 
 
 class TicketManagementController():
 
-    def __init__(self, connect, cursor):
+    def __init__(self, connect, cursor, manager):
         self.connect = connect
         self.cursor = cursor
+        self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
+        #self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
+        self.button_sfx = ButtonSoundManager()
 
         self.state = TicketStateManager(self.connect, self.cursor)
         self.ui = TicketUIManager(self.manager, self.state)
         self.event_handler = TicketEventHandler(self.manager, self.state, self.ui)
 
-    def ticket_management_loop(self):
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
-
-            for event in events:
-                if not self._handle_events(event):
-                    running = False
-
-            self.pygame_renderer.ui_renderer(time_delta)
+    def game_loop(self, events):
+        for event in events:
+            action = self._handle_events(event)
+            
+            if action == ButtonAction.EXIT:
+                return StateTracker.MAIN_MENU
+            if action == ButtonAction.CREATE:
+                return StateTracker.TICKET_CREATION
 
     def _handle_events(self, event):
         if event.type == pygame.QUIT:
@@ -191,19 +187,51 @@ class TicketManagementController():
             self.event_handler.handle_ticket_selection(selected_ticket)
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_action = self.event_handler.handle_button_pressed(event)
+            button_event = self.event_handler.handle_button_pressed(event)
 
-            if button_action == constants.CREATE_ACTION:
-                ticket_creation_page = TicketCreationController(self.state.connect, self.state.cursor)
-                self.state.ticket_title_list = ticket_creation_page.ticket_creation_loop()
-                self._handle_creation_return()
-
-            elif button_action == constants.EXIT_ACTION:
-                return False
+            if button_event == ButtonAction.EXIT:
+                return self._handle_exit_action()
             
+            if button_event == ButtonAction.CREATE:
+                return self._handle_create_action()
+
+            button_action_map = {
+                ButtonAction.DELETE: self._handle_delete_action,
+                ButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
+                ButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action
+            }
+
+            button_action = button_action_map.get(button_event)
+            if button_action:
+                button_action()
+
         self.manager.process_events(event)
         return True
     
-    def _handle_creation_return(self):
-            self.ui.refresh_ticket_list(self.state.ticket_title_list)
-            self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
+    def _handle_create_action(self):
+        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.ui.destroy_elements()
+        return ButtonAction.CREATE
+        #ticket_creation_page = TicketCreationController(self.state.connect, self.state.cursor)
+        #self.state.ticket_title_list = ticket_creation_page.ticket_creation_loop()
+        #self.ui.refresh_ticket_list(self.state.ticket_title_list)
+
+    def _handle_delete_action(self):
+        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.ui.display_confirm_window()
+
+    def _handle_confirm_delete_action(self):
+        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
+        self.state.ticket_delete_confirm_window.kill()
+        self.state.delete_selected_ticket()
+        self.state.ticket_title_list = self.state.fetch_ticket_titles()
+        self.ui.refresh_ticket_list(self.state.ticket_title_list)
+
+    def _handle_cancel_delete_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.state.ticket_delete_confirm_window.kill()
+
+    def _handle_exit_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.ui.destroy_elements()
+        return ButtonAction.EXIT

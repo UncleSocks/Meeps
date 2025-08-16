@@ -77,3 +77,14 @@ class ButtonAction(Enum):
     CONFIRM_DELETE = 'confirm_delete'
     CANCEL_DELETE = 'cancel_delete'
     CONTINUE = 'continue'
+
+class StateTracker(Enum):
+    MAIN_MENU = 'main_menu'
+    SHIFT = 'shift'
+    TICKET_MANAGEMENT = 'ticket_management'
+    TICKET_CREATION = 'ticket_creation'
+    ACCOUNT_MANAGEMENT = 'account_management'
+    ACCOUNT_CREATION = 'account_creation'
+    THREAT_MANAGEMENT = 'threat_management'
+    THREAT_CREATION = 'threat_creation'
+    EXIT = 'exit'

@@ -4,7 +4,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 import constants
-from constants import ButtonAction
+from constants import ButtonAction, StateTracker
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
@@ -80,6 +80,21 @@ class ThreatUIManager():
             self.selected_threat_indicators_tbox, self.selected_threat_countermeasures_tbox, \
                 self.selected_threat_image_path_tbox = threat_element.threat_details_func(self.manager)
         
+    def destroy_elements(self):
+        self.back_button.kill()
+        self.create_button.kill()
+        self.delete_button.kill()
+
+        self.threat_database_image.kill()
+        self.threat_entry_title_tbox.kill()
+        self.threat_entry_slist.kill()
+        self.threat_details_label.kill()
+        self.selected_threat_title_tbox.kill()
+        self.selected_threat_description_tbox.kill()
+        self.selected_threat_indicators_tbox.kill()
+        self.selected_threat_countermeasures_tbox.kill()
+        self.selected_threat_image_path_tbox.kill()
+        
     def set_threat_details(self, threat: ThreatDetails) -> None:
         self.selected_threat_title_tbox.set_text(f"<b>{threat.name}</b>")
         self.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{threat.description}")
@@ -132,12 +147,13 @@ class ThreatEventHandler():
 
 class ThreatManagementController():
 
-    def __init__(self, connect, cursor):
+    def __init__(self, connect, cursor, manager):
         self.connect = connect
         self.cursor = cursor
+        self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
+        #self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
@@ -145,18 +161,15 @@ class ThreatManagementController():
         self.ui = ThreatUIManager(self.manager, self.state)
         self.event_handler = ThreatEventHandler(self.manager, self.state, self.ui, self.button_sfx)
 
-    def threat_management_loop(self) -> None:
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
+    def game_loop(self, events) -> None:
+        for event in events:
+            action = self._handle_events(event)
 
-            for event in events:
-                if self._handle_events(event) == ButtonAction.EXIT:
-                    running = False
+            if action == ButtonAction.EXIT:
+                return StateTracker.MAIN_MENU
+            if action == ButtonAction.CREATE:
+                return StateTracker.THREAT_CREATION
 
-            self.pygame_renderer.ui_renderer(time_delta)
-                
     def _handle_events(self, event) -> bool:
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -172,8 +185,10 @@ class ThreatManagementController():
             if button_event == ButtonAction.EXIT:
                 return self._handle_exit_action()
             
+            if button_event == ButtonAction.CREATE:
+                return self._handle_create_action()
+            
             button_action_map = {
-                ButtonAction.CREATE: self._handle_create_action,
                 ButtonAction.DELETE: self._handle_delete_action,
                 ButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
                 ButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action
@@ -188,9 +203,11 @@ class ThreatManagementController():
     
     def _handle_create_action(self) -> None:
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
-        self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
-        self.ui.refresh_threat_list(self.state.threat_name_list)
+        self.ui.destroy_elements()
+        return ButtonAction.CREATE
+        #threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
+        #self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
+        #self.ui.refresh_threat_list(self.state.threat_name_list)
 
     def _handle_delete_action(self) -> None:
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -209,4 +226,5 @@ class ThreatManagementController():
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.ui.destroy_elements()
         return ButtonAction.EXIT

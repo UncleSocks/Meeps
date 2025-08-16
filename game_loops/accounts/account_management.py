@@ -4,12 +4,12 @@ from typing import Optional
 from dataclasses import dataclass
 
 import constants
-from constants import ButtonAction
+from constants import ButtonAction, StateTracker
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
-from .account_creation import AccountCreationController
 import elements.account_elements as ae
+from .account_creation import AccountCreationController
 
 
 
@@ -101,9 +101,22 @@ class AccountUIManager:
 
     def _draw_ticket_elements(self):
         self.assigned_ticket_label = ae.AssignedTicketLabel(self.manager).draw_label()
-        self.ticket_selection_list = ae.AssignedTicketList(self.manager)
-        self.ticket_selection_list.INPUT = self.state.assigned_ticket_list
-        self.ticket_selection_list = self.ticket_selection_list.draw_selectionlist()
+
+        ticket_selection_list = ae.AssignedTicketList(self.manager)
+        ticket_selection_list.INPUT = self.state.assigned_ticket_list
+        self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
+
+    def destroy_elements(self):
+        self.account_manager_image.kill()
+        self.back_button.kill()
+        self.create_button.kill()
+        self.delete_button.kill()
+        self.account_entry_title_tbox.kill()
+        self.account_selection_list.kill()
+        self.account_details_label.kill()
+        self.selected_account_description.kill()
+        self.assigned_ticket_label.kill()
+        self.ticket_selection_list.kill()
 
     def format_account_details(self, account: AccountDetails) -> str:
         formatted_account_details = (
@@ -180,31 +193,32 @@ class AccountEventHandler:
         if event.ui_element == self.ui.create_button:
             return ButtonAction.CREATE
         
-        if event.ui_element == self.ui.delete_button and \
-            self.state.selected_account is not None:
+        if event.ui_element == self.ui.delete_button \
+            and self.state.selected_account is not None:
             return ButtonAction.DELETE
         
-        if self.state.account_delete_confirm_window and \
-            event.ui_element == self.ui.confirm_delete_yes_button:
+        if self.state.account_delete_confirm_window \
+            and event.ui_element == self.ui.confirm_delete_yes_button:
             return ButtonAction.CONFIRM_DELETE
         
-        if self.state.account_delete_confirm_window and \
-            event.ui_element == self.ui.confirm_delete_no_button:
+        if self.state.account_delete_confirm_window \
+            and event.ui_element == self.ui.confirm_delete_no_button:
             return ButtonAction.CANCEL_DELETE
 
-        if self.state.account_delete_warning_window and \
-            event.ui_element == self.ui.warning_continue_button:
+        if self.state.account_delete_warning_window \
+            and event.ui_element == self.ui.warning_continue_button:
             return ButtonAction.CONTINUE     
 
     
 class AccountManagementController:
 
-    def __init__(self, connect, cursor):
+    def __init__(self, connect, cursor, manager):
         self.connect = connect
         self.cursor = cursor
+        self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
+        #self.manager = self.pygame_renderer.manager
         self.window_surface  = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
@@ -212,17 +226,14 @@ class AccountManagementController:
         self.ui = AccountUIManager(self.manager, self.state)
         self.event_handler = AccountEventHandler(self.manager, self.state, self.ui, self.button_sfx)
     
-    def account_management_loop(self) -> None:
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
+    def game_loop(self, events) -> None:
+        for event in events:
+            action = self._handle_events(event)
 
-            for event in events:
-                if self._handle_events(event) == ButtonAction.EXIT:
-                    running = False
-
-            self.pygame_renderer.ui_renderer(time_delta)
+            if action == ButtonAction.EXIT:
+                return StateTracker.MAIN_MENU
+            if action == ButtonAction.CREATE:
+                return StateTracker.ACCOUNT_CREATION
 
     def _handle_events(self, event) -> bool:
         if event.type == pygame.QUIT:
@@ -238,9 +249,11 @@ class AccountManagementController:
 
             if button_event == ButtonAction.EXIT:
                 return self._handle_exit_action()
+            
+            if button_event == ButtonAction.CREATE:
+                return self._handle_create_action()
 
             button_action_map = {
-                ButtonAction.CREATE: self._handle_create_action,
                 ButtonAction.DELETE: self._handle_delete_action,
                 ButtonAction.CONFIRM_DELETE: self._handle_confirm_delete_action,
                 ButtonAction.CANCEL_DELETE: self._handle_cancel_delete_action,
@@ -256,9 +269,11 @@ class AccountManagementController:
     
     def _handle_create_action(self) -> None:
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        account_creation_page = AccountCreationController(self.state.connect, self.state.cursor)
-        self.state.account_name_list = account_creation_page.account_creation_loop()
-        self.ui.refresh_account_list(self.state.account_name_list)
+        self.ui.destroy_elements()
+        return ButtonAction.CREATE
+        #account_creation_page = AccountCreationController(self.state.connect, self.state.cursor)
+        #self.state.account_name_list = account_creation_page.account_creation_loop()
+        #self.ui.refresh_account_list(self.state.account_name_list)
 
     def _handle_delete_action(self) -> None:
         self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
@@ -283,4 +298,5 @@ class AccountManagementController:
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.ui.destroy_elements()
         return ButtonAction.EXIT

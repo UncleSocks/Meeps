@@ -4,8 +4,10 @@ from dataclasses import dataclass
 import pyttsx3
 
 import constants
+from constants import ButtonAction, StateTracker
 import init
 import sound_manager
+from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 import elements.ticket_elements as ticket_elements
 
@@ -118,6 +120,20 @@ class TicketCreationUIManager():
         
         self.caller_dropdown_label, \
             self.caller_dropdown = ticket_elements.caller_dropdown_func(self.manager, account_list)
+        
+    def destroy_elements(self):
+        self.back_button.kill()
+        self.new_ticket_image.kill()
+        self.ticket_title_text_entry.kill()
+        self.ticket_text_entry.kill()
+
+        self.threat_description_tbox.kill()
+        self.add_ticket_button.kill()
+        self.threat_entry_title_tbox.kill()
+        self.threat_entry_slist.kill()
+        
+        self.caller_dropdown_label.kill()
+        self.caller_dropdown.kill()
 
     def capture_new_ticket_details(self):
         self.state.ticket.title = self.ticket_title_text_entry.get_text()
@@ -163,64 +179,37 @@ class TicketCreationEventHandler():
 
     def handle_button_pressed(self, event):
         if event.ui_element == self.ui.back_button:
-            return self._handle_back_button()
+            return ButtonAction.EXIT
         
         if event.ui_element == self.ui.add_ticket_button:
-            self._handle_add_button()
+            return ButtonAction.CREATE
 
-        if self.state.ticket_confirm_window and event.ui_element == self.ui.ticket_confirm_close_button:
-            self.ui.refresh_creation_page()
-            self.state.ticket_confirm_window.kill()
-            self.state.ticket = TicketDetails()
-
-    def _handle_back_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        return constants.EXIT_ACTION
-    
-    def _handle_add_button(self):
-        self.ui.capture_new_ticket_details()
-
-        if not all([
-            self.state.ticket.title,
-            self.state.ticket.entry,
-            self.state.ticket.threat_id,
-            self.state.ticket.account_id
-        ]):
-            return
-        
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.state.add_new_ticket()
-        self.ui.display_confirm_window()
+        if self.state.ticket_confirm_window \
+            and event.ui_element == self.ui.ticket_confirm_close_button:
+            return ButtonAction.CONFIRM_CREATE
 
 
 class TicketCreationController():
 
-    def __init__(self, connect, cursor):
+    def __init__(self, connect, cursor, manager):
         self.connect = connect
         self.cursor = cursor
+        self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
+        #self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
+        self.button_sfx = ButtonSoundManager()
 
         self.state = TicketCreationStateManager(self.connect, self.cursor)
         self.ui = TicketCreationUIManager(self.manager, self.state)
         self.event_handler = TicketCreationEventHandler(self.manager, self.state, self.ui)
 
-    def ticket_creation_loop(self):
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            events = pygame.event.get()
-
-            for event in events:
-                if not self._handle_events(event):
-                    running = False
-
-            self.pygame_renderer.ui_renderer(time_delta)
-
-        updated_ticket_list = self.state.fetch_ticket_titles()
-        return updated_ticket_list
+    def game_loop(self, events):
+        for event in events:
+            action = self._handle_events(event)
+            if action == ButtonAction.EXIT:
+                return StateTracker.TICKET_MANAGEMENT
 
     def _handle_events(self, event):
         if event.type == pygame.QUIT:
@@ -237,10 +226,44 @@ class TicketCreationController():
             self.event_handler.handle_account_dropdown(selected_account)
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_action = self.event_handler.handle_button_pressed(event)
+            button_event = self.event_handler.handle_button_pressed(event)
 
-            if button_action == constants.EXIT_ACTION:
-                return False
+            if button_event == ButtonAction.EXIT:
+                return self._handle_exit_action()
+
+            button_action_map = {
+                ButtonAction.CREATE: self._handle_create_button,
+                ButtonAction.CONFIRM_CREATE: self._handle_confirm_button
+            }
+
+            button_action = button_action_map.get(button_event)
+            if button_action:
+                button_action()
             
         self.manager.process_events(event)
         return True
+    
+    def _handle_create_button(self):
+        self.ui.capture_new_ticket_details()
+
+        if not all([
+            self.state.ticket.title,
+            self.state.ticket.entry,
+            self.state.ticket.threat_id,
+            self.state.ticket.account_id
+        ]):
+            return
+        
+        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.state.add_new_ticket()
+        self.ui.display_confirm_window()
+
+    def _handle_confirm_button(self):
+        self.ui.refresh_creation_page()
+        self.state.ticket_confirm_window.kill()
+        self.state.ticket = TicketDetails()
+    
+    def _handle_exit_action(self):
+        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.ui.destroy_elements()
+        return ButtonAction.EXIT

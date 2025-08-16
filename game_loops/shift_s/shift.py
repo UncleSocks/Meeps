@@ -5,7 +5,7 @@ import pygame
 import pygame_gui
 
 import constants
-from constants import ButtonAction
+from constants import ButtonAction, StateTracker
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
 import init
@@ -185,13 +185,35 @@ class ShiftUIManager():
         
         self.ticket_title_tbox = main_loop_elements.ticket_title_tbox_func(self.manager)
         self.ticket_entry_tbox = main_loop_elements.ticket_entry_tbox_func(self.manager)
+        self.caller_profile_image = None
+
+    def destroy_elements(self):
+        self.back_button.kill()
+        self.title_label.kill()
+
+        self.main_sla_timer_label.kill()
+        self.caller_profile_tbox .kill()
+
+        self.submit_button.kill()
+        self.threat_entry_title_box.kill()
+        self.threat_entry_slist.kill()
+
+        self.threat_panel.kill()
+        self.threat_title_tbox.kill()
+        self.threat_image.kill()
+        self.threat_description_tbox.kill()
+        
+        self.ticket_title_tbox.kill()
+        self.ticket_entry_tbox.kill()
+
+        self.state.popup_window.kill() if self.state.popup_window else None
+        self.caller_profile_image.kill() if self.caller_profile_image else None
 
     def display_ticket(self, ticket_id, ticket):
         self.ticket_title_tbox.set_text(f'<b>ID#{ticket_id} | {ticket.title}</b>')
         self.ticket_entry_tbox.set_text(ticket.entry)
 
         account_picture_path = "".join([constants.ACCOUNT_ASSETS_PATH, ticket.account_picture])
-        print(account_picture_path)
         self.caller_profile_image = main_loop_elements.caller_profile_image_func(self.manager, account_picture_path)
         self.caller_profile_tbox.set_text(
             f'Name: {ticket.account}\n'
@@ -263,7 +285,7 @@ class GenerateTicket():
 
     def _stop_call(self):
         self.sound.call_sfx.stop_loop()
-        self.state.popup_window.hide()
+        self.state.popup_window.kill()
 
 
 class CountdownManager():
@@ -298,9 +320,9 @@ class CountdownManager():
             self._popup_sla_timeout()
 
     def _popup_sla_timeout(self):
+        self.state.popup_window.kill()
         self.state.dequeue_ticket()
         self.state.reset_ticket_state()
-        self.state.popup_window.kill()
         self.state.missed_calls += 1
         self.sound.call_sfx.stop_loop()
 
@@ -336,7 +358,7 @@ class ShiftEventHandler():
 
         try:
             load_threat_image = pygame.image.load(threat_image_path)
-        except:
+        except (pygame.error, FileNotFoundError):
             load_threat_image = pygame.image.load(constants.DEFAULT_THREAT_IMAGE_PATH)
         
         self.ui.threat_image.set_image(new_image=load_threat_image)
@@ -359,12 +381,13 @@ class ShiftEventHandler():
 
 class ShiftController():
 
-    def __init__(self, connect, cursor):
+    def __init__(self, connect, cursor, manager):
         self.connect = connect
         self.cursor = cursor
+        self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        self.manager = self.pygame_renderer.manager
+        #self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
 
         self.state = ShiftStateManager(self.connect, self.cursor)
@@ -373,32 +396,29 @@ class ShiftController():
         self.event_handler = ShiftEventHandler(self.manager, self.state, self.ui, self.sound)
         self.countdown = CountdownManager(self.manager, self.state, self.ui, self.sound)
 
-    def shift_loop(self):
-        running = True
-        while running:
-            time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
-            self.state.ticket_generate_timer += time_delta
-            events = pygame.event.get()
+    def game_loop(self, events):
+        time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+        self.state.ticket_generate_timer += time_delta
+        #events = pygame.event.get()
 
-            for event in events:
-                if self._handle_events(event) == ButtonAction.EXIT:
-                    running = False
+        for event in events:
+            action = self._handle_events(event)
 
-            if self.state.ticket_generate_timer >= self.state.ticket_interval \
-                and self.state.ticket_id_list and not self.state.ticket_present \
-                    and self.state.popup_window is None:
-                self._handle_incoming_call()
+            if action == ButtonAction.EXIT:
+                return StateTracker.MAIN_MENU
 
-            if self.state.popup_window:
-                self.countdown.popup_sla_countdown(time_delta)
+        if self.state.ticket_generate_timer >= self.state.ticket_interval \
+            and self.state.ticket_id_list and not self.state.ticket_present \
+                and self.state.popup_window is None:
+            self._handle_incoming_call()
 
-            if self.state.ticket_present and self.state.popup_window is None:
-                self.countdown.ticket_sla_countdown(time_delta)
-            
-            self.state.update_difficulty()
+        if self.state.popup_window:
+            self.countdown.popup_sla_countdown(time_delta)
 
-
-            self.pygame_renderer.ui_renderer(time_delta)
+        if self.state.ticket_present and self.state.popup_window is None:
+            self.countdown.ticket_sla_countdown(time_delta)
+        
+        self.state.update_difficulty()
 
     def _handle_incoming_call(self):
         self.ui.display_popup_window()
@@ -462,4 +482,10 @@ class ShiftController():
     def _handle_exit_button(self):
         self.sound.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
         self.sound.end_shift_music()
+        self.sound.call_sfx.stop_loop()
+
+        if self.state.introduction_page:
+            self.ui.destroy_introduction_ui()
+        else:
+            self.ui.destroy_elements()
         return ButtonAction.EXIT
