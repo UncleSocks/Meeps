@@ -2,7 +2,6 @@ import pygame
 import pygame_gui
 from dataclasses import dataclass
 
-
 import init
 import elements.ticket_elements as ticket_elements
 from constants import StateTracker, ButtonAction, \

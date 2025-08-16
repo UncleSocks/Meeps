@@ -1,10 +1,8 @@
 import pygame
-import pygame_gui
 
-import init
-import elements.main_menu as main_menu_element
-from constants import Settings, StateTracker, ButtonSFX, ImagePaths
-from sound_manager import ButtonSoundManager
+from init import database_init, PygameRenderer
+from constants import Settings, StateTracker
+from game_loops.main_menu import MainMenuController
 from game_loops.shift_s.shift import ShiftController
 from game_loops.tickets.ticket_management import TicketManagementController
 from game_loops.tickets.ticket_creation import TicketCreationController
@@ -15,183 +13,48 @@ from game_loops.threats.threat_creation import ThreatCreationController
 
 
 
-class MainMenuUIManager():
 
-    def __init__(self, pygame_manager):
-        self.manager = pygame_manager
-        self.build_ui()
+class MainLoop:
 
-    def build_ui(self):
-        self.start_button = main_menu_element.start_button_func(self.manager)
-        self.ticket_management_button = main_menu_element.ticket_management_button_func(self.manager)
-        self.account_management_button = main_menu_element.accounts_management_button_func(self.manager)
-        self.threat_management_button = main_menu_element.threat_entries_button_func(self.manager)
-        self.logoff_button = main_menu_element.quit_button_func(self.manager)
+    def __init__(self):
+        self.connect, self.cursor = database_init(Settings.DATABASE.value)
+        self.pygame_renderer = PygameRenderer()
+        self.manager = self.pygame_renderer.manager
+        self.current_state = MainMenuController(self.connect, self.cursor, self.manager)
 
-        self.main_title_image = main_menu_element.main_title_image_func(self.manager, ImagePaths.TITLE.value)
-        self.title_slogan = main_menu_element.main_title_slogan_label_func(self.manager)
-        self.version = main_menu_element.version_label_func(self.manager, Settings.VERSION.value)
-        self.github = main_menu_element.github_label_func(self.manager)
+    def main_loop(self):
+        running = True
+        while running:
+            time_delta = self.pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
+            events = pygame.event.get()
 
-    def destroy_elements(self):
-        self.start_button.kill()
-        self.ticket_management_button.kill()
-        self.account_management_button.kill()
-        self.threat_management_button.kill()
-        self.logoff_button.kill()
-
-        self.main_title_image.kill()
-        self.title_slogan.kill()
-        self.version.kill()
-        self.github.kill()
-
-
-class MainMenuEventHandler():
-
-    def __init__(self, connect, cursor, pygame_manager, ui_manager: MainMenuUIManager):
-        self.manager = pygame_manager
-        self.connect = connect
-        self.cursor = cursor
-        self.ui = ui_manager
-        self.button_sfx = ButtonSoundManager()
-
-    def handle_button_pressed(self, event):
-        if event.ui_element == self.ui.start_button:
-            return StateTracker.SHIFT
-        
-        if event.ui_element == self.ui.ticket_management_button:
-            return StateTracker.TICKET_MANAGEMENT
-
-        if event.ui_element == self.ui.account_management_button:
-            return StateTracker.ACCOUNT_MANAGEMENT
-        
-        if event.ui_element == self.ui.threat_management_button:
-            return StateTracker.THREAT_MANAGEMENT
-
-        if event.ui_element == self.ui.logoff_button:
-            return StateTracker.EXIT
-
-    
-
-class MainMenuController():
-
-    def __init__(self, connect, cursor, manager):
-        self.connect = connect
-        self.cursor = cursor
-        self.manager = manager
-        self.button_sfx = ButtonSoundManager()
-
-        self.ui = MainMenuUIManager(self.manager)
-        self.event_handler = MainMenuEventHandler(self.connect, self.cursor, self.manager, self.ui)
-
-    def game_loop(self, events):
-        for event in events:
-            action = self._handle_events(event)
-            if action == StateTracker.ACCOUNT_MANAGEMENT:
-                return StateTracker.ACCOUNT_MANAGEMENT
-            if action == StateTracker.SHIFT:
-                return StateTracker.SHIFT
-            if action == StateTracker.TICKET_MANAGEMENT:
-                return StateTracker.TICKET_MANAGEMENT
-            if action == StateTracker.THREAT_MANAGEMENT:
-                return StateTracker.THREAT_MANAGEMENT
-                
-        
-    def _handle_events(self, event):
-        if event.type == pygame.QUIT:
-            pygame.quit()
-
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            button_event = self.event_handler.handle_button_pressed(event)
-
-            if button_event == StateTracker.SHIFT:
-                self.ui.destroy_elements()
-                return self._handle_shift_action()
+            game_state = self.current_state.game_loop(events)
+            if game_state == StateTracker.EXIT:
+                return self._exit_game()
             
-            if button_event == StateTracker.THREAT_MANAGEMENT:
-                self.ui.destroy_elements()
-                return self._handle_threat_management_action()
-            
-            if button_event == StateTracker.TICKET_MANAGEMENT:
-                self.ui.destroy_elements()
-                return self._handle_ticket_managemnt_action()
-    
-            if button_event == StateTracker.ACCOUNT_MANAGEMENT:
-                self.ui.destroy_elements()
-                return self._handle_account_management_action()
-            
-            if button_event == StateTracker.EXIT:
-                return StateTracker.EXIT
-            
-        self.manager.process_events(event)
-        return True
-    
-    def _handle_shift_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        return StateTracker.SHIFT
-    
-    def _handle_ticket_managemnt_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        return StateTracker.TICKET_MANAGEMENT
-    
-    def _handle_account_management_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        return StateTracker.ACCOUNT_MANAGEMENT
-    
-    def _handle_threat_management_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        return StateTracker.THREAT_MANAGEMENT
-    
-    def _shutdown(self):
+            game_state_map = {
+                StateTracker.MAIN_MENU: lambda: MainMenuController(self.connect, self.cursor, self.manager),
+                StateTracker.SHIFT: lambda: ShiftController(self.connect, self.cursor, self.manager),
+                StateTracker.TICKET_MANAGEMENT: lambda: TicketManagementController(self.connect, self.cursor, self.manager),
+                StateTracker.TICKET_CREATION: lambda: TicketCreationController(self.connect, self.cursor, self.manager),
+                StateTracker.ACCOUNT_MANAGEMENT: lambda: AccountManagementController(self.connect, self.cursor, self.manager),
+                StateTracker.ACCOUNT_CREATION: lambda: AccountCreationController(self.connect, self.cursor, self.manager),
+                StateTracker.THREAT_MANAGEMENT: lambda: ThreatManagementController(self.connect, self.cursor, self.manager),
+                StateTracker.THREAT_CREATION: lambda: ThreatCreationController(self.connect, self.cursor, self.manager),
+            }
+
+            new_game_state = game_state_map.get(game_state)
+            if new_game_state:
+                self.current_state = new_game_state()
+
+            self.pygame_renderer.ui_renderer(time_delta)
+
+    def _exit_game(self):
         self.connect.close()
-        pygame.quit()
+        running = False
+        return running
 
 
 if __name__ == "__main__":
-    connect, cursor = init.database_init(Settings.DATABASE.value)
-    pygame_renderer = init.PygameRenderer()
-    manager = pygame_renderer.manager
-
-    running = True
-    current_state = MainMenuController(connect, cursor, manager)
-    while running:
-        time_delta = pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
-        events = pygame.event.get()
-
-        state = current_state.game_loop(events)
-        print(state)
-
-        if state == StateTracker.MAIN_MENU:
-            current_state = MainMenuController(connect, cursor, manager)
-
-        if state == StateTracker.SHIFT:
-            current_state = ShiftController(connect, cursor, manager)
-
-        if state == StateTracker.TICKET_MANAGEMENT:
-            current_state = TicketManagementController(connect, cursor, manager)
-
-        if state == StateTracker.TICKET_CREATION:
-            current_state = TicketCreationController(connect, cursor, manager)
-
-        if state == StateTracker.ACCOUNT_MANAGEMENT:
-            current_state = AccountManagementController(connect, cursor, manager)
-
-        if state == StateTracker.ACCOUNT_CREATION:
-            current_state = AccountCreationController(connect, cursor, manager)
-
-        if state == StateTracker.THREAT_MANAGEMENT:
-            current_state = ThreatManagementController(connect, cursor, manager)
-
-        if state == StateTracker.THREAT_CREATION:
-            current_state = ThreatCreationController(connect, cursor, manager)
-
-        if state == StateTracker.EXIT:
-            connect.close()
-            pygame.quit()
-            
-
-        pygame_renderer.ui_renderer(time_delta)
-
-
-    #main_menu = MainMenuController()
-    #main_menu.main_menu_loop()
+    initialize_game = MainLoop()
+    start_game = initialize_game.main_loop()
