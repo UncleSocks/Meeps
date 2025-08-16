@@ -4,9 +4,8 @@ from dataclasses import dataclass
 
 import init
 from sound_manager import ButtonSoundManager
-import constants
 from constants import ButtonAction, StateTracker, \
-    ButtonSFX, AssetBasePath
+    ButtonSFX, AssetBasePath, ImagePaths, DefaultImages
 import elements.account_elements as ae
 from queries import SqliteQueries
 
@@ -67,7 +66,7 @@ class AccountCreationUIManager():
         
     def _draw_images(self):
         add_account_image = ae.NewAccountImage(self.manager)
-        load_add_account_image = pygame.image.load(constants.ADD_ACCOUNT_IMAGE_PATH)
+        load_add_account_image = pygame.image.load(ImagePaths.ACCOUNT_CREATION.value)
         add_account_image.INPUT = load_add_account_image
         self.add_account_image = add_account_image.draw_image()
 
@@ -126,7 +125,7 @@ class AccountCreationUIManager():
         try:
             account_picture_load = pygame.image.load(account_picture_path)
         except (pygame.error, FileNotFoundError):
-            account_picture_load = pygame.image.load(constants.GUEST_ACCOUNT_IMAGE_PATH)
+            account_picture_load = pygame.image.load(DefaultImages.GUEST_ACCOUNT.value)
 
         account_picture.INPUT = account_picture_load
         self.account_picture = account_picture.draw_image()

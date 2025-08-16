@@ -4,9 +4,9 @@ from dataclasses import dataclass
 import pygame
 import pygame_gui
 
-import constants
 from constants import ButtonAction, StateTracker, \
-    ButtonSFX, MusicPaths, MixerChannels, AssetBasePath
+    ButtonSFX, MusicPaths, MixerChannels, AssetBasePath, \
+    Timers, Settings, ImagePaths, DefaultImages
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
 import init
@@ -85,7 +85,7 @@ class ShiftStateManager():
         self.missed_tickets = 0
 
     def randomize_ticket_interval(self):
-        ticket_interval = random.uniform(constants.MIN_CALL_INTERVAL, constants.MAX_CALL_INTERVAL)
+        ticket_interval = random.uniform(Timers.MIN_CALL_INTERVAL.value, Timers.MAX_CALL_INTERVAL.value)
         return ticket_interval
     
     def ticket_sla_countdown(self):
@@ -172,7 +172,7 @@ class ShiftUIManager():
 
     def build_shift_ui(self, threat_list):
         self.back_button = main_loop_elements.back_button_func(self.manager)
-        self.title_label = main_loop_elements.title_image_func(self.manager, constants.TITLE_IMAGE_PATH)
+        self.title_label = main_loop_elements.title_image_func(self.manager, ImagePaths.TITLE.value)
 
         self.main_sla_timer_label = main_loop_elements.main_sla_timer_label_func(self.manager)
         self.caller_profile_tbox = main_loop_elements.caller_profile_tbox_func(self.manager)
@@ -360,7 +360,7 @@ class ShiftEventHandler():
         try:
             load_threat_image = pygame.image.load(threat_image_path)
         except (pygame.error, FileNotFoundError):
-            load_threat_image = pygame.image.load(constants.DEFAULT_THREAT_IMAGE_PATH)
+            load_threat_image = pygame.image.load(DefaultImages.THREAT.value)
         
         self.ui.threat_image.set_image(new_image=load_threat_image)
         return
@@ -398,7 +398,7 @@ class ShiftController():
         self.countdown = CountdownManager(self.manager, self.state, self.ui, self.sound)
 
     def game_loop(self, events):
-        time_delta = self.pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+        time_delta = self.pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
         self.state.ticket_generate_timer += time_delta
         #events = pygame.event.get()
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import pyttsx3
 
 import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import init
 import sound_manager
 from sound_manager import ButtonSoundManager
@@ -110,7 +110,7 @@ class TicketCreationUIManager():
 
     def build_ui(self, threat_list, account_list):
         self.back_button = ticket_elements.back_button_func(self.manager)
-        self.new_ticket_image = ticket_elements.new_ticket_image_func(self.manager, constants.NEW_TICKET_IMAGE_PATH)
+        self.new_ticket_image = ticket_elements.new_ticket_image_func(self.manager, ImagePaths.TICKET_CREATION.value)
         self.ticket_title_text_entry = ticket_elements.title_text_entry_func(self.manager)
         self.ticket_text_entry = ticket_elements.ticket_text_entry_func(self.manager)
 

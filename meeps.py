@@ -5,7 +5,7 @@ import init
 from init import PygameRenderer
 import sound_manager
 import constants
-from constants import StateTracker, ButtonSFX
+from constants import StateTracker, ButtonSFX, Settings
 import elements.main_menu as main_menu_element
 #from game_loops.shift import shift_introduction
 from game_loops.shift_s.shift import ShiftController
@@ -31,7 +31,7 @@ class MainMenuUIManager():
 
         self.main_title_image = main_menu_element.main_title_image_func(self.manager, constants.TITLE_IMAGE_PATH)
         self.title_slogan = main_menu_element.main_title_slogan_label_func(self.manager)
-        self.version = main_menu_element.version_label_func(self.manager, constants.CURRENT_VERSION)
+        self.version = main_menu_element.version_label_func(self.manager, Settings.VERSION.value)
         self.github = main_menu_element.github_label_func(self.manager)
 
     def destroy_elements(self):
@@ -155,14 +155,14 @@ class MainMenuController():
 
 
 if __name__ == "__main__":
-    connect, cursor = init.database_init(constants.DATABASE_FILE)
+    connect, cursor = init.database_init(Settings.DATABASE.value)
     pygame_renderer = init.PygameRenderer()
     manager = pygame_renderer.manager
 
     running = True
     current_state = MainMenuController(connect, cursor, manager)
     while running:
-        time_delta = pygame_renderer.clock.tick(constants.FPS) / constants.MILLISECOND_PER_SECOND
+        time_delta = pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
         events = pygame.event.get()
 
         state = current_state.game_loop(events)

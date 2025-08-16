@@ -3,8 +3,7 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
@@ -72,7 +71,7 @@ class ThreatUIManager():
         self.create_button = threat_element.create_button_func(self.manager)
         self.delete_button = threat_element.delete_button_func(self.manager)
 
-        self.threat_database_image = threat_element.threat_database_image_func(self.manager, constants.THREAT_DATABASE_IMAGE_PATH)
+        self.threat_database_image = threat_element.threat_database_image_func(self.manager, ImagePaths.THREAT_MANAGEMENT.value)
         self.threat_entry_title_tbox = threat_element.threat_entry_slist_misc_func(self.manager)
         self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, threat_list)
 

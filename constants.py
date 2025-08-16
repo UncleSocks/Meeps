@@ -1,32 +1,14 @@
 from enum import Enum
 
 
-FPS = 60
-CURRENT_VERSION = 'v2025.0.1 BETA'
-DATABASE_FILE = 'data.db'
 
 
-MILLISECOND_PER_SECOND = 1000
-MIN_CALL_INTERVAL = 5
-MAX_CALL_INTERVAL = 12
+class Settings(Enum):
+    VERSION = 'v2025.1.0 BETA'
+    DATABASE = 'data.db'
+    FPS = 60
+    MS_PER_SECOND = 1000
 
-TITLE_IMAGE_PATH = 'assets/images/general/title.png'
-DEFAULT_THREAT_IMAGE_PATH = 'assets/images/threats/default.png'
-
-THREAT_DATABASE_IMAGE_PATH = 'assets/images/general/threat_database.png'
-THREAT_CREATE_IMAGE_PATH = 'assets/images/general/add_threat.png'
-
-TICKET_MANAGEMENT_IMAGE_PATH = 'assets/images/general/ticket_mngr.png'
-NEW_TICKET_IMAGE_PATH = 'assets/images/general/new_ticket.png'
-
-ACCOUNT_MANAGEMENT_IMAGE_PATH = 'assets/images/general/account_manager.png'
-ADD_ACCOUNT_IMAGE_PATH = 'assets/images/general/add_account.png'
-GUEST_ACCOUNT_IMAGE_PATH = 'assets/images/accounts/guest.png'
-
-
-
-THREAT_ASSETS_PATH = 'assets/images/threats/'
-ACCOUNT_ASSETS_PATH = 'assets/images/accounts/'
 
 class WindowConfig(Enum):
     WIDTH = 800
@@ -37,9 +19,29 @@ class WindowConfig(Enum):
     BACKGROUND = 0,0,0 #RGB values for black.
 
 
+class Timers(Enum):
+    MIN_CALL_INTERVAL = 5
+    MAX_CALL_INTERVAL = 12
+
+
 class AssetBasePath(Enum):
     THREAT_ASSETS = 'assets/images/threats/'
     ACCOUNT_ASSETS = 'assets/images/accounts/'
+
+
+class ImagePaths(Enum):
+    TITLE = 'assets/images/general/title.png'
+    TICKET_MANAGEMENT = 'assets/images/general/ticket_mngr.png'
+    TICKET_CREATION = 'assets/images/general/new_ticket.png'
+    THREAT_MANAGEMENT = 'assets/images/general/threat_database.png'
+    THREAT_CREATION = 'assets/images/general/add_threat.png'
+    ACCOUNT_MANAGEMENT = 'assets/images/general/account_manager.png'
+    ACCOUNT_CREATION = 'assets/images/general/add_account.png'
+
+
+class DefaultImages(Enum):
+    THREAT = 'assets/images/threats/default.png'
+    GUEST_ACCOUNT = 'assets/images/accounts/guest.png'
 
 
 class MusicPaths(Enum):

@@ -4,8 +4,7 @@ from dataclasses import dataclass
 
 import init
 from sound_manager import ButtonSoundManager
-import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import elements.threats_elements as threat_element
 from queries import SqliteQueries
 
@@ -60,7 +59,7 @@ class ThreatCreationUIManager():
         self.build_ui()
 
     def build_ui(self):
-        self.threat_create_image = threat_element.add_threat_image_func(self.manager, constants.THREAT_CREATE_IMAGE_PATH)
+        self.threat_create_image = threat_element.add_threat_image_func(self.manager, ImagePaths.THREAT_CREATION.value)
         
         self.back_button = threat_element.back_button_func(self.manager)
         self.add_threat_button = threat_element.threat_entry_add_button_func(self.manager)

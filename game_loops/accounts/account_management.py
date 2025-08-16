@@ -3,8 +3,7 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
@@ -79,7 +78,7 @@ class AccountUIManager:
 
     def _draw_images(self):
         account_manager_image = ae.TitleImage(self.manager)
-        load_account_manager_image = pygame.image.load(constants.ACCOUNT_MANAGEMENT_IMAGE_PATH)
+        load_account_manager_image = pygame.image.load(ImagePaths.ACCOUNT_MANAGEMENT.value)
         account_manager_image.INPUT = load_account_manager_image
         self.account_manager_image = account_manager_image.draw_image()
         

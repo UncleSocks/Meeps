@@ -2,8 +2,7 @@ import pygame
 import pygame_gui
 from dataclasses import dataclass
 
-import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, ButtonSFX, ImagePaths
 import init
 import sound_manager
 from sound_manager import ButtonSoundManager
@@ -69,7 +68,7 @@ class TicketUIManager():
 
     def build_ui(self, ticket_list):
         self.back_button = ticket_elements.back_button_func(self.manager)
-        self.ticket_management_image = ticket_elements.ticket_manager_image_func(self.manager, constants.TICKET_MANAGEMENT_IMAGE_PATH)
+        self.ticket_management_image = ticket_elements.ticket_manager_image_func(self.manager, ImagePaths.TICKET_MANAGEMENT.value)
         self.ticket_information_label = ticket_elements.ticket_information_label_func(self.manager)
 
         self.create_button = ticket_elements.create_ticket_button_func(self.manager)
