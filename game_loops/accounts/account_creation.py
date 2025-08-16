@@ -5,7 +5,8 @@ from dataclasses import dataclass
 import init
 from sound_manager import ButtonSoundManager
 import constants
-from constants import ButtonAction, StateTracker, ButtonSFX
+from constants import ButtonAction, StateTracker, \
+    ButtonSFX, AssetBasePath
 import elements.account_elements as ae
 from queries import SqliteQueries
 
@@ -119,7 +120,7 @@ class AccountCreationUIManager():
 
     def _set_new_account_image(self):
         self.state.account.picture_file = self.account_picture_file.get_text()
-        account_picture_path = "".join([constants.ACCOUNT_ASSETS_PATH, self.state.account.picture_file])
+        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, self.state.account.picture_file])
         account_picture = ae.NewAccountPicture(self.manager)
 
         try:

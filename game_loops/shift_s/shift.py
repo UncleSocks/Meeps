@@ -6,7 +6,7 @@ import pygame_gui
 
 import constants
 from constants import ButtonAction, StateTracker, \
-    ButtonSFX, MusicPaths, MixerChannels
+    ButtonSFX, MusicPaths, MixerChannels, AssetBasePath
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
 import init
@@ -214,7 +214,7 @@ class ShiftUIManager():
         self.ticket_title_tbox.set_text(f'<b>ID#{ticket_id} | {ticket.title}</b>')
         self.ticket_entry_tbox.set_text(ticket.entry)
 
-        account_picture_path = "".join([constants.ACCOUNT_ASSETS_PATH, ticket.account_picture])
+        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, ticket.account_picture])
         self.caller_profile_image = main_loop_elements.caller_profile_image_func(self.manager, account_picture_path)
         self.caller_profile_tbox.set_text(
             f'Name: {ticket.account}\n'
@@ -355,7 +355,7 @@ class ShiftEventHandler():
 
     def _load_threat_image(self, image_file):
         image_file = str(image_file)
-        threat_image_path = "".join([constants.THREAT_ASSETS_PATH, image_file])
+        threat_image_path = "".join([AssetBasePath.THREAT_ASSETS.value, image_file])
 
         try:
             load_threat_image = pygame.image.load(threat_image_path)

@@ -2,7 +2,7 @@ import sqlite3
 import pygame
 import pygame_gui
 
-import constants
+from constants import WindowConfig
 
 
 
@@ -18,17 +18,20 @@ class PygameRenderer:
     def __init__(self):
         pygame.init()
         self.window_surface, self.background = self.window_init()
-        self.manager = pygame_gui.UIManager((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT), constants.THEME_PATH)
+        self.manager = pygame_gui.UIManager(
+            (WindowConfig.WIDTH.value, WindowConfig.HEIGHT.value),
+            WindowConfig.THEME.value
+        )
         self.clock = pygame.time.Clock()
         
     def window_init(self):
-        pygame.display.set_caption(constants.WINDOW_CAPTION)
-        window_icon_load = pygame.image.load(constants.WINDOW_ICON_PATH)
+        pygame.display.set_caption(WindowConfig.CAPTION.value)
+        window_icon_load = pygame.image.load(WindowConfig.ICON.value)
         pygame.display.set_icon(window_icon_load)
 
-        window_surface = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
-        background = pygame.Surface((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
-        background.fill(pygame.Color(constants.BACKGROUND_COLOR_RGB))
+        window_surface = pygame.display.set_mode((WindowConfig.WIDTH.value, WindowConfig.HEIGHT.value))
+        background = pygame.Surface((WindowConfig.WIDTH.value, WindowConfig.HEIGHT.value))
+        background.fill(pygame.Color(WindowConfig.BACKGROUND.value))
         return window_surface, background
 
     def ui_renderer(self, time_delta):
