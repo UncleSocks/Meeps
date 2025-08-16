@@ -100,44 +100,14 @@ class MainMenuController():
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_event = self.event_handler.handle_button_pressed(event)
 
-            if button_event == ButtonAction.SHIFT:
-                return self._handle_shift_action()
-            
-            if button_event == ButtonAction.THREAT:
-                return self._handle_threat_management_action()
-
-            if button_event == ButtonAction.ACCOUNT:
-                return self._handle_account_management_action()
-
-            if button_event == ButtonAction.TICKET:
-                return self._handle_ticket_managemnt_action()
-            
-            if button_event == ButtonAction.EXIT:
-                return self._handle_exit_action()
+            if button_event:
+                return self._handle_button_action(button_event)
             
         self.manager.process_events(event)
-        return True
+        return None
     
-    def _handle_shift_action(self):
+    def _handle_button_action(self, button_event):
         self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
         self.ui.destroy_elements()
-        return ButtonAction.SHIFT
-    
-    def _handle_ticket_managemnt_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        self.ui.destroy_elements()
-        return ButtonAction.TICKET
-    
-    def _handle_account_management_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        self.ui.destroy_elements()
-        return ButtonAction.ACCOUNT
-    
-    def _handle_threat_management_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        self.ui.destroy_elements()
-        return ButtonAction.THREAT
-    
-    def _handle_exit_action(self):
-        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        return ButtonAction.EXIT
+        action = button_event
+        return action
