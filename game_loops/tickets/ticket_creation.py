@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import pyttsx3
 
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, ButtonSFX
 import init
 import sound_manager
 from sound_manager import ButtonSoundManager
@@ -166,7 +166,7 @@ class TicketCreationEventHandler():
         self.button_sfx = sound_manager.ButtonSoundManager()
 
     def handle_threat_selection(self, selected_threat):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)
         self.state.ticket.threat_id = self.state.threat_id_name_map[selected_threat]
         self._updated_threat_textbox()
 
@@ -254,7 +254,7 @@ class TicketCreationController():
         ]):
             return
         
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.state.add_new_ticket()
         self.ui.display_confirm_window()
 
@@ -264,6 +264,6 @@ class TicketCreationController():
         self.state.ticket = TicketDetails()
     
     def _handle_exit_action(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.EXIT

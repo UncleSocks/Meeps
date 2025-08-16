@@ -4,7 +4,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, ButtonSFX
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
@@ -121,7 +121,7 @@ class ThreatEventHandler():
         self.button_sfx = sound_manager
 
     def handle_threat_selection(self) -> None:
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)
         self._update_threat_textbox()
         
     def _update_threat_textbox(self) -> None:
@@ -202,7 +202,7 @@ class ThreatManagementController():
         return True
     
     def _handle_create_action(self) -> None:
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.CREATE
         #threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
@@ -210,21 +210,21 @@ class ThreatManagementController():
         #self.ui.refresh_threat_list(self.state.threat_name_list)
 
     def _handle_delete_action(self) -> None:
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.display_confirm_window()
 
     def _handle_confirm_delete_action(self) -> None:
-        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.DELETE_BUTTON)
         self.state.threat_delete_confirm_window.kill()
         self.state.delete_selected_threat()
         self.state.threat_name_list = self.state.fetch_threat_names()
         self.ui.refresh_threat_list(self.state.threat_name_list)
 
     def _handle_cancel_delete_action(self) -> None: 
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.state.threat_delete_confirm_window.kill()
 
     def _handle_exit_action(self) -> False:
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.EXIT

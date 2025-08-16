@@ -4,12 +4,11 @@ from typing import Optional
 from dataclasses import dataclass
 
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, ButtonSFX
 import init
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 import elements.account_elements as ae
-from .account_creation import AccountCreationController
 
 
 
@@ -70,9 +69,9 @@ class AccountUIManager:
     def __init__(self, manager, state_manager: AccountStateManager):
         self.manager = manager
         self.state = state_manager
-        self.draw_management_ui()
+        self.draw_ui_elements()
 
-    def draw_management_ui(self):
+    def draw_ui_elements(self):
         self._draw_images()
         self._draw_buttons()
         self._draw_account_elements()
@@ -106,7 +105,7 @@ class AccountUIManager:
         ticket_selection_list.INPUT = self.state.assigned_ticket_list
         self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
 
-    def destroy_elements(self):
+    def destroy_ui_elements(self):
         self.account_manager_image.kill()
         self.back_button.kill()
         self.create_button.kill()
@@ -176,7 +175,7 @@ class AccountEventHandler:
         self.button_sfx = sound_manager
         
     def handle_account_selection(self) -> None:
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)
         self._update_account_textbox()
 
     def _update_account_textbox(self) -> None:
@@ -218,7 +217,6 @@ class AccountManagementController:
         self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
         self.window_surface  = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
@@ -268,35 +266,32 @@ class AccountManagementController:
         return True
     
     def _handle_create_action(self) -> None:
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
-        self.ui.destroy_elements()
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
+        self.ui.destroy_ui_elements()
         return ButtonAction.CREATE
-        #account_creation_page = AccountCreationController(self.state.connect, self.state.cursor)
-        #self.state.account_name_list = account_creation_page.account_creation_loop()
-        #self.ui.refresh_account_list(self.state.account_name_list)
-
+    
     def _handle_delete_action(self) -> None:
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         if self.state.selected_account == 'Guest':
             self.ui.display_warning_window()
         else:
             self.ui.display_confirm_window()
 
     def _handle_confirm_delete_action(self) -> None:
-        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.DELETE_BUTTON)
         self.state.account_delete_confirm_window.kill()
         self.state.delete_selected_account()
         self.state.account_name_list = self.state.fetch_account_names()
         self.ui.refresh_account_list(self.state.account_name_list)
 
     def _handle_cancel_delete_action(self) -> None:
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.state.account_delete_confirm_window.kill()
 
     def _handle_continue_action(self) -> None:
         self.state.account_delete_warning_window.kill()
 
     def _handle_exit_action(self) -> False:
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
-        self.ui.destroy_elements()
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
+        self.ui.destroy_ui_elements()
         return ButtonAction.EXIT

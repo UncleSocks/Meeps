@@ -5,7 +5,8 @@ import pygame
 import pygame_gui
 
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, \
+    ButtonSFX, MusicPaths, MixerChannels
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
 import init
@@ -239,8 +240,8 @@ class ShiftSoundController():
     def __init__(self, state_manager: ShiftStateManager):
         self.state = state_manager
         self.button_sfx = ButtonSoundManager()
-        self.call_sfx = LoopingSoundManager(constants.INCOMING_CALL_MUSIC_PATH, constants.INCOMMING_CALL_CHANNEL)
-        self.background_music = BackgroundMusicManager(constants.BACKGROUND_MUSIC_PATH)
+        self.call_sfx = LoopingSoundManager(MusicPaths.INCOMING_CALL.value, MixerChannels.INCOMING_CALL.value)
+        self.background_music = BackgroundMusicManager(MusicPaths.BACKGROUND_MUSIC.value)
 
     def transcribe_ticket(self, ticket_transcript):
         self.state.ticket_transcript = TicketTranscriptManager(ticket_transcript)
@@ -337,7 +338,7 @@ class ShiftEventHandler():
         self.sound = sound_controller
 
     def handle_threat_selection(self, selected_threat):
-        self.sound.button_sfx.play_sfx(constants.LIST_BUTTON_SFX)
+        self.sound.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)
         self.state.selected_threat = selected_threat
         self._update_threat_textbox()
 
@@ -473,14 +474,14 @@ class ShiftController():
     def _check_ticket_answer(self):
         if self.state.selected_threat_id == self.state.ticket_answer:
             print(f"Correct {self.state.selected_threat_id}:{self.state.ticket_answer}")
-            self.sound.button_sfx.play_sfx(constants.CORRECT_SUBMIT_SFX)
+            self.sound.button_sfx.play_sfx(ButtonSFX.CORRECT_SUBMISSION)
             self.state.total_score += 1
         else:
             print("Incorrect")
-            self.sound.button_sfx.play_sfx(constants.INCORRECT_SUBMIT_SFX)
+            self.sound.button_sfx.play_sfx(ButtonSFX.INCORRECT_SUBMISSION)
 
     def _handle_exit_button(self):
-        self.sound.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.sound.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.sound.end_shift_music()
         self.sound.call_sfx.stop_loop()
 

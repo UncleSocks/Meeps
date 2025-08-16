@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import init
 from sound_manager import ButtonSoundManager
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, ButtonSFX
 import elements.threats_elements as threat_element
 from queries import SqliteQueries
 
@@ -174,7 +174,7 @@ class ThreatCreationController():
         ]):
             return
         
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.state.add_new_threat()
         self.ui.display_confirm_window()
 
@@ -184,6 +184,6 @@ class ThreatCreationController():
         self.state.threat = ThreatDetails()
 
     def _handle_exit_action(self) -> None:
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.EXIT

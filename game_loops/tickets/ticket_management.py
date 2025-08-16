@@ -3,7 +3,7 @@ import pygame_gui
 from dataclasses import dataclass
 
 import constants
-from constants import ButtonAction, StateTracker
+from constants import ButtonAction, StateTracker, ButtonSFX
 import init
 import sound_manager
 from sound_manager import ButtonSoundManager
@@ -116,7 +116,7 @@ class TicketEventHandler():
         self.button_sfx = sound_manager.ButtonSoundManager()
 
     def handle_ticket_selection(self, selected_ticket):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.LIST_BUTTON)
         self.state.selected_ticket = selected_ticket
         self._update_ticket_textbox()
 
@@ -209,7 +209,7 @@ class TicketManagementController():
         return True
     
     def _handle_create_action(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.CREATE
         #ticket_creation_page = TicketCreationController(self.state.connect, self.state.cursor)
@@ -217,21 +217,21 @@ class TicketManagementController():
         #self.ui.refresh_ticket_list(self.state.ticket_title_list)
 
     def _handle_delete_action(self):
-        self.button_sfx.play_sfx(constants.MODIFY_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.display_confirm_window()
 
     def _handle_confirm_delete_action(self):
-        self.button_sfx.play_sfx(constants.DELETE_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.DELETE_BUTTON)
         self.state.ticket_delete_confirm_window.kill()
         self.state.delete_selected_ticket()
         self.state.ticket_title_list = self.state.fetch_ticket_titles()
         self.ui.refresh_ticket_list(self.state.ticket_title_list)
 
     def _handle_cancel_delete_action(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.state.ticket_delete_confirm_window.kill()
 
     def _handle_exit_action(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.EXIT

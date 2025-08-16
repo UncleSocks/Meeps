@@ -5,12 +5,13 @@ import init
 from init import PygameRenderer
 import sound_manager
 import constants
-from constants import StateTracker
+from constants import StateTracker, ButtonSFX
 import elements.main_menu as main_menu_element
 #from game_loops.shift import shift_introduction
 from game_loops.shift_s.shift import ShiftController
 from game_loops.tickets.ticket_management import TicketManagementController, TicketCreationController
-from game_loops.accounts.account_management import AccountManagementController, AccountCreationController
+from game_loops.accounts.account_management import AccountManagementController
+from game_loops.accounts.account_creation import AccountCreationController
 from game_loops.threats.threat_management import ThreatManagementController, ThreatCreationController
 
 
@@ -72,7 +73,7 @@ class MainMenuEventHandler():
             return StateTracker.EXIT
 
     def _handle_logoff_button(self):
-        self.button_sfx.play_sfx(constants.BACK_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         return constants.EXIT_ACTION
     
 
@@ -133,19 +134,19 @@ class MainMenuController():
         return True
     
     def _handle_shift_action(self):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
         return StateTracker.SHIFT
     
     def _handle_ticket_managemnt_action(self):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
         return StateTracker.TICKET_MANAGEMENT
     
     def _handle_account_management_action(self):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
         return StateTracker.ACCOUNT_MANAGEMENT
     
     def _handle_threat_management_action(self):
-        self.button_sfx.play_sfx(constants.MENU_BUTTON_SFX)
+        self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
         return StateTracker.THREAT_MANAGEMENT
     
     def _shutdown(self):
