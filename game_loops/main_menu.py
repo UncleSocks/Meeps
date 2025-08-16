@@ -2,17 +2,10 @@ import pygame
 import pygame_gui
 
 import elements.main_menu as main_menu_element
-from init import database_init, PygameRenderer
 from constants import Settings, StateTracker, ButtonAction, \
     ButtonSFX, ImagePaths
 from sound_manager import ButtonSoundManager
-from shift_s.shift import ShiftController
-from game_loops.tickets.ticket_management import TicketManagementController
-from game_loops.tickets.ticket_creation import TicketCreationController
-from game_loops.accounts.account_management import AccountManagementController
-from game_loops.accounts.account_creation import AccountCreationController
-from game_loops.threats.threat_management import ThreatManagementController
-from game_loops.threats.threat_creation import ThreatCreationController
+
 
 
 
