@@ -27,6 +27,7 @@ class DrawElement:
     ANCHOR_POS: ClassVar[Optional[Offset]] = None
     CONTAINER: ClassVar[Optional[pygame_gui.core.UIContainer]] = None
     OBJECT_ID: ClassVar[Optional[pygame_gui.core.ObjectID]] = None
+    STARTING_POINT: ClassVar[Optional[str]] = None
 
     def __init__(self, manager):
         self.manager = manager
@@ -67,6 +68,7 @@ class DrawElement:
         return pygame_gui.elements.UITextEntryBox(
             manager=self.manager,
             relative_rect=self.dimension,
+            placeholder_text=self.INPUT,
             anchors=self.ANCHOR,
             container=self.CONTAINER,
             object_id=self.OBJECT_ID
@@ -90,6 +92,16 @@ class DrawElement:
             anchors=self.ANCHOR,
             container=self.CONTAINER,
             object_id=self.OBJECT_ID
+        )
+    
+    def draw_dropdown(self):
+        return pygame_gui.elements.UIDropDownMenu(
+            manager=self.manager,
+            relative_rect=self.dimension,
+            options_list=self.INPUT,
+            starting_option=self.STARTING_POINT,
+            anchors=self.ANCHOR,
+            container=self.CONTAINER
         )
     
     def draw_image(self):

@@ -1,8 +1,8 @@
 import pygame
 import pygame_gui
 
-import elements.main_menu as main_menu_element
-from constants import Settings, StateTracker, ButtonAction, \
+import elements.game_elements.menu_elements as me
+from constants import StateTracker, ButtonAction, \
     ButtonSFX, ImagePaths
 from sound_manager import ButtonSoundManager
 
@@ -13,28 +13,39 @@ class MenuUIManager():
 
     def __init__(self, pygame_manager):
         self.manager = pygame_manager
-        self.build_ui()
+        self.draw_ui_elements()
 
-    def build_ui(self):
-        self.start_button = main_menu_element.start_button_func(self.manager)
-        self.ticket_management_button = main_menu_element.ticket_management_button_func(self.manager)
-        self.account_management_button = main_menu_element.accounts_management_button_func(self.manager)
-        self.threat_management_button = main_menu_element.threat_entries_button_func(self.manager)
-        self.logoff_button = main_menu_element.quit_button_func(self.manager)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._menu_elements()
 
-        self.main_title_image = main_menu_element.main_title_image_func(self.manager, ImagePaths.TITLE.value)
-        self.title_slogan = main_menu_element.main_title_slogan_label_func(self.manager)
-        self.version = main_menu_element.version_label_func(self.manager, Settings.VERSION.value)
-        self.github = main_menu_element.github_label_func(self.manager)
+    def _draw_images(self):
+        title_image = me.MenuImage(self.manager)
+        title_image_load = pygame.image.load(ImagePaths.TITLE.value)
+        title_image.INPUT = title_image_load
+        self.title_image = title_image.draw_image()
+
+    def _draw_buttons(self):
+        self.shift_button = me.ShiftButton(self.manager).draw_button()
+        self.ticket_button = me.TicketButton(self.manager).draw_button()
+        self.account_button = me.AccountButton(self.manager).draw_button()
+        self.threat_button = me.ThreatButton(self.manager).draw_button()
+        self.logoff_button = me.LogOffButton(self.manager).draw_button()
+
+    def _menu_elements(self):
+        self.title_slogan = me.TitleSloganLabel(self.manager).draw_label()
+        self.version = me.VersionLabel(self.manager).draw_label()
+        self.github = me.GitHubLabel(self.manager).draw_label()
 
     def destroy_elements(self):
-        self.start_button.kill()
-        self.ticket_management_button.kill()
-        self.account_management_button.kill()
-        self.threat_management_button.kill()
+        self.shift_button.kill()
+        self.ticket_button.kill()
+        self.account_button.kill()
+        self.threat_button.kill()
         self.logoff_button.kill()
 
-        self.main_title_image.kill()
+        self.title_image.kill()
         self.title_slogan.kill()
         self.version.kill()
         self.github.kill()
@@ -50,16 +61,16 @@ class MenuEventHandler():
         self.button_sfx = ButtonSoundManager()
 
     def handle_button_pressed(self, event):
-        if event.ui_element == self.ui.start_button:
+        if event.ui_element == self.ui.shift_button:
             return ButtonAction.SHIFT
         
-        if event.ui_element == self.ui.ticket_management_button:
+        if event.ui_element == self.ui.ticket_button:
             return ButtonAction.TICKET
 
-        if event.ui_element == self.ui.account_management_button:
+        if event.ui_element == self.ui.account_button:
             return ButtonAction.ACCOUNT
         
-        if event.ui_element == self.ui.threat_management_button:
+        if event.ui_element == self.ui.threat_button:
             return ButtonAction.THREAT
 
         if event.ui_element == self.ui.logoff_button:

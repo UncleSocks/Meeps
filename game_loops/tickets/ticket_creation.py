@@ -4,7 +4,8 @@ import pyttsx3
 from dataclasses import dataclass
 
 import init
-import elements.ticket_elements as ticket_elements
+import elements.game_elements.ticket_elements.ticket_creation_elements as tce
+import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
 from sound_manager import ButtonSoundManager
@@ -45,7 +46,7 @@ class TicketCreationStateManager():
         self.account_list = self.fetch_account_list()
         self.threat_id_name_map = self.threat_id_name_mapper()
         self.account_id_name_map = self.account_id_name_mapper()
-        self.ticket_confirm_window = False
+        self.confirm_window = False
 
     def threat_id_name_mapper(self):
         threat_id_name_list = self.query.threat_id_name_query()
@@ -104,43 +105,61 @@ class TicketCreationUIManager():
     def __init__(self, pygame_manager, state_manger: TicketCreationStateManager):
         self.manager = pygame_manager
         self.state = state_manger
-        self.threat_list = self.state.threat_list
-        self.account_list = self.state.account_list
-        self.build_ui(self.threat_list, self.account_list)
+        self.draw_ui_elements()
 
-    def build_ui(self, threat_list, account_list):
-        self.back_button = ticket_elements.back_button_func(self.manager)
-        self.new_ticket_image = ticket_elements.new_ticket_image_func(self.manager, ImagePaths.TICKET_CREATION.value)
-        self.ticket_title_text_entry = ticket_elements.title_text_entry_func(self.manager)
-        self.ticket_text_entry = ticket_elements.ticket_text_entry_func(self.manager)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_dropdowns()
+        self._draw_ticket_creation_elements()        
 
-        self.threat_description_tbox = ticket_elements.threat_description_tbox_func(self.manager)
-        self.add_ticket_button, self.threat_entry_title_tbox, \
-            self.threat_entry_slist = ticket_elements.threat_entry_slist_func(self.manager, threat_list)
-        
-        self.caller_dropdown_label, \
-            self.caller_dropdown = ticket_elements.caller_dropdown_func(self.manager, account_list)
+    def _draw_images(self):
+        add_ticket_image = tce.NewTicketImage(self.manager)
+        add_ticket_image_load = pygame.image.load(ImagePaths.TICKET_CREATION.value)
+        add_ticket_image.INPUT = add_ticket_image_load
+        self.add_ticket_image = add_ticket_image.draw_image()
+
+    def _draw_buttons(self):
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.add_button = tce.AddTicketButton(self.manager).draw_button()
+
+    def _draw_dropdowns(self):
+        self.account_dropdown_label = tce.AccountDropDownLabel(self.manager).draw_label()
+
+        account_dropdown = tce.AccountDropDown(self.manager)
+        account_dropdown.INPUT = self.state.account_list
+        self.account_dropdown = account_dropdown.draw_dropdown()
+
+    def _draw_ticket_creation_elements(self):
+        self.new_ticket_title = tce.NewTicketTitle(self.manager).draw_textentrybox()
+        self.new_ticket_description = tce.NewTicketDescription(self.manager).draw_textentrybox()
+        self.threat_list_textbox = tce.ThreatListTextBox(self.manager).draw_textbox()
+        self.threat_description = tce.ThreatDescription(self.manager).draw_textbox()
+
+        threat_selection_list = tce.ThreatList(self.manager)
+        threat_selection_list.INPUT = self.state.threat_list
+        self.threat_selection_list = threat_selection_list.draw_selectionlist()
         
     def destroy_elements(self):
         self.back_button.kill()
-        self.new_ticket_image.kill()
-        self.ticket_title_text_entry.kill()
-        self.ticket_text_entry.kill()
+        self.add_ticket_image.kill()
+        self.new_ticket_title.kill()
+        self.new_ticket_description.kill()
 
-        self.threat_description_tbox.kill()
-        self.add_ticket_button.kill()
-        self.threat_entry_title_tbox.kill()
-        self.threat_entry_slist.kill()
+        self.threat_description.kill()
+        self.add_button.kill()
+        self.threat_list_textbox.kill()
+        self.threat_selection_list.kill()
         
-        self.caller_dropdown_label.kill()
-        self.caller_dropdown.kill()
+        self.account_dropdown_label.kill()
+        self.account_dropdown.kill()
 
     def capture_new_ticket_details(self):
-        self.state.ticket.title = self.ticket_title_text_entry.get_text()
-        self.state.ticket.entry = self.ticket_text_entry.get_text()
+        self.state.ticket.title = self.new_ticket_title.get_text()
+        self.state.ticket.entry = self.new_ticket_description.get_text()
 
     def display_threat_textbox(self, threat):
-        self.threat_description_tbox.set_text(
+        self.threat_description.set_text(
             f"<b>{threat.name.upper()}</b>\n"
             f"<b>Description</b>:\n{threat.description}\n"
             f"<b>Indicators:\n</b>{threat.indicators}\n"
@@ -148,13 +167,20 @@ class TicketCreationUIManager():
         )
 
     def display_confirm_window(self):
-        self.state.ticket_confirm_window, \
-            self.ticket_confirm_close_button = ticket_elements.ticket_confirm_window_func(self.manager)
+        self.state.confirm_window = tce.ConfirmWindow(self.manager).draw_window()
+
+        confirm_label = tce.ConfirmLabel(self.manager)
+        confirm_label.CONTAINER = self.state.confirm_window
+        self.confirm_label = confirm_label.draw_label()
+
+        confirm_button = se.ConfirmButton(self.manager)
+        confirm_button.CONTAINER = self.state.confirm_window
+        self.confirm_button = confirm_button.draw_button()
         
     def refresh_creation_page(self):
-        self.ticket_title_text_entry.set_text("")
-        self.ticket_text_entry.set_text("")
-        self.threat_description_tbox.set_text("")
+        self.new_ticket_title.set_text("")
+        self.new_ticket_description.set_text("")
+        self.threat_description.set_text("")
 
 
 class TicketCreationEventHandler():
@@ -181,11 +207,11 @@ class TicketCreationEventHandler():
         if event.ui_element == self.ui.back_button:
             return ButtonAction.EXIT
         
-        if event.ui_element == self.ui.add_ticket_button:
+        if event.ui_element == self.ui.add_button:
             return ButtonAction.CREATE
 
-        if self.state.ticket_confirm_window \
-            and event.ui_element == self.ui.ticket_confirm_close_button:
+        if self.state.confirm_window \
+            and event.ui_element == self.ui.confirm_button:
             return ButtonAction.CONFIRM_CREATE
 
 
@@ -197,7 +223,6 @@ class TicketCreationController():
         self.manager = manager
 
         self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
         self.window_surface = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
@@ -216,12 +241,12 @@ class TicketCreationController():
             pygame.quit()
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
-            and event.ui_element == self.ui.threat_entry_slist:
+            and event.ui_element == self.ui.threat_selection_list:
             selected_threat = event.text
             self.event_handler.handle_threat_selection(selected_threat)
 
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED \
-            and event.ui_element == self.ui.caller_dropdown:
+            and event.ui_element == self.ui.account_dropdown:
             selected_account = event.text
             self.event_handler.handle_account_dropdown(selected_account)
 
@@ -260,7 +285,7 @@ class TicketCreationController():
 
     def _handle_confirm_button(self):
         self.ui.refresh_creation_page()
-        self.state.ticket_confirm_window.kill()
+        self.state.confirm_window.kill()
         self.state.ticket = TicketDetails()
     
     def _handle_exit_action(self):
