@@ -9,7 +9,7 @@ from sound_manager import ButtonSoundManager
 
 
 
-class MainMenuUIManager():
+class MenuUIManager():
 
     def __init__(self, pygame_manager):
         self.manager = pygame_manager
@@ -40,9 +40,9 @@ class MainMenuUIManager():
         self.github.kill()
 
 
-class MainMenuEventHandler():
+class MenuEventHandler():
 
-    def __init__(self, connect, cursor, pygame_manager, ui_manager: MainMenuUIManager):
+    def __init__(self, connect, cursor, pygame_manager, ui_manager: MenuUIManager):
         self.manager = pygame_manager
         self.connect = connect
         self.cursor = cursor
@@ -67,7 +67,7 @@ class MainMenuEventHandler():
 
     
 
-class MainMenuController():
+class MenuController():
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect
@@ -75,8 +75,8 @@ class MainMenuController():
         self.manager = manager
         self.button_sfx = ButtonSoundManager()
 
-        self.ui = MainMenuUIManager(self.manager)
-        self.event_handler = MainMenuEventHandler(self.connect, self.cursor, self.manager, self.ui)
+        self.ui = MenuUIManager(self.manager)
+        self.event_handler = MenuEventHandler(self.connect, self.cursor, self.manager, self.ui)
 
     def game_loop(self, events):
         for event in events:

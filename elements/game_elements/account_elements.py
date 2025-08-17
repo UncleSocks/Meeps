@@ -1,4 +1,4 @@
-from .element_creator import DrawElement, \
+from elements.element_creator import DrawElement, \
     Position, Offset, AnchorConfig
 
 

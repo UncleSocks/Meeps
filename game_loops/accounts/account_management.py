@@ -3,12 +3,12 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-import init
-import elements.account_elements as ae
-from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+import elements.game_elements.account_elements as ae
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
+from init import PygameRenderer
+from sound_manager import ButtonSoundManager
+from queries import SqliteQueries
 
 
 
@@ -217,7 +217,7 @@ class AccountManagementController:
         self.cursor = cursor
         self.manager = manager
 
-        self.pygame_renderer = init.PygameRenderer()
+        self.pygame_renderer = PygameRenderer()
         self.window_surface  = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 

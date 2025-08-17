@@ -2,7 +2,7 @@ import pygame
 
 from init import database_init, PygameRenderer
 from constants import Settings, StateTracker
-from game_loops.main_menu import MainMenuController
+from game_loops.main_menu import MenuController
 from game_loops.shift_s.shift import ShiftController
 from game_loops.tickets.ticket_management import TicketManagementController
 from game_loops.tickets.ticket_creation import TicketCreationController
@@ -20,7 +20,7 @@ class MainLoop:
         self.connect, self.cursor = database_init(Settings.DATABASE.value)
         self.pygame_renderer = PygameRenderer()
         self.manager = self.pygame_renderer.manager
-        self.current_state = MainMenuController(self.connect, self.cursor, self.manager)
+        self.current_state = MenuController(self.connect, self.cursor, self.manager)
 
     def main_loop(self):
         running = True
@@ -33,7 +33,7 @@ class MainLoop:
                 return self._exit_game()
             
             game_state_map = {
-                StateTracker.MAIN_MENU: lambda: MainMenuController(self.connect, self.cursor, self.manager),
+                StateTracker.MAIN_MENU: lambda: MenuController(self.connect, self.cursor, self.manager),
                 StateTracker.SHIFT: lambda: ShiftController(self.connect, self.cursor, self.manager),
                 StateTracker.TICKET_MANAGEMENT: lambda: TicketManagementController(self.connect, self.cursor, self.manager),
                 StateTracker.TICKET_CREATION: lambda: TicketCreationController(self.connect, self.cursor, self.manager),
