@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import init
 import elements.ticket_elements as ticket_elements
+import elements.game_elements.ticket_elements_s as te
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from sound_manager import ButtonSoundManager
@@ -63,46 +64,70 @@ class TicketUIManager():
     def __init__(self, pygame_manager, state_manager: TicketStateManager):
         self.manager = pygame_manager
         self.state = state_manager
-        self.ticket_list = self.state.ticket_title_list
-        self.build_ui(self.ticket_list)
+        self.draw_ui_elements()
 
-    def build_ui(self, ticket_list):
-        self.back_button = ticket_elements.back_button_func(self.manager)
-        self.ticket_management_image = ticket_elements.ticket_manager_image_func(self.manager, ImagePaths.TICKET_MANAGEMENT.value)
-        self.ticket_information_label = ticket_elements.ticket_information_label_func(self.manager)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_ticket_elements()
 
-        self.create_button = ticket_elements.create_ticket_button_func(self.manager)
-        self.delete_button = ticket_elements.delete_ticket_button_func(self.manager)
+    def _draw_images(self):
+        ticket_manager_image = te.TitleImage(self.manager)
+        load_ticket_manager_image = pygame.image.load(ImagePaths.TICKET_MANAGEMENT.value)
+        ticket_manager_image.INPUT = load_ticket_manager_image
+        self.ticket_manager_image = ticket_manager_image.draw_image()
 
-        self.ticket_entry_title_tbox = ticket_elements.ticket_entry_slist_misc_func(self.manager)
-        self.ticket_entry_slist = ticket_elements.ticket_entry_slist_func(self.manager, ticket_list)
-        self.selected_ticket_title_tbox, self.selected_ticket_description_tbox = ticket_elements.selected_ticket_tbox_func(self.manager)
+    def _draw_buttons(self):
+        self.back_button = te.BackButton(self.manager).draw_button()
+        self.create_button = te.CreateButton(self.manager).draw_button()
+        self.delete_button = te.DeleteButton(self.manager).draw_button()
 
-        self.account_details_label = ticket_elements.account_details_label_func(self.manager)
-        self.selected_ticket_account_tbox = ticket_elements.selected_ticket_account_func(self.manager)
+    def _draw_ticket_elements(self):
+        self.ticket_entry_title_tbox = te.TicketListTitle(self.manager).draw_textbox()
+
+        ticket_selection_list = te.TicketList(self.manager)
+        ticket_selection_list.INPUT = self.state.ticket_title_list
+        self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
+
+        self.ticket_details_label = te.TicketLabel(self.manager).draw_label()
+        self.ticket_title = te.TicketTitleTextBox(self.manager).draw_textbox()
+        self.ticket_description = te.TicketDescriptionTextBox(self.manager).draw_textbox()
+        self.account_details_label = te.AccountLabel(self.manager).draw_label()
+        self.account_description = te.AccountDescriptionTextBox(self.manager).draw_textbox()
 
     def destroy_elements(self):
         self.back_button.kill()
-        self.ticket_management_image.kill()
-        self.ticket_information_label.kill()
+        self.ticket_manager_image.kill()
+        self.ticket_details_label.kill()
 
         self.create_button.kill()
         self.delete_button.kill()
 
         self.ticket_entry_title_tbox.kill()
-        self.ticket_entry_slist.kill()
-        self.selected_ticket_title_tbox.kill()
-        self.selected_ticket_description_tbox.kill()
+        self.ticket_selection_list.kill()
+        self.ticket_title.kill()
+        self.ticket_description.kill()
 
         self.account_details_label.kill()
-        self.selected_ticket_account_tbox.kill()
+        self.account_description.kill()
 
     def display_confirm_window(self):
-        self.state.ticket_delete_confirm_window, self.ticket_delete_confirm_yes_button, \
-            self.ticket_delete_confirm_no_button = ticket_elements.ticket_delete_confirm_window_func(self.manager)
+        self.state.ticket_delete_confirm_window = te.DeleteConfirmWindow(self.manager).draw_window()
+
+        delete_confirm_label = te.DeleteConfirmLabel(self.manager)
+        delete_confirm_label.CONTAINER = self.state.ticket_delete_confirm_window
+        self.delete_confirm_label = delete_confirm_label.draw_label()
+        
+        ticket_delete_confirm_yes_button = te.DeleteYesButton(self.manager)
+        ticket_delete_confirm_yes_button.CONTAINER = self.state.ticket_delete_confirm_window
+        self.ticket_delete_confirm_yes_button = ticket_delete_confirm_yes_button.draw_button()
+
+        ticket_delete_confirm_no_button = te.DeleteNoButton(self.manager)
+        ticket_delete_confirm_no_button.CONTAINER = self.state.ticket_delete_confirm_window
+        self.ticket_delete_confirm_no_button = ticket_delete_confirm_no_button.draw_button()
 
     def refresh_ticket_list(self, updated_ticket_list):
-        self.ticket_entry_slist.set_item_list(updated_ticket_list)
+        self.ticket_selection_list.set_item_list(updated_ticket_list)
         self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
 
 
@@ -122,9 +147,9 @@ class TicketEventHandler():
     def _update_ticket_textbox(self):
         ticket = self.state.fetch_ticket_details()
 
-        self.ui.selected_ticket_title_tbox.set_text(f"<b>{ticket.title}</b>")
-        self.ui.selected_ticket_description_tbox.set_text(f"{ticket.entry}")
-        self.ui.selected_ticket_account_tbox.set_text(
+        self.ui.ticket_title.set_text(f"<b>{ticket.title}</b>")
+        self.ui.ticket_description.set_text(f"{ticket.entry}")
+        self.ui.account_description.set_text(
             f"<b>Name:</b> {ticket.account}\n"
             f"<b>Organization:</b> {ticket.account_organization}\n"
             f"<b>Email:</b> {ticket.account_email}\n"
@@ -181,7 +206,7 @@ class TicketManagementController():
             pygame.quit()
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
-            and event.ui_element == self.ui.ticket_entry_slist:
+            and event.ui_element == self.ui.ticket_selection_list:
             selected_ticket = event.text
             self.event_handler.handle_ticket_selection(selected_ticket)
 

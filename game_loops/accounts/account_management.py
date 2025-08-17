@@ -3,7 +3,8 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-import elements.game_elements.account_elements as ae
+import elements.game_elements.account_elements.account_management_elements as ame
+import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
@@ -79,30 +80,30 @@ class AccountUIManager:
         self._draw_ticket_elements()
 
     def _draw_images(self):
-        account_manager_image = ae.TitleImage(self.manager)
+        account_manager_image = ame.TitleImage(self.manager)
         load_account_manager_image = pygame.image.load(ImagePaths.ACCOUNT_MANAGEMENT.value)
         account_manager_image.INPUT = load_account_manager_image
         self.account_manager_image = account_manager_image.draw_image()
         
     def _draw_buttons(self):
-        self.back_button = ae.BackButton(self.manager).draw_button()
-        self.create_button = ae.CreateButton(self.manager).draw_button()
-        self.delete_button = ae.DeleteButton(self.manager).draw_button()
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.create_button = se.CreateButton(self.manager).draw_button()
+        self.delete_button = se.DeleteButton(self.manager).draw_button()
 
     def _draw_account_elements(self):
-        self.account_entry_title_tbox = ae.AccountListTitle(self.manager).draw_textbox()
+        self.account_entry_title_tbox = ame.AccountListTitle(self.manager).draw_textbox()
 
-        account_selection_list = ae.AccountList(self.manager)
+        account_selection_list = ame.AccountList(self.manager)
         account_selection_list.INPUT = self.state.account_name_list
         self.account_selection_list = account_selection_list.draw_selectionlist()
         
-        self.account_details_label = ae.AccountLabel(self.manager).draw_label()
-        self.selected_account_description = ae.AccountDescriptionTextBox(self.manager).draw_textbox()
+        self.account_details_label = ame.AccountLabel(self.manager).draw_label()
+        self.selected_account_description = ame.AccountDescriptionTextBox(self.manager).draw_textbox()
 
     def _draw_ticket_elements(self):
-        self.assigned_ticket_label = ae.AssignedTicketLabel(self.manager).draw_label()
+        self.assigned_ticket_label = ame.AssignedTicketLabel(self.manager).draw_label()
 
-        ticket_selection_list = ae.AssignedTicketList(self.manager)
+        ticket_selection_list = ame.AssignedTicketList(self.manager)
         ticket_selection_list.INPUT = self.state.assigned_ticket_list
         self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
 
@@ -129,32 +130,32 @@ class AccountUIManager:
         return formatted_account_details
 
     def display_confirm_window(self) -> None:
-        self.state.account_delete_confirm_window = ae.DeleteConfirmWindow(self.manager).draw_window()
+        self.state.account_delete_confirm_window = ame.DeleteConfirmWindow(self.manager).draw_window()
 
-        confirm_delete_label = ae.DeleteConfirmLabel(self.manager)
+        confirm_delete_label = ame.DeleteConfirmLabel(self.manager)
         confirm_delete_label.CONTAINER = self.state.account_delete_confirm_window
         self.confirm_delete_label = confirm_delete_label.draw_label()
 
-        confirm_delete_warning_label = ae.DeleteConfirmWarningLabel(self.manager)
+        confirm_delete_warning_label = ame.DeleteConfirmWarningLabel(self.manager)
         confirm_delete_warning_label.CONTAINER = self.state.account_delete_confirm_window
         self.confirm_delete_warning_label = confirm_delete_warning_label.draw_label()
 
-        confirm_delete_yes_button = ae.DeleteYesButton(self.manager)
+        confirm_delete_yes_button = se.DeleteYesButton(self.manager)
         confirm_delete_yes_button.CONTAINER = self.state.account_delete_confirm_window
         self.confirm_delete_yes_button = confirm_delete_yes_button.draw_button()
 
-        confirm_delete_no_button = ae.DeleteNoButton(self.manager)
+        confirm_delete_no_button = se.DeleteNoButton(self.manager)
         confirm_delete_no_button.CONTAINER = self.state.account_delete_confirm_window
         self.confirm_delete_no_button = confirm_delete_no_button.draw_button()
         
     def display_warning_window(self) -> None:
-        self.state.account_delete_warning_window = ae.DeleteWarningWindow(self.manager).draw_window()
+        self.state.account_delete_warning_window = ame.DeleteWarningWindow(self.manager).draw_window()
 
-        delete_warning_label = ae.DeleteWarningLabel(self.manager)
+        delete_warning_label = ame.DeleteWarningLabel(self.manager)
         delete_warning_label.CONTAINER = self.state.account_delete_warning_window
         self.delete_warning_label = delete_warning_label.draw_label()
 
-        warning_continue_button = ae.DeleteWarningButton(self.manager)
+        warning_continue_button = ame.DeleteWarningButton(self.manager)
         warning_continue_button.CONTAINER = self.state.account_delete_warning_window
         self.warning_continue_button = warning_continue_button.draw_button()
 

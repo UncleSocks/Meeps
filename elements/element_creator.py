@@ -1,5 +1,6 @@
 from collections import namedtuple
-from typing import ClassVar, Optional, Union, Dict
+from typing import ClassVar, Optional, Callable, \
+    Union, Dict
 from enum import Enum
 
 import pygame
@@ -25,6 +26,7 @@ class DrawElement:
     ANCHOR_CONFIG: ClassVar[Optional[AnchorConfig]] = None
     ANCHOR_POS: ClassVar[Optional[Offset]] = None
     CONTAINER: ClassVar[Optional[pygame_gui.core.UIContainer]] = None
+    OBJECT_ID: ClassVar[Optional[pygame_gui.core.ObjectID]] = None
 
     def __init__(self, manager):
         self.manager = manager
@@ -37,7 +39,8 @@ class DrawElement:
         return pygame_gui.elements.UIWindow(
             manager=self.manager,
             rect=self.dimension,
-            window_display_title=self.INPUT
+            window_display_title=self.INPUT,
+            object_id=self.OBJECT_ID
         )
     
     def draw_button(self):
@@ -46,7 +49,8 @@ class DrawElement:
             relative_rect=self.dimension,
             text=self.INPUT,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )
     
     def draw_textbox(self):
@@ -55,7 +59,8 @@ class DrawElement:
             relative_rect=self.dimension,
             html_text=self.INPUT,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )
     
     def draw_textentrybox(self):
@@ -63,7 +68,8 @@ class DrawElement:
             manager=self.manager,
             relative_rect=self.dimension,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )
     
     def draw_label(self):
@@ -72,7 +78,8 @@ class DrawElement:
             relative_rect=self.dimension,
             text=self.INPUT,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )
     
     def draw_selectionlist(self):
@@ -81,7 +88,8 @@ class DrawElement:
             relative_rect=self.dimension,
             item_list=self.INPUT,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )
     
     def draw_image(self):
@@ -90,5 +98,6 @@ class DrawElement:
             relative_rect=self.dimension,
             image_surface=self.INPUT,
             anchors=self.ANCHOR,
-            container=self.CONTAINER
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
         )

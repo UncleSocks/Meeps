@@ -3,7 +3,8 @@ import pygame_gui
 from dataclasses import dataclass
 
 import init
-import elements.game_elements.account_elements as ae
+import elements.game_elements.account_elements.account_creation_elements as ace
+import elements.game_elements.shared_elements as se
 from sound_manager import ButtonSoundManager
 from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, DefaultImages, ButtonSFX
@@ -66,32 +67,32 @@ class AccountCreationUIManager():
         self._draw_account_creation_elements()
         
     def _draw_images(self):
-        add_account_image = ae.NewAccountImage(self.manager)
+        add_account_image = ace.NewAccountImage(self.manager)
         load_add_account_image = pygame.image.load(ImagePaths.ACCOUNT_CREATION.value)
         add_account_image.INPUT = load_add_account_image
         self.add_account_image = add_account_image.draw_image()
 
     def _draw_buttons(self):
-        self.back_button = ae.BackButton(self.manager).draw_button()
-        self.add_account_button = ae.AddAccountButton(self.manager).draw_button()
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.add_account_button = ace.AddAccountButton(self.manager).draw_button()
 
     def _draw_account_creation_elements(self):
-        self.account_name_label = ae.NewAccountNameLabel(self.manager).draw_label()
-        self.account_name_entry = ae.NewAccountNameTextEntry(self.manager).draw_textentrybox()
+        self.account_name_label = ace.NewAccountNameLabel(self.manager).draw_label()
+        self.account_name_entry = ace.NewAccountNameTextEntry(self.manager).draw_textentrybox()
         
-        self.account_organization_label = ae.NewAccountOrganizationLabel(self.manager).draw_label()
-        self.account_organization_entry = ae.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
+        self.account_organization_label = ace.NewAccountOrganizationLabel(self.manager).draw_label()
+        self.account_organization_entry = ace.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
 
-        self.account_email_label = ae.NewAccountEmailLabel(self.manager).draw_label()
-        self.account_email_entry = ae.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
+        self.account_email_label = ace.NewAccountEmailLabel(self.manager).draw_label()
+        self.account_email_entry = ace.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
 
-        self.account_contact_label = ae.NewAccountContactLabel(self.manager).draw_label()
-        self.account_contact_entry = ae.NewAccountContactTextEntry(self.manager).draw_textentrybox()
+        self.account_contact_label = ace.NewAccountContactLabel(self.manager).draw_label()
+        self.account_contact_entry = ace.NewAccountContactTextEntry(self.manager).draw_textentrybox()
 
-        self.account_picture_file_label = ae.NewAccountPictureFileLabel(self.manager).draw_label()
-        self.account_picture_file = ae.NewAccountPictureFileTextEntry(self.manager).draw_textentrybox()
+        self.account_picture_file_label = ace.NewAccountPictureFileLabel(self.manager).draw_label()
+        self.account_picture_file = ace.NewAccountPictureFileTextEntry(self.manager).draw_textentrybox()
 
-        self.account_picture_border = ae.NewAccountPictureBorder(self.manager).draw_textentrybox()
+        self.account_picture_border = ace.NewAccountPictureBorder(self.manager).draw_textentrybox()
         self.account_picture = None
 
     def destroy_elements(self):
@@ -121,7 +122,7 @@ class AccountCreationUIManager():
     def _set_new_account_image(self):
         self.state.account.picture_file = self.account_picture_file.get_text()
         account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, self.state.account.picture_file])
-        account_picture = ae.NewAccountPicture(self.manager)
+        account_picture = ace.NewAccountPicture(self.manager)
 
         try:
             account_picture_load = pygame.image.load(account_picture_path)
@@ -132,13 +133,13 @@ class AccountCreationUIManager():
         self.account_picture = account_picture.draw_image()
 
     def display_confirm_window(self):
-        self.state.confirm_window = ae.ConfirmWindow(self.manager).draw_window()
+        self.state.confirm_window = ace.ConfirmWindow(self.manager).draw_window()
 
-        confirm_label = ae.ConfirmLabel(self.manager)
+        confirm_label = ace.ConfirmLabel(self.manager)
         confirm_label.CONTAINER = self.state.confirm_window
         self.confirm_label = confirm_label.draw_label()
 
-        confirm_button = ae.ConfirmButton(self.manager)
+        confirm_button = se.ConfirmButton(self.manager)
         confirm_button.CONTAINER = self.state.confirm_window
         self.confirm_button = confirm_button.draw_button()
 

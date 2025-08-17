@@ -12,7 +12,7 @@ def back_button_func(manager):
 
 def ticket_manager_image_func(manager, image_path):
 
-    ticket_manager_image_rect = pygame.Rect(20, 35, 320, 75)
+    ticket_manager_image_rect = pygame.Rect(40, 35, 315, 75)
     ticket_manager_image_load = pygame.image.load(image_path)
     ticket_manager_image = pygame_gui.elements.UIImage(relative_rect=ticket_manager_image_rect,
                                                        image_surface=ticket_manager_image_load,
