@@ -2,11 +2,11 @@ import pygame
 import pygame_gui
 from dataclasses import dataclass
 
-import init
-import elements.ticket_elements as ticket_elements
-import elements.game_elements.ticket_elements_s as te
+import elements.game_elements.ticket_elements.ticket_management_elements as tme
+import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
+from init import PygameRenderer
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 
@@ -72,28 +72,28 @@ class TicketUIManager():
         self._draw_ticket_elements()
 
     def _draw_images(self):
-        ticket_manager_image = te.TitleImage(self.manager)
+        ticket_manager_image = tme.TitleImage(self.manager)
         load_ticket_manager_image = pygame.image.load(ImagePaths.TICKET_MANAGEMENT.value)
         ticket_manager_image.INPUT = load_ticket_manager_image
         self.ticket_manager_image = ticket_manager_image.draw_image()
 
     def _draw_buttons(self):
-        self.back_button = te.BackButton(self.manager).draw_button()
-        self.create_button = te.CreateButton(self.manager).draw_button()
-        self.delete_button = te.DeleteButton(self.manager).draw_button()
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.create_button = se.CreateButton(self.manager).draw_button()
+        self.delete_button = se.DeleteButton(self.manager).draw_button()
 
     def _draw_ticket_elements(self):
-        self.ticket_entry_title_tbox = te.TicketListTitle(self.manager).draw_textbox()
+        self.ticket_entry_title_tbox = tme.TicketListTitle(self.manager).draw_textbox()
 
-        ticket_selection_list = te.TicketList(self.manager)
+        ticket_selection_list = tme.TicketList(self.manager)
         ticket_selection_list.INPUT = self.state.ticket_title_list
         self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
 
-        self.ticket_details_label = te.TicketLabel(self.manager).draw_label()
-        self.ticket_title = te.TicketTitleTextBox(self.manager).draw_textbox()
-        self.ticket_description = te.TicketDescriptionTextBox(self.manager).draw_textbox()
-        self.account_details_label = te.AccountLabel(self.manager).draw_label()
-        self.account_description = te.AccountDescriptionTextBox(self.manager).draw_textbox()
+        self.ticket_details_label = tme.TicketLabel(self.manager).draw_label()
+        self.ticket_title = tme.TicketTitleTextBox(self.manager).draw_textbox()
+        self.ticket_description = tme.TicketDescriptionTextBox(self.manager).draw_textbox()
+        self.account_details_label = tme.AccountLabel(self.manager).draw_label()
+        self.account_description = tme.AccountDescriptionTextBox(self.manager).draw_textbox()
 
     def destroy_elements(self):
         self.back_button.kill()
@@ -112,17 +112,17 @@ class TicketUIManager():
         self.account_description.kill()
 
     def display_confirm_window(self):
-        self.state.ticket_delete_confirm_window = te.DeleteConfirmWindow(self.manager).draw_window()
+        self.state.ticket_delete_confirm_window = tme.DeleteConfirmWindow(self.manager).draw_window()
 
-        delete_confirm_label = te.DeleteConfirmLabel(self.manager)
+        delete_confirm_label = tme.DeleteConfirmLabel(self.manager)
         delete_confirm_label.CONTAINER = self.state.ticket_delete_confirm_window
         self.delete_confirm_label = delete_confirm_label.draw_label()
         
-        ticket_delete_confirm_yes_button = te.DeleteYesButton(self.manager)
+        ticket_delete_confirm_yes_button = se.DeleteYesButton(self.manager)
         ticket_delete_confirm_yes_button.CONTAINER = self.state.ticket_delete_confirm_window
         self.ticket_delete_confirm_yes_button = ticket_delete_confirm_yes_button.draw_button()
 
-        ticket_delete_confirm_no_button = te.DeleteNoButton(self.manager)
+        ticket_delete_confirm_no_button = se.DeleteNoButton(self.manager)
         ticket_delete_confirm_no_button.CONTAINER = self.state.ticket_delete_confirm_window
         self.ticket_delete_confirm_no_button = ticket_delete_confirm_no_button.draw_button()
 
@@ -183,8 +183,7 @@ class TicketManagementController():
         self.cursor = cursor
         self.manager = manager
 
-        self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
+        self.pygame_renderer = PygameRenderer()
         self.window_surface = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
@@ -236,9 +235,6 @@ class TicketManagementController():
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.CREATE
-        #ticket_creation_page = TicketCreationController(self.state.connect, self.state.cursor)
-        #self.state.ticket_title_list = ticket_creation_page.ticket_creation_loop()
-        #self.ui.refresh_ticket_list(self.state.ticket_title_list)
 
     def _handle_delete_action(self):
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
