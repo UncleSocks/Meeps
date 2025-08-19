@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import pygame
 import pygame_gui
 
-import elements.main_loop_elements as main_loop_elements
 import elements.game_elements.shift_elements as she
 import elements.game_elements.shared_elements as se
 from constants import ButtonAction, StateTracker, \
@@ -75,7 +74,6 @@ class ShiftStateManager():
     
     def _timer_variabbles(self):
         self.ticket_generate_timer = 0
-
         self.max_ticket_sla = 180
         self.max_popup_sla = 15
         self.ticket_sla_timer = 0
@@ -163,11 +161,10 @@ class ShiftUIManager():
         self.state.introduction_page = she.IntroductionText(self.manager).draw_textbox()
         self.continue_shift_button = she.ContinueButton(self.manager).draw_button()
         
-    def destroy_introduction_ui(self):
+    def destroy_introduction_elements(self):
         self.back_button.kill()
         self.state.introduction_page.kill()
         self.continue_shift_button.kill()
-
         self.state.introduction_page = None
 
     def draw_ui_elements(self):
@@ -505,7 +502,7 @@ class ShiftController():
         return True
     
     def _handle_continue_action(self):
-        self.ui.destroy_introduction_ui()
+        self.ui.destroy_introduction_elements()
         self.ui.draw_ui_elements()
 
     def _handle_answer_action(self):
@@ -534,7 +531,7 @@ class ShiftController():
         self.sound.call_sfx.stop_loop()
 
         if self.state.introduction_page:
-            self.ui.destroy_introduction_ui()
+            self.ui.destroy_introduction_elements()
         else:
             self.ui.destroy_elements()
         return ButtonAction.EXIT
