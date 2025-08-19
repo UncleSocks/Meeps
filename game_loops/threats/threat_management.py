@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import init
 import elements.threats_elements as threat_element
+import elements.game_elements.threat_elements.threat_management_elements as tme
+import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from sound_manager import ButtonSoundManager
@@ -63,50 +65,66 @@ class ThreatUIManager():
     def __init__(self, pygame_manager, state_manager: ThreatStateManager):
         self.manager = pygame_manager
         self.state = state_manager
-        self.threat_list = self.state.threat_name_list
-        self.build_ui(self.threat_list)
+        self.draw_ui_elements()
 
-    def build_ui(self, threat_list):
-        self.back_button = threat_element.back_button_func(self.manager)
-        self.create_button = threat_element.create_button_func(self.manager)
-        self.delete_button = threat_element.delete_button_func(self.manager)
-
-        self.threat_database_image = threat_element.threat_database_image_func(self.manager, ImagePaths.THREAT_MANAGEMENT.value)
-        self.threat_entry_title_tbox = threat_element.threat_entry_slist_misc_func(self.manager)
-        self.threat_entry_slist = threat_element.threat_entry_slist_func(self.manager, threat_list)
-
-        self.threat_details_label, self.selected_threat_title_tbox, self.selected_threat_description_tbox, \
-            self.selected_threat_indicators_tbox, self.selected_threat_countermeasures_tbox, \
-                self.selected_threat_image_path_tbox = threat_element.threat_details_func(self.manager)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_threat_elements()
         
+    def _draw_images(self):
+        threat_manager_image = tme.TitleImage(self.manager)
+        threat_manager_image_load = pygame.image.load(ImagePaths.THREAT_MANAGEMENT.value)
+        threat_manager_image.INPUT = threat_manager_image_load
+        self.threat_manager_image = threat_manager_image.draw_image()
+        
+    def _draw_buttons(self):
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.create_button = se.CreateButton(self.manager).draw_button()
+        self.delete_button = se.DeleteButton(self.manager).draw_button()
+
+    def _draw_threat_elements(self):
+        self.threat_selection_list_title = tme.ThreatListTitle(self.manager).draw_textbox()
+        
+        threat_selection_list = tme.ThreatList(self.manager)
+        threat_selection_list.INPUT = self.state.threat_name_list
+        self.threat_selection_list = threat_selection_list.draw_selectionlist()
+
+        self.threat_details_label = tme.ThreatDetailLabel(self.manager).draw_label()
+        self.threat_title = tme.ThreatTitle(self.manager).draw_textbox()
+        self.threat_description = tme.ThreatDescription(self.manager).draw_textbox()
+        self.threat_indicators = tme.ThreatIndicators(self.manager).draw_textbox()
+        self.threat_countermeasures = tme.ThreatCountermeasures(self.manager).draw_textbox()
+        self.threat_image_filename = tme.ThreatImageFileName(self.manager).draw_textbox()
+
     def destroy_elements(self):
         self.back_button.kill()
         self.create_button.kill()
         self.delete_button.kill()
 
-        self.threat_database_image.kill()
-        self.threat_entry_title_tbox.kill()
-        self.threat_entry_slist.kill()
+        self.threat_manager_image.kill()
+        self.threat_selection_list_title.kill()
+        self.threat_selection_list.kill()
         self.threat_details_label.kill()
-        self.selected_threat_title_tbox.kill()
-        self.selected_threat_description_tbox.kill()
-        self.selected_threat_indicators_tbox.kill()
-        self.selected_threat_countermeasures_tbox.kill()
-        self.selected_threat_image_path_tbox.kill()
+        self.threat_title.kill()
+        self.threat_description.kill()
+        self.threat_indicators.kill()
+        self.threat_countermeasures.kill()
+        self.threat_image_filename.kill()
         
     def set_threat_details(self, threat: ThreatDetails) -> None:
-        self.selected_threat_title_tbox.set_text(f"<b>{threat.name}</b>")
-        self.selected_threat_description_tbox.set_text(f"DESCRIPTION:\n{threat.description}")
-        self.selected_threat_indicators_tbox.set_text(f"INDICATORS:\n{threat.indicators}")
-        self.selected_threat_countermeasures_tbox.set_text(f"COUNTERMEASURES:\n{threat.countermeasures}")
-        self.selected_threat_image_path_tbox.set_text(f"{threat.image_file}")
+        self.threat_title.set_text(f"<b>{threat.name}</b>")
+        self.threat_description.set_text(f"DESCRIPTION:\n{threat.description}")
+        self.threat_indicators.set_text(f"INDICATORS:\n{threat.indicators}")
+        self.threat_countermeasures.set_text(f"COUNTERMEASURES:\n{threat.countermeasures}")
+        self.threat_image_filename.set_text(f"{threat.image_file}")
         
     def display_confirm_window(self):
         self.state.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, \
             self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
         
     def refresh_threat_list(self, updated_threat_list):
-        self.threat_entry_slist.set_item_list(updated_threat_list)
+        self.threat_selection_list.set_item_list(updated_threat_list)
         self.state.threat_id_name_map = self.state.threat_id_name_mapper()
 
 
@@ -174,7 +192,7 @@ class ThreatManagementController():
             pygame.quit()
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
-            and event.ui_element == self.ui.threat_entry_slist:
+            and event.ui_element == self.ui.threat_selection_list:
             self.state.selected_threat = event.text
             self.event_handler.handle_threat_selection()
 

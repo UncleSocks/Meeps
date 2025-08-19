@@ -12,7 +12,7 @@ def back_button_func(manager):
 
 def threat_database_image_func(manager, image_path):
 
-    threat_database_image_rect = pygame.Rect(20, 35, 320, 80)
+    threat_database_image_rect = pygame.Rect(40, 35, 300, 80)
     threat_database_image_load = pygame.image.load(image_path)
     threat_database_image = pygame_gui.elements.UIImage(relative_rect=threat_database_image_rect,
                                                        image_surface=threat_database_image_load,
