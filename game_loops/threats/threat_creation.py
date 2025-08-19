@@ -2,10 +2,11 @@ import pygame
 import pygame_gui
 from dataclasses import dataclass
 
-import init
-import elements.threats_elements as threat_element
+import elements.game_elements.threat_elements.threat_creation_elements as tce
+import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
+from init import PygameRenderer
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 
@@ -58,46 +59,66 @@ class ThreatCreationUIManager():
     def __init__(self, pygame_manager, state_manager: ThreatCreationStateManager):
         self.manager = pygame_manager
         self.state = state_manager
-        self.build_ui()
+        self.draw_ui_elements()
 
-    def build_ui(self):
-        self.threat_create_image = threat_element.add_threat_image_func(self.manager, ImagePaths.THREAT_CREATION.value)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_threat_creation_elements()
         
-        self.back_button = threat_element.back_button_func(self.manager)
-        self.add_threat_button = threat_element.threat_entry_add_button_func(self.manager)
+    def _draw_images(self):
+        add_threat_image = tce.NewThreatImage(self.manager)
+        add_threat_image_load = pygame.image.load(ImagePaths.THREAT_CREATION.value)
+        add_threat_image.INPUT = add_threat_image_load
+        self.add_threat_image = add_threat_image.draw_image()
+        
+    def _draw_buttons(self):
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.add_threat_button = tce.AddThreatButton(self.manager).draw_button()
 
-        self.threat_entry_name, self.threat_entry_description, self.threat_entry_indicators, \
-            self.threat_entry_countermeasures, self.threat_entry_image_path = threat_element.threat_entry_func(self.manager)
+    def _draw_threat_creation_elements(self):
+        self.new_threat_name = tce.NewThreatName(self.manager).draw_textentrybox()
+        self.new_threat_description = tce.NewThreatDescription(self.manager).draw_textentrybox()
+        self.new_threat_indicators = tce.NewThreatIndicators(self.manager).draw_textentrybox()
+        self.new_threat_countermeasures = tce.NewThreatCountermeasures(self.manager).draw_textentrybox()
+        self.new_threat_image_filename = tce.NewThreatImageFileName(self.manager).draw_textentrybox()
         
     def destroy_elements(self):
-        self.threat_create_image.kill()
+        self.add_threat_image.kill()
         
         self.back_button.kill()
         self.add_threat_button.kill()
 
-        self.threat_entry_name.kill()
-        self.threat_entry_description.kill()
-        self.threat_entry_indicators.kill()
-        self.threat_entry_countermeasures.kill()
-        self.threat_entry_image_path.kill()
+        self.new_threat_name.kill()
+        self.new_threat_description.kill()
+        self.new_threat_indicators.kill()
+        self.new_threat_countermeasures.kill()
+        self.new_threat_image_filename.kill()
         
     def capture_new_threat_details(self):
-        self.state.threat.name = self.threat_entry_name.get_text()
-        self.state.threat.description = self.threat_entry_description.get_text()
-        self.state.threat.indicators = self.threat_entry_indicators.get_text()
-        self.state.threat.countermeasures = self.threat_entry_countermeasures.get_text()
-        self.state.threat.image_path = self.threat_entry_image_path.get_text()
+        self.state.threat.name = self.new_threat_name.get_text()
+        self.state.threat.description = self.new_threat_description.get_text()
+        self.state.threat.indicators = self.new_threat_indicators.get_text()
+        self.state.threat.countermeasures = self.new_threat_countermeasures.get_text()
+        self.state.threat.image_path = self.new_threat_image_filename.get_text()
 
     def display_confirm_window(self):
-        self.state.threat_confirm_window, \
-            self.threat_confirm_close_button = threat_element.threat_confirm_window_func(self.manager)
+        self.state.threat_confirm_window = tce.ConfirmWindow(self.manager).draw_window()
+
+        confirm_label = tce.ConfirmLabel(self.manager)
+        confirm_label.CONTAINER = self.state.threat_confirm_window
+        self.confirm_label = confirm_label.draw_label()
+
+        confirm_button = se.ConfirmButton(self.manager)
+        confirm_button.CONTAINER = self.state.threat_confirm_window
+        self.confirm_button = confirm_button.draw_button()
     
     def refresh_creation_page(self):
-        self.threat_entry_name.set_text("")
-        self.threat_entry_description.set_text("")
-        self.threat_entry_indicators.set_text("")
-        self.threat_entry_countermeasures.set_text("")
-        self.threat_entry_image_path.set_text("") 
+        self.new_threat_name.set_text("")
+        self.new_threat_description.set_text("")
+        self.new_threat_indicators.set_text("")
+        self.new_threat_countermeasures.set_text("")
+        self.new_threat_image_filename.set_text("") 
 
 
 class ThreatCreationEventHandler():
@@ -115,7 +136,7 @@ class ThreatCreationEventHandler():
             return ButtonAction.CREATE
 
         if self.state.threat_confirm_window \
-            and event.ui_element == self.ui.threat_confirm_close_button:
+            and event.ui_element == self.ui.confirm_button:
             return ButtonAction.CONFIRM_CREATE
 
 
@@ -126,8 +147,7 @@ class ThreatCreationController():
         self.cursor = cursor
         self.manager = manager
 
-        self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
+        self.pygame_renderer = PygameRenderer()
         self.window_surface = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 

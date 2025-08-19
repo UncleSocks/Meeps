@@ -235,9 +235,6 @@ class ThreatManagementController():
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
         self.ui.destroy_elements()
         return ButtonAction.CREATE
-        #threat_creation_page = ThreatCreationController(self.state.connect, self.state.cursor)
-        #self.state.threat_name_list  = threat_creation_page.threat_creation_loop()
-        #self.ui.refresh_threat_list(self.state.threat_name_list)
 
     def _handle_delete_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
