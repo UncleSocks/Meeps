@@ -4,13 +4,15 @@ from dataclasses import dataclass
 import pygame
 import pygame_gui
 
+import elements.main_loop_elements as main_loop_elements
+import elements.game_elements.shift_elements as she
+import elements.game_elements.shared_elements as se
 from constants import ButtonAction, StateTracker, \
     ButtonSFX, MusicPaths, MixerChannels, AssetBasePath, \
     Timers, Settings, ImagePaths, DefaultImages
+from init import PygameRenderer
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
-import init
-import elements.main_loop_elements as main_loop_elements
 from queries import SqliteQueries
 
 
@@ -154,14 +156,12 @@ class ShiftUIManager():
     def __init__(self, pygame_manager, state_manager: ShiftStateManager):
         self.manager = pygame_manager
         self.state = state_manager
-        self.build_introduction_ui()
+        self.draw_introduction_elements()
 
-    def build_introduction_ui(self):
-        self.back_button = main_loop_elements.back_button_func(self.manager)
-
-        introduction_text = " The cyberspace has neve been this dangerous."
-        self.state.introduction_page, \
-            self.continue_shift_button = main_loop_elements.introduction_tbox(self.manager, introduction_text)
+    def draw_introduction_elements(self):
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.state.introduction_page = she.IntroductionText(self.manager).draw_textbox()
+        self.continue_shift_button = she.ContinueButton(self.manager).draw_button()
         
     def destroy_introduction_ui(self):
         self.back_button.kill()
@@ -170,68 +170,118 @@ class ShiftUIManager():
 
         self.state.introduction_page = None
 
-    def build_shift_ui(self, threat_list):
-        self.back_button = main_loop_elements.back_button_func(self.manager)
-        self.title_label = main_loop_elements.title_image_func(self.manager, ImagePaths.TITLE.value)
-
-        self.main_sla_timer_label = main_loop_elements.main_sla_timer_label_func(self.manager)
-        self.caller_profile_tbox = main_loop_elements.caller_profile_tbox_func(self.manager)
-
-        self.submit_button = main_loop_elements.submit_button_func(self.manager)
-        self.threat_entry_title_box = main_loop_elements.threat_entry_title_tbox_func(self.manager)
-        self.threat_entry_slist = main_loop_elements.threat_entry_slist_func(self.manager, threat_list)
-
-        self.threat_panel, self.threat_title_tbox, \
-            self.threat_image, self.threat_description_tbox = main_loop_elements.threat_panel_func(self.manager)
-        
-        self.ticket_title_tbox = main_loop_elements.ticket_title_tbox_func(self.manager)
-        self.ticket_entry_tbox = main_loop_elements.ticket_entry_tbox_func(self.manager)
+    def draw_ui_elements(self):
+        self._draw_images()
+        self._draw_buttons()
+        self._draw_shift_elements()
+        self._draw_threat_elements()
         self.caller_profile_image = None
+
+    def _draw_images(self):
+        shift_title_image = she.ShiftTitleImage(self.manager)
+        shift_title_image_load = pygame.image.load(ImagePaths.TITLE.value)
+        shift_title_image.INPUT = shift_title_image_load
+        self.shift_title_image = shift_title_image.draw_image()
+
+    def _draw_buttons(self):
+        self.back_button = se.BackButton(self.manager).draw_button()
+        self.submit_button = she.SubmitButton(self.manager).draw_button()
+
+    def _draw_shift_elements(self):
+        self.ticket_sla_timer_label = she.TicketSLATimerLabel(self.manager).draw_label()
+        self.caller_information = she.CallerInformation(self.manager).draw_textbox()
+
+        self.threat_list_title = she.ThreatListTitle(self.manager).draw_textbox()
+        threat_selection_list = she.ThreatList(self.manager)
+        threat_selection_list.INPUT = self.state.threat_list
+        self.threat_selection_list = threat_selection_list.draw_selectionlist()
+
+        self.ticket_title = she.TicketTitle(self.manager).draw_textbox()
+        self.ticket_information = she.TicketInformation(self.manager).draw_textbox()
+
+    def _draw_threat_elements(self):
+        self.threat_information_panel = she.ThreatPanel(self.manager).draw_panel()
+
+        threat_title = she.ThreatTitle(self.manager)
+        threat_title.CONTAINER = self.threat_information_panel
+        self.threat_title = threat_title.draw_textbox()
+
+        threat_image = she.ThreatImage(self.manager)
+        threat_image_load = pygame.image.load(DefaultImages.BLANK.value)
+        threat_image.INPUT = threat_image_load
+        threat_image.CONTAINER = self.threat_information_panel
+        self.threat_image = threat_image.draw_image()
+
+        threat_information = she.ThreatInformation(self.manager)
+        threat_information.CONTAINER = self.threat_information_panel
+        self.threat_information = threat_information.draw_textbox()
 
     def destroy_elements(self):
         self.back_button.kill()
-        self.title_label.kill()
+        self.shift_title_image.kill()
 
-        self.main_sla_timer_label.kill()
-        self.caller_profile_tbox .kill()
+        self.ticket_sla_timer_label.kill()
+        self.caller_information .kill()
 
         self.submit_button.kill()
-        self.threat_entry_title_box.kill()
-        self.threat_entry_slist.kill()
+        self.threat_list_title.kill()
+        self.threat_selection_list.kill()
 
-        self.threat_panel.kill()
-        self.threat_title_tbox.kill()
+        self.threat_information_panel.kill()
+        self.threat_title.kill()
         self.threat_image.kill()
-        self.threat_description_tbox.kill()
+        self.threat_information.kill()
         
-        self.ticket_title_tbox.kill()
-        self.ticket_entry_tbox.kill()
+        self.ticket_title.kill()
+        self.ticket_information.kill()
 
         self.state.popup_window.kill() if self.state.popup_window else None
         self.caller_profile_image.kill() if self.caller_profile_image else None
 
     def display_ticket(self, ticket_id, ticket):
-        self.ticket_title_tbox.set_text(f'<b>ID#{ticket_id} | {ticket.title}</b>')
-        self.ticket_entry_tbox.set_text(ticket.entry)
-
-        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, ticket.account_picture])
-        self.caller_profile_image = main_loop_elements.caller_profile_image_func(self.manager, account_picture_path)
-        self.caller_profile_tbox.set_text(
+        self.ticket_title.set_text(f'<b>ID#{ticket_id} | {ticket.title}</b>')
+        self.ticket_information.set_text(ticket.entry)
+        
+        self._display_caller_image(ticket)
+        self.caller_information.set_text(
             f'Name: {ticket.account}\n'
             f'Organization: {ticket.account_organization}\n'
             f'Email: {ticket.account_email}\n'
             f'Contact: {ticket.account_contact}'
         )
 
+    def _display_caller_image(self, ticket):
+        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, ticket.account_picture])
+        caller_profile_image = she.CallerProfileImagee(self.manager)
+
+        try:
+            load_caller_profile_image = pygame.image.load(account_picture_path)
+        except (pygame.error, FileNotFoundError):
+            load_caller_profile_image = pygame.image.load(DefaultImages.GUEST_ACCOUNT.value)
+        
+        caller_profile_image.INPUT = load_caller_profile_image
+        self.caller_profile_image = caller_profile_image.draw_image()
+
     def display_popup_window(self):
-        self.state.popup_window, self.popup_accept_button, \
-            self.popup_countdown = main_loop_elements.caller_popup_window_func(self.manager)
+        self.state.popup_window = she.CallerPopupWindow(self.manager).draw_window()
+
+        popup_window_label = she.CallerPopupWindowLabel(self.manager)
+        popup_window_label.CONTAINER = self.state.popup_window
+        self.popup_window_label = popup_window_label.draw_label()
+        
+        popup_countdown = she.CallerPopupWindowSLA(self.manager)
+        popup_countdown.CONTAINER = self.state.popup_window
+        self.popup_countdown = popup_countdown.draw_label()
+
+        answer_button = she.AnswerButton(self.manager)
+        answer_button.CONTAINER = self.state.popup_window
+        self.answer_button = answer_button.draw_button()
         
     def refresh_ticket(self):
-        self.ticket_title_tbox.set_text("")
-        self.ticket_entry_tbox.set_text("AWAITING TICKET...")
-        self.caller_profile_tbox.set_text("NO CALLER")
-        self.main_sla_timer_label.set_text("SLA: ")
+        self.ticket_title.set_text("")
+        self.ticket_information.set_text("AWAITING TICKET...")
+        self.caller_information.set_text("NO CALLER")
+        self.ticket_sla_timer_label.set_text("SLA: ")
         self.caller_profile_image.kill()
 
 
@@ -300,7 +350,7 @@ class CountdownManager():
 
     def ticket_sla_countdown(self, time_delta):
         ticket_sla_difference = self.state.max_ticket_sla - self.state.ticket_sla_timer
-        self.ui.main_sla_timer_label.set_text('SLA: {:.1f}'.format(max(0, ticket_sla_difference)))                            
+        self.ui.ticket_sla_timer_label.set_text('SLA: {:.1f}'.format(max(0, ticket_sla_difference)))                            
         self.state.ticket_sla_timer += time_delta
 
         if ticket_sla_difference <= 0:
@@ -346,8 +396,8 @@ class ShiftEventHandler():
         threat = self.state.fetch_threat_details()
 
         self._load_threat_image(threat.image)
-        self.ui.threat_title_tbox.set_text(f"<b>{threat.name.upper()}</b>")
-        self.ui.threat_description_tbox.set_text(
+        self.ui.threat_title.set_text(f"<b>{threat.name.upper()}</b>")
+        self.ui.threat_information.set_text(
             f"<b>Description</b>:\n{threat.description}\n"
             f"<b>Indicators:\n</b>{threat.indicators}\n"
             f"<b>Countermeasures:</b>\n{threat.countermeasures}"
@@ -372,7 +422,7 @@ class ShiftEventHandler():
         if self.state.introduction_page and event.ui_element == self.ui.continue_shift_button:
             return ButtonAction.CONTINUE
         
-        if self.state.popup_window and event.ui_element == self.ui.popup_accept_button:
+        if self.state.popup_window and event.ui_element == self.ui.answer_button:
             return ButtonAction.ANSWER
         
         if event.ui_element == self.ui.submit_button and self.state.ticket_present \
@@ -387,8 +437,7 @@ class ShiftController():
         self.cursor = cursor
         self.manager = manager
 
-        self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
+        self.pygame_renderer = PygameRenderer()
         self.window_surface = self.pygame_renderer.window_surface
 
         self.state = ShiftStateManager(self.connect, self.cursor)
@@ -400,7 +449,6 @@ class ShiftController():
     def game_loop(self, events):
         time_delta = self.pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
         self.state.ticket_generate_timer += time_delta
-        #events = pygame.event.get()
 
         for event in events:
             action = self._handle_events(event)
@@ -433,7 +481,7 @@ class ShiftController():
             pygame.quit()
 
         if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION \
-            and event.ui_element == self.ui.threat_entry_slist:
+            and event.ui_element == self.ui.threat_selection_list:
             selected_threat = event.text
             self.event_handler.handle_threat_selection(selected_threat)
 
@@ -458,7 +506,7 @@ class ShiftController():
     
     def _handle_continue_action(self):
         self.ui.destroy_introduction_ui()
-        self.ui.build_shift_ui(self.state.threat_list)
+        self.ui.draw_ui_elements()
 
     def _handle_answer_action(self):
         generate_ticket = GenerateTicket(self.manager, self.state, self.ui, self.sound)

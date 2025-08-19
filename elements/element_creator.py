@@ -44,6 +44,15 @@ class DrawElement:
             object_id=self.OBJECT_ID
         )
     
+    def draw_panel(self):
+        return pygame_gui.elements.UIPanel(
+            manager=self.manager,
+            relative_rect=self.dimension,
+            anchors=self.ANCHOR,
+            container=self.CONTAINER,
+            object_id=self.OBJECT_ID
+        )
+    
     def draw_button(self):
         return pygame_gui.elements.UIButton(
             manager=self.manager,

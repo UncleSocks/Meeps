@@ -70,7 +70,7 @@ def caller_profile_tbox_func(manager):
                                                         manager=manager)
     return caller_profile_tbox
 
-
+#NOT YET DONE HERE:
 def caller_profile_image_func(manager, image_path):
 
     caller_profile_image_rect = pygame.Rect(18, 180, 98, 98)

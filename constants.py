@@ -70,6 +70,7 @@ class ImagePaths(Enum):
 class DefaultImages(Enum):
     THREAT = 'assets/images/threats/default.png'
     GUEST_ACCOUNT = 'assets/images/accounts/guest.png'
+    BLANK = 'assets/images/general/blank.png'
 
 
 class MusicPaths(Enum):
