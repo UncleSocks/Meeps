@@ -50,3 +50,20 @@ class ThreatCountermeasures(DrawElement):
 class ThreatImageFileName(DrawElement):
     POS = Position(375, 610, 405, 30)
     INPUT = "THREAT IMAGE FILENAME"
+
+
+class DeleteConfirmWindow(DrawElement):
+    POS = Position(0, 0, 400, 200)
+    INPUT = "Meeps Security: Delete Threat"
+
+
+class DeleteConfirmLabel(DrawElement):
+    POS = Position(0, -10, 300, 200)
+    INPUT = "Delete selected threat?"
+    ANCHOR = {'center':'center'}
+
+
+class DeleteConfirmWarningLabel(DrawElement):
+    POS = Position(0, -40, 350, 200)
+    INPUT = "[!] This will delete associated tickets."
+    ANCHOR = {'center':'center'}

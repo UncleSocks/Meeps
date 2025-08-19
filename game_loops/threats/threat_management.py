@@ -3,12 +3,11 @@ import pygame_gui
 from typing import Optional
 from dataclasses import dataclass
 
-import init
-import elements.threats_elements as threat_element
 import elements.game_elements.threat_elements.threat_management_elements as tme
 import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
+from init import PygameRenderer
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
 
@@ -120,8 +119,23 @@ class ThreatUIManager():
         self.threat_image_filename.set_text(f"{threat.image_file}")
         
     def display_confirm_window(self):
-        self.state.threat_delete_confirm_window, self.threat_delete_confirm_yes_button, \
-            self.threat_delete_confirm_no_button = threat_element.threat_delete_confirm_window_func(self.manager)
+        self.state.threat_delete_confirm_window = tme.DeleteConfirmWindow(self.manager).draw_window()
+
+        confirm_delete_label = tme.DeleteConfirmLabel(self.manager)
+        confirm_delete_label.CONTAINER = self.state.threat_delete_confirm_window
+        self.confirm_delete_label = confirm_delete_label.draw_label()
+
+        confirm_delete_warning_label = tme.DeleteConfirmWarningLabel(self.manager)
+        confirm_delete_warning_label.CONTAINER = self.state.threat_delete_confirm_window
+        self.confirm_delete_warning_label = confirm_delete_warning_label.draw_label()
+        
+        confirm_delete_yes_button = se.DeleteYesButton(self.manager)
+        confirm_delete_yes_button.CONTAINER = self.state.threat_delete_confirm_window
+        self.confirm_yes_button = confirm_delete_yes_button.draw_button()
+
+        confirm_delete_no_button = se.DeleteNoButton(self.manager)
+        confirm_delete_no_button.CONTAINER = self.state.threat_delete_confirm_window
+        self.confirm_delete_no_button = confirm_delete_no_button.draw_button()
         
     def refresh_threat_list(self, updated_threat_list):
         self.threat_selection_list.set_item_list(updated_threat_list)
@@ -155,10 +169,10 @@ class ThreatEventHandler():
         if event.ui_element == self.ui.delete_button and self.state.selected_threat is not None:
             return ButtonAction.DELETE
 
-        if self.state.threat_delete_confirm_window and event.ui_element == self.ui.threat_delete_confirm_yes_button:
+        if self.state.threat_delete_confirm_window and event.ui_element == self.ui.confirm_yes_button:
             return ButtonAction.CONFIRM_DELETE
 
-        if self.state.threat_delete_confirm_window and event.ui_element == self.ui.threat_delete_confirm_no_button:
+        if self.state.threat_delete_confirm_window and event.ui_element == self.ui.confirm_delete_no_button:
             return ButtonAction.CANCEL_DELETE
 
 
@@ -169,8 +183,7 @@ class ThreatManagementController():
         self.cursor = cursor
         self.manager = manager
 
-        self.pygame_renderer = init.PygameRenderer()
-        #self.manager = self.pygame_renderer.manager
+        self.pygame_renderer = PygameRenderer()
         self.window_surface = self.pygame_renderer.window_surface
         self.button_sfx = ButtonSoundManager()
 
