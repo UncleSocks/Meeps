@@ -95,22 +95,6 @@ class TicketUIManager():
         self.account_details_label = tme.AccountLabel(self.manager).draw_label()
         self.account_description = tme.AccountDescriptionTextBox(self.manager).draw_textbox()
 
-    def destroy_elements(self):
-        self.back_button.kill()
-        self.ticket_manager_image.kill()
-        self.ticket_details_label.kill()
-
-        self.create_button.kill()
-        self.delete_button.kill()
-
-        self.ticket_entry_title_tbox.kill()
-        self.ticket_selection_list.kill()
-        self.ticket_title.kill()
-        self.ticket_description.kill()
-
-        self.account_details_label.kill()
-        self.account_description.kill()
-
     def display_confirm_window(self):
         self.state.ticket_delete_confirm_window = tme.DeleteConfirmWindow(self.manager).draw_window()
 
@@ -233,7 +217,7 @@ class TicketManagementController():
     
     def _handle_create_action(self):
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.CREATE
 
     def _handle_delete_action(self):
@@ -253,5 +237,5 @@ class TicketManagementController():
 
     def _handle_exit_action(self):
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

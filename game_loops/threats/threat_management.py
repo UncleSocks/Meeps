@@ -95,21 +95,6 @@ class ThreatUIManager():
         self.threat_indicators = tme.ThreatIndicators(self.manager).draw_textbox()
         self.threat_countermeasures = tme.ThreatCountermeasures(self.manager).draw_textbox()
         self.threat_image_filename = tme.ThreatImageFileName(self.manager).draw_textbox()
-
-    def destroy_elements(self):
-        self.back_button.kill()
-        self.create_button.kill()
-        self.delete_button.kill()
-
-        self.threat_manager_image.kill()
-        self.threat_selection_list_title.kill()
-        self.threat_selection_list.kill()
-        self.threat_details_label.kill()
-        self.threat_title.kill()
-        self.threat_description.kill()
-        self.threat_indicators.kill()
-        self.threat_countermeasures.kill()
-        self.threat_image_filename.kill()
         
     def set_threat_details(self, threat: ThreatDetails) -> None:
         self.threat_title.set_text(f"<b>{threat.name}</b>")
@@ -233,7 +218,7 @@ class ThreatManagementController():
     
     def _handle_create_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.CREATE
 
     def _handle_delete_action(self) -> None:
@@ -253,5 +238,5 @@ class ThreatManagementController():
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

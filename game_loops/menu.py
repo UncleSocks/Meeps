@@ -119,6 +119,6 @@ class MenuController():
     
     def _handle_button_action(self, button_event):
         self.button_sfx.play_sfx(ButtonSFX.MENU_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         action = button_event
         return action

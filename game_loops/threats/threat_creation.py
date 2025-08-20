@@ -83,18 +83,6 @@ class ThreatCreationUIManager():
         self.new_threat_countermeasures = tce.NewThreatCountermeasures(self.manager).draw_textentrybox()
         self.new_threat_image_filename = tce.NewThreatImageFileName(self.manager).draw_textentrybox()
         
-    def destroy_elements(self):
-        self.add_threat_image.kill()
-        
-        self.back_button.kill()
-        self.add_threat_button.kill()
-
-        self.new_threat_name.kill()
-        self.new_threat_description.kill()
-        self.new_threat_indicators.kill()
-        self.new_threat_countermeasures.kill()
-        self.new_threat_image_filename.kill()
-        
     def capture_new_threat_details(self):
         self.state.threat.name = self.new_threat_name.get_text()
         self.state.threat.description = self.new_threat_description.get_text()
@@ -206,5 +194,5 @@ class ThreatCreationController():
 
     def _handle_exit_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

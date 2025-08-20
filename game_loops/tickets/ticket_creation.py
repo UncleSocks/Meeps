@@ -139,20 +139,6 @@ class TicketCreationUIManager():
         threat_selection_list = tce.ThreatList(self.manager)
         threat_selection_list.INPUT = self.state.threat_list
         self.threat_selection_list = threat_selection_list.draw_selectionlist()
-        
-    def destroy_elements(self):
-        self.back_button.kill()
-        self.add_ticket_image.kill()
-        self.new_ticket_title.kill()
-        self.new_ticket_description.kill()
-
-        self.threat_description.kill()
-        self.add_button.kill()
-        self.threat_list_textbox.kill()
-        self.threat_selection_list.kill()
-        
-        self.account_dropdown_label.kill()
-        self.account_dropdown.kill()
 
     def capture_new_ticket_details(self):
         self.state.ticket.title = self.new_ticket_title.get_text()
@@ -290,5 +276,5 @@ class TicketCreationController():
     
     def _handle_exit_action(self):
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

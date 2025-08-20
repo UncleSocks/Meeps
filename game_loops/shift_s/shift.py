@@ -38,7 +38,7 @@ class ThreatDetails:
     image: str = ""
 
 
-class ShiftStateManager():
+class ShiftStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -149,7 +149,7 @@ class ShiftStateManager():
         self.selected_ticket_id = self.ticket_id_list.pop(0)
     
 
-class ShiftUIManager():
+class ShiftUIManager:
 
     def __init__(self, pygame_manager, state_manager: ShiftStateManager):
         self.manager = pygame_manager
@@ -160,12 +160,6 @@ class ShiftUIManager():
         self.back_button = se.BackButton(self.manager).draw_button()
         self.state.introduction_page = she.IntroductionText(self.manager).draw_textbox()
         self.continue_shift_button = she.ContinueButton(self.manager).draw_button()
-        
-    def destroy_introduction_elements(self):
-        self.back_button.kill()
-        self.state.introduction_page.kill()
-        self.continue_shift_button.kill()
-        self.state.introduction_page = None
 
     def draw_ui_elements(self):
         self._draw_images()
@@ -212,28 +206,6 @@ class ShiftUIManager():
         threat_information = she.ThreatInformation(self.manager)
         threat_information.CONTAINER = self.threat_information_panel
         self.threat_information = threat_information.draw_textbox()
-
-    def destroy_elements(self):
-        self.back_button.kill()
-        self.shift_title_image.kill()
-
-        self.ticket_sla_timer_label.kill()
-        self.caller_information .kill()
-
-        self.submit_button.kill()
-        self.threat_list_title.kill()
-        self.threat_selection_list.kill()
-
-        self.threat_information_panel.kill()
-        self.threat_title.kill()
-        self.threat_image.kill()
-        self.threat_information.kill()
-        
-        self.ticket_title.kill()
-        self.ticket_information.kill()
-
-        self.state.popup_window.kill() if self.state.popup_window else None
-        self.caller_profile_image.kill() if self.caller_profile_image else None
 
     def display_ticket(self, ticket_id, ticket):
         self.ticket_title.set_text(f'<b>ID#{ticket_id} | {ticket.title}</b>')
@@ -282,7 +254,7 @@ class ShiftUIManager():
         self.caller_profile_image.kill()
 
 
-class ShiftSoundController():
+class ShiftSoundController:
 
     def __init__(self, state_manager: ShiftStateManager):
         self.state = state_manager
@@ -313,11 +285,10 @@ class ShiftSoundController():
         pygame.mixer.music.unload()
 
 
-class GenerateTicket():
+class GenerateTicket:
 
-    def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
+    def __init__(self, state_manager: ShiftStateManager, 
                  ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
-        self.manager = pygame_manager
         self.state = state_manager
         self.ui = ui_manager
         self.sound = sound_controller
@@ -336,7 +307,13 @@ class GenerateTicket():
         self.state.popup_window.kill()
 
 
-class CountdownManager():
+class GenerateReport:
+
+    def __init__(self, state_manager: ShiftStateManager):
+        self.state = state_manager
+
+
+class CountdownManager:
 
     def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
                  ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
@@ -375,7 +352,7 @@ class CountdownManager():
         self.sound.call_sfx.stop_loop()
 
 
-class ShiftEventHandler():
+class ShiftEventHandler:
 
     def __init__(self, pygame_manager, state_manager: ShiftStateManager, 
                  ui_manager: ShiftUIManager, sound_controller: ShiftSoundController):
@@ -427,7 +404,7 @@ class ShiftEventHandler():
             return ButtonAction.SUBMIT
     
 
-class ShiftController():
+class ShiftController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect
@@ -445,7 +422,8 @@ class ShiftController():
 
     def game_loop(self, events):
         time_delta = self.pygame_renderer.clock.tick(Settings.FPS.value) / Settings.MS_PER_SECOND.value
-        self.state.ticket_generate_timer += time_delta
+        if self.state.introduction_page is None:
+            self.state.ticket_generate_timer += time_delta
 
         for event in events:
             action = self._handle_events(event)
@@ -455,7 +433,8 @@ class ShiftController():
 
         if self.state.ticket_generate_timer >= self.state.ticket_interval \
             and self.state.ticket_id_list and not self.state.ticket_present \
-                and self.state.popup_window is None:
+                and self.state.popup_window is None \
+                    and self.state.introduction_page is None:
             self._handle_incoming_call()
 
         if self.state.popup_window:
@@ -502,11 +481,12 @@ class ShiftController():
         return True
     
     def _handle_continue_action(self):
-        self.ui.destroy_introduction_elements()
+        self.manager.clear_and_reset()
+        self.state.introduction_page = None
         self.ui.draw_ui_elements()
 
     def _handle_answer_action(self):
-        generate_ticket = GenerateTicket(self.manager, self.state, self.ui, self.sound)
+        generate_ticket = GenerateTicket(self.state, self.ui, self.sound)
         generate_ticket.generate_ticket()
     
     def _handle_submit_action(self):
@@ -529,9 +509,5 @@ class ShiftController():
         self.sound.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
         self.sound.end_shift_music()
         self.sound.call_sfx.stop_loop()
-
-        if self.state.introduction_page:
-            self.ui.destroy_introduction_elements()
-        else:
-            self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

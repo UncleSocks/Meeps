@@ -79,38 +79,15 @@ class AccountCreationUIManager():
     def _draw_account_creation_elements(self):
         self.account_name_label = ace.NewAccountNameLabel(self.manager).draw_label()
         self.account_name_entry = ace.NewAccountNameTextEntry(self.manager).draw_textentrybox()
-        
         self.account_organization_label = ace.NewAccountOrganizationLabel(self.manager).draw_label()
         self.account_organization_entry = ace.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
-
         self.account_email_label = ace.NewAccountEmailLabel(self.manager).draw_label()
         self.account_email_entry = ace.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
-
         self.account_contact_label = ace.NewAccountContactLabel(self.manager).draw_label()
         self.account_contact_entry = ace.NewAccountContactTextEntry(self.manager).draw_textentrybox()
-
         self.account_picture_file_label = ace.NewAccountPictureFileLabel(self.manager).draw_label()
         self.account_picture_file = ace.NewAccountPictureFileTextEntry(self.manager).draw_textentrybox()
-
         self.account_picture_border = ace.NewAccountPictureBorder(self.manager).draw_textentrybox()
-        self.account_picture = None
-
-    def destroy_elements(self):
-        self.add_account_image.kill()
-        self.back_button.kill()
-        self.add_account_button.kill()
-        self.account_name_label.kill()
-        self.account_name_entry.kill()
-        self.account_organization_label.kill()
-        self.account_organization_entry.kill()
-        self.account_email_label.kill()
-        self.account_email_entry.kill()
-        self.account_contact_label.kill()
-        self.account_contact_entry.kill()
-        self.account_picture_file_label.kill()
-        self.account_picture_file.kill()
-        self.account_picture_border.kill()
-        self.account_picture.kill() if self.account_picture else None
 
     def capture_new_account_details(self):
         self.state.account.name = self.account_name_entry.get_text()
@@ -236,5 +213,5 @@ class AccountCreationController():
 
     def _handle_exit_action(self):
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT

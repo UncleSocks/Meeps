@@ -107,18 +107,6 @@ class AccountUIManager:
         ticket_selection_list.INPUT = self.state.assigned_ticket_list
         self.ticket_selection_list = ticket_selection_list.draw_selectionlist()
 
-    def destroy_ui_elements(self):
-        self.account_manager_image.kill()
-        self.back_button.kill()
-        self.create_button.kill()
-        self.delete_button.kill()
-        self.account_entry_title_tbox.kill()
-        self.account_selection_list.kill()
-        self.account_details_label.kill()
-        self.selected_account_description.kill()
-        self.assigned_ticket_label.kill()
-        self.ticket_selection_list.kill()
-
     def format_account_details(self, account: AccountDetails) -> str:
         formatted_account_details = (
             f"<b>Name:</b> {account.name}\n"
@@ -269,7 +257,7 @@ class AccountManagementController:
     
     def _handle_create_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.MODIFY_BUTTON)
-        self.ui.destroy_ui_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.CREATE
     
     def _handle_delete_action(self) -> None:
@@ -295,5 +283,5 @@ class AccountManagementController:
 
     def _handle_exit_action(self) -> False:
         self.button_sfx.play_sfx(ButtonSFX.BACK_BUTTON)
-        self.ui.destroy_ui_elements()
+        self.manager.clear_and_reset()
         return ButtonAction.EXIT
