@@ -14,7 +14,7 @@ class WindowConfig(Enum):
     WIDTH = 800
     HEIGHT = 650
     CAPTION = "Meeps_Security_Responder.exe"
-    ICON = 'assets/images/general/icon.png'
+    ICON = 'assets/images/static/icon.png'
     THEME = 'theme.json'
     BACKGROUND = 0,0,0 #RGB values for black.
 
@@ -50,29 +50,29 @@ class ButtonAction(Enum):
 
 
 class Timers(Enum):
-    MIN_CALL_INTERVAL = 1
-    MAX_CALL_INTERVAL = 3
+    MIN_CALL_INTERVAL = 5
+    MAX_CALL_INTERVAL = 12
 
 
 class AssetBasePath(Enum):
-    THREAT_ASSETS = 'assets/images/threats/'
-    ACCOUNT_ASSETS = 'assets/images/accounts/'
+    THREAT_ASSETS = 'usrdat/threats/'
+    ACCOUNT_ASSETS = 'usrdat/accounts/'
 
 
 class ImagePaths(Enum):
-    TITLE = 'assets/images/general/title.png'
-    TICKET_MANAGEMENT = 'assets/images/general/ticket_mngr.png'
-    TICKET_CREATION = 'assets/images/general/new_ticket.png'
-    THREAT_MANAGEMENT = 'assets/images/general/threat_database.png'
-    THREAT_CREATION = 'assets/images/general/add_threat.png'
-    ACCOUNT_MANAGEMENT = 'assets/images/general/account_manager.png'
-    ACCOUNT_CREATION = 'assets/images/general/add_account.png'
+    TITLE = 'assets/images/static/title.png'
+    TICKET_MANAGEMENT = 'assets/images/static/ticket_mngr.png'
+    TICKET_CREATION = 'assets/images/static/new_ticket.png'
+    THREAT_MANAGEMENT = 'assets/images/static/threat_database.png'
+    THREAT_CREATION = 'assets/images/static/add_threat.png'
+    ACCOUNT_MANAGEMENT = 'assets/images/static/account_manager.png'
+    ACCOUNT_CREATION = 'assets/images/static/add_account.png'
 
 
 class DefaultImages(Enum):
-    THREAT = 'assets/images/threats/default.png'
-    GUEST_ACCOUNT = 'assets/images/accounts/guest.png'
-    BLANK = 'assets/images/general/blank.png'
+    THREAT = 'assets/images/default/threat.png'
+    GUEST_ACCOUNT = 'assets/images/default/guest.png'
+    BLANK = 'assets/images/static/blank.png'
 
 
 class MusicPaths(Enum):
