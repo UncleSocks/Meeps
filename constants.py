@@ -22,6 +22,7 @@ class WindowConfig(Enum):
 class StateTracker(Enum):
     MAIN_MENU = 'main_menu'
     SHIFT = 'shift'
+    SHIFT_REPORT = 'shift_report'
     TICKET_MANAGEMENT = 'ticket_management'
     TICKET_CREATION = 'ticket_creation'
     ACCOUNT_MANAGEMENT = 'account_management'
@@ -45,11 +46,12 @@ class ButtonAction(Enum):
     CONFIRM_DELETE = 'confirm_delete'
     CANCEL_DELETE = 'cancel_delete'
     CONTINUE = 'continue'
+    SHIFT_REPORT = 'shift_report'
 
 
 class Timers(Enum):
-    MIN_CALL_INTERVAL = 5
-    MAX_CALL_INTERVAL = 12
+    MIN_CALL_INTERVAL = 1
+    MAX_CALL_INTERVAL = 3
 
 
 class AssetBasePath(Enum):

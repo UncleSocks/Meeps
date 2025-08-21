@@ -112,3 +112,20 @@ class AnswerButton(DrawElement):
     ANCHOR = {'left':'left', 'bottom':'bottom'}
     ANCHOR_CONFIG = AnchorConfig.BOTTOMLEFT
     ANCHOR_POS = Offset(15, -10)
+
+
+class EndShiftLabel(DrawElement):
+    POS = Position(0, 170, 100, 60)
+    INPUT = "SHIFT REPORT"
+    ANCHOR = {'centerx':'centerx'}
+
+
+class EndShiftTextBox(DrawElement):
+    POS = Position(0, 0, 300, 230)
+    ANCHOR = {'center':'center'}
+
+
+class EndShiftButton(DrawElement):
+    POS = Position(0, -210, 300, 40)
+    INPUT = "END SHIFT"
+    ANCHOR = {'centerx':'centerx', 'bottom':'bottom'}

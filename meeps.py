@@ -3,7 +3,7 @@ import pygame
 from init import database_init, PygameRenderer
 from constants import Settings, StateTracker
 from game_loops.menu import MenuController
-from game_loops.shift_s.shift import ShiftController
+from game_loops.shift import ShiftController
 from game_loops.tickets.ticket_management import TicketManagementController
 from game_loops.tickets.ticket_creation import TicketCreationController
 from game_loops.accounts.account_management import AccountManagementController
