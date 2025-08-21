@@ -5,7 +5,7 @@ from enum import Enum
 
 class Settings(Enum):
     VERSION = 'v2025.1.0 BETA'
-    DATABASE = 'usrdat/data.db'
+    DATABASE = 'data/data.db'
     FPS = 60
     MS_PER_SECOND = 1000
 
@@ -55,8 +55,8 @@ class Timers(Enum):
 
 
 class AssetBasePath(Enum):
-    THREAT_ASSETS = 'usrdat/images/threats/'
-    ACCOUNT_ASSETS = 'usrdat/images/accounts/'
+    THREAT_ASSETS = 'data/images/threats/'
+    ACCOUNT_ASSETS = 'data/images/accounts/'
 
 
 class ImagePaths(Enum):
