@@ -5,7 +5,7 @@ from enum import Enum
 
 class Settings(Enum):
     VERSION = 'v2025.1.0 BETA'
-    DATABASE = 'data.db'
+    DATABASE = 'usrdat/data.db'
     FPS = 60
     MS_PER_SECOND = 1000
 
