@@ -81,7 +81,7 @@ class TicketCreationStateManager():
         return ticket_id
     
     def _generate_ticket_transcript(self):
-        ticket_transcript_filename = f'assets/sounds/{self.ticket.id}_transcript.wav'
+        ticket_transcript_filename = f'assets/sounds/transcripts/{self.ticket.id}_transcript.wav'
         self.transcript_engine.save_to_file(self.ticket.entry, ticket_transcript_filename)
         self.transcript_engine.runAndWait()
         return ticket_transcript_filename
