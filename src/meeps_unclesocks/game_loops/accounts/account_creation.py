@@ -207,6 +207,7 @@ class AccountCreationController():
         self.ui.display_confirm_window()
 
     def _handle_confirm_button(self) -> None:
+        self.button_sfx.play_sfx(ButtonSFX.CONFIRM_BUTTON)
         self.ui.refresh_creation_page()
         self.state.confirm_window.kill()
         self.state.account = AccountDetails()

@@ -76,18 +76,19 @@ class DefaultImages(Enum):
 
 
 class MusicPaths(Enum):
-    BACKGROUND_MUSIC = 'assets/sounds/background2.mp3'
-    INCOMING_CALL = 'assets/sounds/incoming_call_2.mp3'
+    BACKGROUND_MUSIC = 'assets/sounds/music/background.mp3'
+    INCOMING_CALL = 'assets/sounds/music/incoming_call.mp3'
 
 
 class SFXPath(Enum):
-    BACK_BUTTON = 'assets/sounds/back_button.mp3'
-    MENU_BUTTON = 'assets/sounds/menu_button.mp3'
-    MODIFY_BUTTON = 'assets/sounds/add_button.mp3'
-    DELETE_BUTTON = 'assets/sounds/delete_button.mp3'
-    LIST_BUTTON = 'assets/sounds/list_click2.mp3'
-    CORRECT_SUBMISSION = 'assets/sounds/correct_submit.mp3'
-    INCORRECT_SUBMISSION = 'assets/sounds/incorrect_submit.mp3'
+    BACK_BUTTON = 'assets/sounds/sfx/back_button.mp3'
+    MENU_BUTTON = 'assets/sounds/sfx/menu_button.mp3'
+    MODIFY_BUTTON = 'assets/sounds/sfx/modify_button.mp3'
+    DELETE_BUTTON = 'assets/sounds/sfx/delete_button.mp3'
+    CONFIRM_BUTTON = 'assets/sounds/sfx/confirm_button.mp3'
+    LIST_BUTTON = 'assets/sounds/sfx/list_click.mp3'
+    CORRECT_SUBMISSION = 'assets/sounds/sfx/correct_submit.mp3'
+    INCORRECT_SUBMISSION = 'assets/sounds/sfx/incorrect_submit.mp3'
 
 
 class MixerChannels(Enum):
@@ -100,6 +101,7 @@ class ButtonSFX(Enum):
     MENU_BUTTON = 'menu_button'
     MODIFY_BUTTON = 'modify_button'
     DELETE_BUTTON = 'delete_button'
+    CONFIRM_BUTTON = 'confirm_button'
     LIST_BUTTON = 'list_button'
     CORRECT_SUBMISSION = 'correct_submission'
     INCORRECT_SUBMISSION = 'incorrect_submission'
