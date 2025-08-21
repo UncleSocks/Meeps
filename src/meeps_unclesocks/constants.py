@@ -55,8 +55,8 @@ class Timers(Enum):
 
 
 class AssetBasePath(Enum):
-    THREAT_ASSETS = 'usrdat/threats/'
-    ACCOUNT_ASSETS = 'usrdat/accounts/'
+    THREAT_ASSETS = 'usrdat/images/threats/'
+    ACCOUNT_ASSETS = 'usrdat/images/accounts/'
 
 
 class ImagePaths(Enum):
