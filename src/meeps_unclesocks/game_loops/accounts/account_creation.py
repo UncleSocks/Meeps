@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, DefaultImages, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import DatabaseQueries
+from db_manager import DatabaseQueries
 
 
 

@@ -9,7 +9,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import DatabaseQueries
+from db_manager import DatabaseQueries, DatabaseRemovals
 
 
 
@@ -29,6 +29,7 @@ class ThreatStateManager():
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
+        self.delete = DatabaseRemovals(self.cursor, self.connect)
         self.threat_variables()
     
     def threat_variables(self) -> None:
@@ -54,9 +55,7 @@ class ThreatStateManager():
     
     def delete_selected_threat(self) -> None:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        self.cursor.execute('DELETE FROM tickets WHERE threat_id=?', [selected_threat_id])
-        self.cursor.execute('DELETE FROM threats WHERE id=?', [selected_threat_id])
-        self.connect.commit()
+        self.delete.delete_threat(selected_threat_id)
     
 
 class ThreatUIManager():

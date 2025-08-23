@@ -9,7 +9,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import DatabaseQueries
+from db_manager import DatabaseQueries, DatabaseRemovals
 
 
 
@@ -29,6 +29,7 @@ class AccountStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
+        self.delete = DatabaseRemovals(self.cursor, self.connect)
         self.account_variables()
 
     def account_variables(self) -> None:
@@ -62,9 +63,7 @@ class AccountStateManager:
     
     def delete_selected_account(self) -> None:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        self.cursor.execute('DELETE FROM accounts WHERE id=?', [selected_account_id])        
-        self.cursor.execute('DELETE FROM tickets WHERE caller_id=?', [selected_account_id])
-        self.connect.commit()
+        self.delete.delete_account(selected_account_id)
     
 
 class AccountUIManager:

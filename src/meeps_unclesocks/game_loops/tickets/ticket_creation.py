@@ -9,7 +9,7 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
 from sound_manager import ButtonSoundManager
-from queries import DatabaseQueries
+from db_manager import DatabaseQueries
 
 
 

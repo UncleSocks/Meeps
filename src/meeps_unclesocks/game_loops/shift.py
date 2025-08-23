@@ -12,7 +12,7 @@ from constants import ButtonAction, StateTracker, \
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
-from queries import DatabaseQueries
+from db_manager import DatabaseQueries
 
 
 

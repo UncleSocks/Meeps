@@ -96,3 +96,29 @@ class DatabaseQueries:
     def fetch_assigned_tickets(self, account_id):
         query = 'SELECT title FROM tickets WHERE caller_id=?'
         return self._fetch_all(query, param=[account_id], col=0)
+    
+
+class DatabaseRemovals:
+
+    def __init__(self, cursor, connect):
+        self.cursor = cursor
+        self.connect = connect
+
+    def _delete_entry(self, table: str, key: str, param: Union[list, tuple]):
+        query = f'DELETE FROM {table} WHERE {key}=?'
+        self.cursor.execute(query, param)
+        self.connect.commit()
+
+    def delete_ticket(self, ticket_id) -> None:
+        self._delete_entry(table='tickets', key='id', param=[ticket_id])
+        return
+
+    def delete_account(self, account_id) -> None:
+        self._delete_entry(table='accounts', key='id', param=[account_id])
+        self._delete_entry(table='tickets', key='caller_id', param=[account_id])
+        return
+    
+    def delete_threat(self, threat_id) -> None:
+        self._delete_entry(table='tickets', key='threat_id', param=[threat_id])
+        self._delete_entry(table='threats', key='id', param=[threat_id])
+        return
