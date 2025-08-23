@@ -77,7 +77,7 @@ class TicketCreationStateManager():
         return threat
     
     def _generate_new_ticket_id(self):
-        max_id = self.query.fetch_max_ticket_id()
+        max_id = self.query.fetch_max_id(table='tickets')
         ticket_id = max_id + 1
         return ticket_id
     

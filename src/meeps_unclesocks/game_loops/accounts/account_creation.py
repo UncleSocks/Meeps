@@ -37,7 +37,7 @@ class AccountCreationStateManager():
         return account_name_list
     
     def _generate_new_account_id(self):
-        max_id = self.query.fetch_max_account_id()
+        max_id = self.query.fetch_max_id(table='accounts')
         account_id = max_id + 1
         return account_id
     

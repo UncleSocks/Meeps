@@ -37,7 +37,7 @@ class ThreatCreationStateManager():
         return threat_name_list
     
     def _generate_new_threat_id(self):
-        max_id = self.query.fetch_max_threat_id()
+        max_id = self.query.fetch_max_id(table='threats')
         print(max_id)
         threat_id = max_id + 1
         return threat_id

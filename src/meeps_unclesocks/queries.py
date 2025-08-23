@@ -1,9 +1,15 @@
+from typing import Optional, Union
+
+
+
+
 class DatabaseQueries:
 
     def __init__(self, cursor):
         self.cursor = cursor
     
-    def _fetch_all(self, query, param=None, col=None) -> tuple:
+    def _fetch_all(self, query: str, 
+                   param: Optional[Union[list | tuple]] = None, col: int = None):
         if param is None:
             self.cursor.execute(query)
         else:
@@ -15,7 +21,8 @@ class DatabaseQueries:
             results = self.cursor.fetchall()
             return [result[col] for result in results]
     
-    def _fetch_one(self, query, param=None, col=None) -> tuple:
+    def _fetch_one(self, query: str, 
+                   param: Optional[Union[list | tuple]] = None, col: int = None):
         if param is None:
             self.cursor.execute(query)
         else:
@@ -25,8 +32,8 @@ class DatabaseQueries:
             return self.cursor.fetchone()
         else:
             return self.cursor.fetchone()[col]
- 
-        
+
+
     """--------------------SHARED QUERIES--------------------"""
 
     def fetch_ticket_titles(self):
@@ -53,6 +60,10 @@ class DatabaseQueries:
         query = 'SELECT name, description, indicators, countermeasures, image FROM threats WHERE id=?'
         return self._fetch_one(query, param=[threat_id])
     
+    def fetch_max_id(self, table: str) -> int:
+        query = f'SELECT MAX(id) FROM {table}'
+        return self._fetch_one(query, col=0)  
+    
 
     """--------------------SHIFT QUERIES--------------------"""
 
@@ -75,10 +86,6 @@ class DatabaseQueries:
         query = 'SELECT t.title, t.entry, a.name, a.organization, a.email, a.contact FROM tickets t JOIN accounts a ON t.caller_id = a.id WHERE t.id=?'
         return self._fetch_one(query, param=[ticket_id])
     
-    def fetch_max_ticket_id(self):
-        query = 'SELECT MAX(id) FROM tickets'
-        return self._fetch_one(query, col=0)
-    
 
     """--------------------ACCOUNT QUERIES--------------------"""
     
@@ -89,14 +96,3 @@ class DatabaseQueries:
     def fetch_assigned_tickets(self, account_id):
         query = 'SELECT title FROM tickets WHERE caller_id=?'
         return self._fetch_all(query, param=[account_id], col=0)
-
-    def fetch_max_account_id(self) -> int:
-        query = 'SELECT MAX(id) FROM accounts'
-        return self._fetch_one(query, col=0)
-
-
-    """--------------------THREAT QUERIES--------------------"""
-
-    def fetch_max_threat_id(self) -> int:
-        query = 'SELECT MAX(id) FROM threats'
-        return self._fetch_one(query, col=0)  
