@@ -61,7 +61,7 @@ class NewAccountPicture(DrawElement):
 
 
 class AddAccountButton(DrawElement):
-    POS = Position(15, 455, 120, 40)
+    POS = Position(15, 455, 150, 50)
     INPUT = "ADD ACCOUNT"
 
 
