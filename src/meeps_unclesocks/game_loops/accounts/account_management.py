@@ -10,6 +10,7 @@ from constants import StateTracker, ButtonAction, \
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
 from queries import SqliteQueries
+from queries_s import DatabaseQueries
 
 
 
@@ -28,7 +29,7 @@ class AccountStateManager:
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.account_variables()
 
     def account_variables(self) -> None:
@@ -40,23 +41,24 @@ class AccountStateManager:
         self.account_delete_warning_window = None
 
     def account_id_name_mapper(self) -> dict:
-        account_id_name_list = self.query.account_id_name_list()
+        account_id_name_list = self.query.fetch_account_names_ids()
         account_id_name_map = {account[1]: account[0] for account in account_id_name_list}
         return account_id_name_map
 
     def fetch_account_names(self) -> list:
-        account_name_list = self.query.account_name_list_query()
+        account_name_list = self.query.fetch_account_names()
         return account_name_list
 
     def fetch_account_details(self) -> tuple:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        account_details = self.query.account_details_query(selected_account_id)
+        print(type(selected_account_id))
+        account_details = self.query.fetch_account_details(selected_account_id)
         account = AccountDetails(*account_details)
         return account
     
     def fetch_assigned_tickets(self) -> list:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        assigned_tickets_list = self.query.ticket_title_caller_id_query(selected_account_id)
+        assigned_tickets_list = self.query.fetch_ticket_titles(selected_account_id)
         return assigned_tickets_list
     
     def delete_selected_account(self) -> None:
