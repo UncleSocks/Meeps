@@ -1,3 +1,4 @@
+import os
 import pygame
 import pygame_gui
 from dataclasses import dataclass
@@ -5,7 +6,7 @@ from dataclasses import dataclass
 import elements.game_elements.ticket_elements.ticket_management_elements as tme
 import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
-    ImagePaths, ButtonSFX
+    AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
 from managers.db_manager import DatabaseQueries, DatabaseRemovals
@@ -56,6 +57,13 @@ class TicketStateManager():
     def delete_selected_ticket(self):
         selected_ticket_id = self.ticket_title_id_map[self.selected_ticket]
         self.delete.delete_ticket(selected_ticket_id)
+        self._delete_transcript(selected_ticket_id)
+
+    def _delete_transcript(self, selected_ticket_id):
+        transcript_filename = f"{selected_ticket_id}_transcript.wav"
+        transcript_path = "".join([AssetBasePath.TRANSCRIPTS.value, transcript_filename])
+        if os.path.exists(transcript_path):
+            os.remove(transcript_path)
     
 
 class TicketUIManager():

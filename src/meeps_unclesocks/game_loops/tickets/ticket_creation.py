@@ -7,7 +7,7 @@ import init
 import elements.game_elements.ticket_elements.ticket_creation_elements as tce
 import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
-    ImagePaths, ButtonSFX 
+    AssetBasePath, ImagePaths, ButtonSFX 
 from managers.sound_manager import ButtonSoundManager
 from managers.db_manager import DatabaseQueries
 
@@ -82,10 +82,11 @@ class TicketCreationStateManager():
         return ticket_id
     
     def _generate_ticket_transcript(self):
-        ticket_transcript_filename = f'assets/sounds/transcripts/{self.ticket.id}_transcript.wav'
-        self.transcript_engine.save_to_file(self.ticket.entry, ticket_transcript_filename)
+        transcript_filename = f"{self.ticket.id}_transcript.wav"
+        ticket_transcript_path = "".join([AssetBasePath.TRANSCRIPTS.value, transcript_filename])
+        self.transcript_engine.save_to_file(self.ticket.entry, ticket_transcript_path)
         self.transcript_engine.runAndWait()
-        return ticket_transcript_filename
+        return ticket_transcript_path
 
     def add_new_ticket(self):
         self.ticket.id = self._generate_new_ticket_id()
