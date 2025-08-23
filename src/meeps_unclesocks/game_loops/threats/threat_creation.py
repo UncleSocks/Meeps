@@ -1,6 +1,6 @@
 import pygame
 import pygame_gui
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 
 import elements.game_elements.threat_elements.threat_creation_elements as tce
 import elements.game_elements.shared_elements as se
@@ -23,7 +23,7 @@ class ThreatDetails:
     image_path: str = ""
 
 
-class ThreatCreationStateManager():
+class ThreatCreationStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -44,18 +44,13 @@ class ThreatCreationStateManager():
     
     def add_new_threat(self):
         self.threat.id = self._generate_new_threat_id()
-        new_threat_entry = (self.threat.id,
-                            self.threat.name,
-                            self.threat.description,
-                            self.threat.indicators,
-                            self.threat.countermeasures,
-                            self.threat.image_path)
+        new_threat_entry = astuple(self.threat)
         
         self.cursor.execute('INSERT INTO threats VALUES (?, ?, ?, ?, ?, ?)', new_threat_entry)
         self.connect.commit()
 
 
-class ThreatCreationUIManager():
+class ThreatCreationUIManager:
 
     def __init__(self, pygame_manager, state_manager: ThreatCreationStateManager):
         self.manager = pygame_manager
@@ -83,7 +78,17 @@ class ThreatCreationUIManager():
         self.new_threat_indicators = tce.NewThreatIndicators(self.manager).draw_textentrybox()
         self.new_threat_countermeasures = tce.NewThreatCountermeasures(self.manager).draw_textentrybox()
         self.new_threat_image_filename = tce.NewThreatImageFileName(self.manager).draw_textentrybox()
-        
+        self._unfocus_text_entry_box_elements()
+
+    def text_entry_box_elements(self):
+        return [
+            self.new_threat_name,
+            self.new_threat_description,
+            self.new_threat_indicators,
+            self.new_threat_countermeasures,
+            self.new_threat_image_filename
+        ]
+
     def capture_new_threat_details(self):
         self.state.threat.name = self.new_threat_name.get_text()
         self.state.threat.description = self.new_threat_description.get_text()
@@ -103,14 +108,16 @@ class ThreatCreationUIManager():
         self.confirm_button = confirm_button.draw_button()
     
     def refresh_creation_page(self):
-        self.new_threat_name.set_text("")
-        self.new_threat_description.set_text("")
-        self.new_threat_indicators.set_text("")
-        self.new_threat_countermeasures.set_text("")
-        self.new_threat_image_filename.set_text("") 
+        for element in self.text_entry_box_elements():
+            element.set_text("")
+            element.unfocus()
+
+    def _unfocus_text_entry_box_elements(self):
+        for element in self.text_entry_box_elements():
+            element.unfocus()
 
 
-class ThreatCreationEventHandler():
+class ThreatCreationEventHandler:
 
     def __init__(self, pygame_manager, state_manager: ThreatCreationStateManager, ui_manager: ThreatCreationUIManager):
         self.manager = pygame_manager
@@ -129,7 +136,7 @@ class ThreatCreationEventHandler():
             return ButtonAction.CONFIRM_CREATE
 
 
-class ThreatCreationController():
+class ThreatCreationController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect

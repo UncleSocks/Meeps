@@ -1,6 +1,6 @@
 import pygame
 import pygame_gui
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 
 import elements.game_elements.account_elements.account_creation_elements as ace
 import elements.game_elements.shared_elements as se
@@ -43,12 +43,7 @@ class AccountCreationStateManager():
     
     def add_new_account(self):
         self.account.id = self._generate_new_account_id()
-        new_account_entry = (self.account.id,
-                             self.account.name,
-                             self.account.organization,
-                             self.account.email,
-                             self.account.contact,
-                             self.account.picture_file)
+        new_account_entry = astuple(self.account)
         
         self.cursor.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)', new_account_entry)
         self.connect.commit()
@@ -78,16 +73,27 @@ class AccountCreationUIManager():
 
     def _draw_account_creation_elements(self):
         self.account_name_label = ace.NewAccountNameLabel(self.manager).draw_label()
-        self.account_name_entry = ace.NewAccountNameTextEntry(self.manager).draw_textentrybox()
         self.account_organization_label = ace.NewAccountOrganizationLabel(self.manager).draw_label()
-        self.account_organization_entry = ace.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
         self.account_email_label = ace.NewAccountEmailLabel(self.manager).draw_label()
-        self.account_email_entry = ace.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
         self.account_contact_label = ace.NewAccountContactLabel(self.manager).draw_label()
-        self.account_contact_entry = ace.NewAccountContactTextEntry(self.manager).draw_textentrybox()
         self.account_picture_file_label = ace.NewAccountPictureFileLabel(self.manager).draw_label()
+
+        self.account_name_entry = ace.NewAccountNameTextEntry(self.manager).draw_textentrybox()
+        self.account_organization_entry = ace.NewAccountOrganizationTextEntry(self.manager).draw_textentrybox()
+        self.account_email_entry = ace.NewAccountEmailTextEntry(self.manager).draw_textentrybox()
+        self.account_contact_entry = ace.NewAccountContactTextEntry(self.manager).draw_textentrybox()        
         self.account_picture_file = ace.NewAccountPictureFileTextEntry(self.manager).draw_textentrybox()
         self.account_picture_border = ace.NewAccountPictureBorder(self.manager).draw_textentrybox()
+
+    def text_entry_box_elements(self):
+        return [
+            self.account_name_entry,
+            self.account_organization_entry,
+            self.account_email_entry,
+            self.account_contact_entry,   
+            self.account_picture_file,
+            self.account_picture_border
+        ]
 
     def capture_new_account_details(self):
         self.state.account.name = self.account_name_entry.get_text()
@@ -121,12 +127,9 @@ class AccountCreationUIManager():
         self.confirm_button = confirm_button.draw_button()
 
     def refresh_creation_page(self):
-        self.account_name_entry.set_text("")
-        self.account_organization_entry.set_text("")
-        self.account_email_entry.set_text("")
-        self.account_contact_entry.set_text("")
-        self.account_picture_file.set_text("")
-
+        for element in self.text_entry_box_elements():
+            element.set_text("")
+            
 
 class AccountCreationEventHandler():
 

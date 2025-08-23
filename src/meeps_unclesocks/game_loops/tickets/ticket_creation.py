@@ -1,7 +1,7 @@
 import pygame
 import pygame_gui
 import pyttsx3
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 
 import init
 import elements.game_elements.ticket_elements.ticket_creation_elements as tce
@@ -90,12 +90,7 @@ class TicketCreationStateManager():
     def add_new_ticket(self):
         self.ticket.id = self._generate_new_ticket_id()
         self.ticket.transcript = self._generate_ticket_transcript()
-        new_ticket_entry = (self.ticket.id,
-                            self.ticket.title,
-                            self.ticket.entry,
-                            self.ticket.threat_id,
-                            self.ticket.account_id,
-                            self.ticket.transcript)
+        new_ticket_entry = astuple(self.ticket)
         
         self.cursor.execute('INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?)', new_ticket_entry)
         self.connect.commit()
@@ -141,6 +136,11 @@ class TicketCreationUIManager():
         threat_selection_list.INPUT = self.state.threat_list
         self.threat_selection_list = threat_selection_list.draw_selectionlist()
 
+        self._unfocus_text_entry_box_elements()
+
+    def text_entry_box_elements(self):
+        return [self.new_ticket_title, self.new_ticket_description]
+
     def capture_new_ticket_details(self):
         self.state.ticket.title = self.new_ticket_title.get_text()
         self.state.ticket.entry = self.new_ticket_description.get_text()
@@ -165,9 +165,14 @@ class TicketCreationUIManager():
         self.confirm_button = confirm_button.draw_button()
         
     def refresh_creation_page(self):
-        self.new_ticket_title.set_text("")
-        self.new_ticket_description.set_text("")
-        self.threat_description.set_text("")
+        for elements in self.text_entry_box_elements():
+            elements.set_text("")
+            elements.unfocus()
+
+    def _unfocus_text_entry_box_elements(self):
+        for elements in self.text_entry_box_elements():
+            elements.unfocus()
+
 
 
 class TicketCreationEventHandler():
