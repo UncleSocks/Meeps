@@ -7,8 +7,8 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
-from sound_manager import ButtonSoundManager
-from db_manager import DatabaseQueries, DatabaseRemovals
+from managers.sound_manager import ButtonSoundManager
+from managers.db_manager import DatabaseQueries, DatabaseRemovals
 
 
 

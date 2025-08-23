@@ -10,9 +10,9 @@ from constants import ButtonAction, StateTracker, \
     ButtonSFX, MusicPaths, MixerChannels, AssetBasePath, \
     Timers, Settings, ImagePaths, DefaultImages
 from init import PygameRenderer
-from sound_manager import ButtonSoundManager, LoopingSoundManager, \
+from managers.sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
-from db_manager import DatabaseQueries
+from managers.db_manager import DatabaseQueries
 
 
 

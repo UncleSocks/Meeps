@@ -8,8 +8,8 @@ import elements.game_elements.ticket_elements.ticket_creation_elements as tce
 import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
-from sound_manager import ButtonSoundManager
-from db_manager import DatabaseQueries
+from managers.sound_manager import ButtonSoundManager
+from managers.db_manager import DatabaseQueries
 
 
 
