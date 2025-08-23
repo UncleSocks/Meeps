@@ -22,7 +22,7 @@ class MenuUIManager():
 
     def _draw_images(self):
         title_image = me.MenuImage(self.manager)
-        title_image_load = pygame.image.load(ImagePaths.TITLE.value)
+        title_image_load = pygame.image.load(ImagePaths.TITLE.path)
         title_image.INPUT = title_image_load
         self.title_image = title_image.draw_image()
 

@@ -111,7 +111,7 @@ class TicketCreationUIManager():
 
     def _draw_images(self):
         add_ticket_image = tce.NewTicketImage(self.manager)
-        add_ticket_image_load = pygame.image.load(ImagePaths.TICKET_CREATION.value)
+        add_ticket_image_load = pygame.image.load(ImagePaths.TICKET_CREATION.path)
         add_ticket_image.INPUT = add_ticket_image_load
         self.add_ticket_image = add_ticket_image.draw_image()
 

@@ -64,7 +64,7 @@ class ThreatCreationUIManager:
         
     def _draw_images(self):
         add_threat_image = tce.NewThreatImage(self.manager)
-        add_threat_image_load = pygame.image.load(ImagePaths.THREAT_CREATION.value)
+        add_threat_image_load = pygame.image.load(ImagePaths.THREAT_CREATION.path)
         add_threat_image.INPUT = add_threat_image_load
         self.add_threat_image = add_threat_image.draw_image()
         

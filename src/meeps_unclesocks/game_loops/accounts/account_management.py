@@ -81,7 +81,7 @@ class AccountUIManager:
 
     def _draw_images(self):
         account_manager_image = ame.TitleImage(self.manager)
-        load_account_manager_image = pygame.image.load(ImagePaths.ACCOUNT_MANAGEMENT.value)
+        load_account_manager_image = pygame.image.load(ImagePaths.ACCOUNT_MANAGEMENT.path)
         account_manager_image.INPUT = load_account_manager_image
         self.account_manager_image = account_manager_image.draw_image()
         

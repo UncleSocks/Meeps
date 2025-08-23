@@ -11,14 +11,14 @@ class ButtonSoundManager():
 
         self.button_sfx = {
 
-            ButtonSFX.MENU_BUTTON: pygame.mixer.Sound(SFXPath.MENU_BUTTON.value), 
-            ButtonSFX.BACK_BUTTON: pygame.mixer.Sound(SFXPath.BACK_BUTTON.value), 
-            ButtonSFX.MODIFY_BUTTON: pygame.mixer.Sound(SFXPath.MODIFY_BUTTON.value),
-            ButtonSFX.DELETE_BUTTON: pygame.mixer.Sound(SFXPath.DELETE_BUTTON.value),
-            ButtonSFX.CONFIRM_BUTTON: pygame.mixer.Sound(SFXPath.CONFIRM_BUTTON.value),
-            ButtonSFX.LIST_BUTTON: pygame.mixer.Sound(SFXPath.LIST_BUTTON.value),
-            ButtonSFX.CORRECT_SUBMISSION: pygame.mixer.Sound(SFXPath.CORRECT_SUBMISSION.value),
-            ButtonSFX.INCORRECT_SUBMISSION: pygame.mixer.Sound(SFXPath.INCORRECT_SUBMISSION.value)
+            ButtonSFX.MENU_BUTTON: pygame.mixer.Sound(SFXPath.MENU_BUTTON.path), 
+            ButtonSFX.BACK_BUTTON: pygame.mixer.Sound(SFXPath.BACK_BUTTON.path), 
+            ButtonSFX.MODIFY_BUTTON: pygame.mixer.Sound(SFXPath.MODIFY_BUTTON.path),
+            ButtonSFX.DELETE_BUTTON: pygame.mixer.Sound(SFXPath.DELETE_BUTTON.path),
+            ButtonSFX.CONFIRM_BUTTON: pygame.mixer.Sound(SFXPath.CONFIRM_BUTTON.path),
+            ButtonSFX.LIST_BUTTON: pygame.mixer.Sound(SFXPath.LIST_BUTTON.path),
+            ButtonSFX.CORRECT_SUBMISSION: pygame.mixer.Sound(SFXPath.CORRECT_SUBMISSION.path),
+            ButtonSFX.INCORRECT_SUBMISSION: pygame.mixer.Sound(SFXPath.INCORRECT_SUBMISSION.path)
 
         }
 

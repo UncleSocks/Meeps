@@ -172,7 +172,7 @@ class ShiftUIManager:
 
     def _draw_images(self):
         shift_title_image = she.ShiftTitleImage(self.manager)
-        shift_title_image_load = pygame.image.load(ImagePaths.TITLE.value)
+        shift_title_image_load = pygame.image.load(ImagePaths.TITLE.path)
         shift_title_image.INPUT = shift_title_image_load
         self.shift_title_image = shift_title_image.draw_image()
 
@@ -200,7 +200,7 @@ class ShiftUIManager:
         self.threat_title = threat_title.draw_textbox()
 
         threat_image = she.ThreatImage(self.manager)
-        threat_image_load = pygame.image.load(DefaultImages.BLANK.value)
+        threat_image_load = pygame.image.load(DefaultImages.BLANK.path)
         threat_image.INPUT = threat_image_load
         threat_image.CONTAINER = self.threat_information_panel
         self.threat_image = threat_image.draw_image()
@@ -228,7 +228,7 @@ class ShiftUIManager:
         try:
             load_caller_profile_image = pygame.image.load(account_picture_path)
         except (pygame.error, FileNotFoundError):
-            load_caller_profile_image = pygame.image.load(DefaultImages.GUEST_ACCOUNT.value)
+            load_caller_profile_image = pygame.image.load(DefaultImages.GUEST_ACCOUNT.path)
         
         caller_profile_image.INPUT = load_caller_profile_image
         self.caller_profile_image = caller_profile_image.draw_image()
@@ -277,8 +277,8 @@ class ShiftSoundController:
     def __init__(self, state_manager: ShiftStateManager):
         self.state = state_manager
         self.button_sfx = ButtonSoundManager()
-        self.call_sfx = LoopingSoundManager(MusicPaths.INCOMING_CALL.value, MixerChannels.INCOMING_CALL.value)
-        self.background_music = BackgroundMusicManager(MusicPaths.BACKGROUND_MUSIC.value)
+        self.call_sfx = LoopingSoundManager(MusicPaths.INCOMING_CALL.path, MixerChannels.INCOMING_CALL.value)
+        self.background_music = BackgroundMusicManager(MusicPaths.BACKGROUND_MUSIC.path)
 
     def transcribe_ticket(self, ticket_transcript):
         self.state.ticket_transcript = TicketTranscriptManager(ticket_transcript)
@@ -410,7 +410,7 @@ class ShiftEventHandler:
         try:
             load_threat_image = pygame.image.load(threat_image_path)
         except (pygame.error, FileNotFoundError):
-            load_threat_image = pygame.image.load(DefaultImages.THREAT.value)
+            load_threat_image = pygame.image.load(DefaultImages.THREAT.path)
         
         self.ui.threat_image.set_image(new_image=load_threat_image)
         return

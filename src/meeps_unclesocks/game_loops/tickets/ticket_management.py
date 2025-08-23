@@ -72,7 +72,7 @@ class TicketUIManager():
 
     def _draw_images(self):
         ticket_manager_image = tme.TitleImage(self.manager)
-        load_ticket_manager_image = pygame.image.load(ImagePaths.TICKET_MANAGEMENT.value)
+        load_ticket_manager_image = pygame.image.load(ImagePaths.TICKET_MANAGEMENT.path)
         ticket_manager_image.INPUT = load_ticket_manager_image
         self.ticket_manager_image = ticket_manager_image.draw_image()
 

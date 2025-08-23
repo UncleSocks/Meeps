@@ -20,13 +20,13 @@ class PygameRenderer:
         self.window_surface, self.background = self.window_init()
         self.manager = pygame_gui.UIManager(
             (WindowConfig.WIDTH.value, WindowConfig.HEIGHT.value),
-            WindowConfig.THEME.value
+            WindowConfig.THEME.path
         )
         self.clock = pygame.time.Clock()
         
     def window_init(self):
         pygame.display.set_caption(WindowConfig.CAPTION.value)
-        window_icon_load = pygame.image.load(WindowConfig.ICON.value)
+        window_icon_load = pygame.image.load(WindowConfig.ICON.path)
         pygame.display.set_icon(window_icon_load)
 
         window_surface = pygame.display.set_mode((WindowConfig.WIDTH.value, WindowConfig.HEIGHT.value))

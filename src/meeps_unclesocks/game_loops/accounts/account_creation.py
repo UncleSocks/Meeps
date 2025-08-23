@@ -63,7 +63,7 @@ class AccountCreationUIManager():
         
     def _draw_images(self):
         add_account_image = ace.NewAccountImage(self.manager)
-        load_add_account_image = pygame.image.load(ImagePaths.ACCOUNT_CREATION.value)
+        load_add_account_image = pygame.image.load(ImagePaths.ACCOUNT_CREATION.path)
         add_account_image.INPUT = load_add_account_image
         self.add_account_image = add_account_image.draw_image()
 
@@ -110,7 +110,7 @@ class AccountCreationUIManager():
         try:
             account_picture_load = pygame.image.load(account_picture_path)
         except (pygame.error, FileNotFoundError):
-            account_picture_load = pygame.image.load(DefaultImages.GUEST_ACCOUNT.value)
+            account_picture_load = pygame.image.load(DefaultImages.GUEST_ACCOUNT.path)
 
         account_picture.INPUT = account_picture_load
         self.account_picture = account_picture.draw_image()

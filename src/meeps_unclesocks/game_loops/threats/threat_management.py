@@ -72,7 +72,7 @@ class ThreatUIManager():
         
     def _draw_images(self):
         threat_manager_image = tme.TitleImage(self.manager)
-        threat_manager_image_load = pygame.image.load(ImagePaths.THREAT_MANAGEMENT.value)
+        threat_manager_image_load = pygame.image.load(ImagePaths.THREAT_MANAGEMENT.path)
         threat_manager_image.INPUT = threat_manager_image_load
         self.threat_manager_image = threat_manager_image.draw_image()
         

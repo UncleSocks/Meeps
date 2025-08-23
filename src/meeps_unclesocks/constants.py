@@ -1,11 +1,19 @@
+import os, sys
 from enum import Enum
 
 
 
+def asset_path(relative_path: str) -> str:
+    if hasattr(sys, '_MEIPASS'):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 
 class Settings(Enum):
     VERSION = 'v2025.1.0 BETA'
-    DATABASE = 'data/data.db'
+    DATABASE = './data/data.db'
     FPS = 60
     MS_PER_SECOND = 1000
 
@@ -14,9 +22,13 @@ class WindowConfig(Enum):
     WIDTH = 800
     HEIGHT = 650
     CAPTION = "Meeps_Security_Responder.exe"
-    ICON = 'assets/images/static/icon.png'
     THEME = 'theme.json'
+    ICON = 'assets/images/static/icon.png'
     BACKGROUND = 0,0,0 #RGB values for black.
+
+    @property
+    def path(self) -> str:
+        return asset_path(self.value)
 
 
 class StateTracker(Enum):
@@ -55,8 +67,8 @@ class Timers(Enum):
 
 
 class AssetBasePath(Enum):
-    THREAT_ASSETS = 'data/images/threats/'
-    ACCOUNT_ASSETS = 'data/images/accounts/'
+    THREAT_ASSETS = './data/images/threats/'
+    ACCOUNT_ASSETS = './data/images/accounts/'
 
 
 class ImagePaths(Enum):
@@ -68,16 +80,28 @@ class ImagePaths(Enum):
     ACCOUNT_MANAGEMENT = 'assets/images/static/account_manager.png'
     ACCOUNT_CREATION = 'assets/images/static/add_account.png'
 
+    @property
+    def path(self) -> str:
+        return asset_path(self.value)
+
 
 class DefaultImages(Enum):
     THREAT = 'assets/images/default/threat.png'
     GUEST_ACCOUNT = 'assets/images/default/guest.png'
     BLANK = 'assets/images/static/blank.png'
 
+    @property
+    def path(self) -> str:
+        return asset_path(self.value)
+
 
 class MusicPaths(Enum):
     BACKGROUND_MUSIC = 'assets/sounds/music/background.mp3'
     INCOMING_CALL = 'assets/sounds/music/incoming_call.mp3'
+
+    @property
+    def path(self) -> str:
+        return asset_path(self.value)
 
 
 class SFXPath(Enum):
@@ -89,6 +113,10 @@ class SFXPath(Enum):
     LIST_BUTTON = 'assets/sounds/sfx/list_click.mp3'
     CORRECT_SUBMISSION = 'assets/sounds/sfx/correct_submit.mp3'
     INCORRECT_SUBMISSION = 'assets/sounds/sfx/incorrect_submit.mp3'
+
+    @property
+    def path(self) -> str:
+        return asset_path(self.value)
 
 
 class MixerChannels(Enum):
