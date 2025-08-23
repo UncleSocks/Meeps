@@ -9,7 +9,7 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -29,6 +29,7 @@ class ThreatDetails:
     description: str = ""
     indicators: str = ""
     countermeasures: str = ""
+    image: str = ""
 
 
 class TicketCreationStateManager():
@@ -36,7 +37,7 @@ class TicketCreationStateManager():
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.ticket = TicketDetails()
         self.transcript_engine = pyttsx3.init()
         self.ticket_creation_variables()
@@ -49,34 +50,34 @@ class TicketCreationStateManager():
         self.confirm_window = False
 
     def threat_id_name_mapper(self):
-        threat_id_name_list = self.query.threat_id_name_query()
+        threat_id_name_list = self.query.fetch_threat_names_ids()
         threat_id_name_map = {threat[1]: threat[0] for threat in threat_id_name_list}
         return threat_id_name_map
 
     def account_id_name_mapper(self):
-        account_id_name_list = self.query.account_id_name_list()
+        account_id_name_list = self.query.fetch_account_names_ids()
         account_id_name_map = {account[1]: account[0] for account in account_id_name_list}
         return account_id_name_map
 
     def fetch_ticket_titles(self):
-        ticket_title_list = self.query.ticket_titles_query()
+        ticket_title_list = self.query.fetch_ticket_titles()
         return ticket_title_list
 
     def fetch_threat_list(self):
-        threat_list = self.query.threat_list_query()
+        threat_list = self.query.fetch_threat_names()
         return threat_list
     
     def fetch_account_list(self):
-        account_list = self.query.account_name_list_query()
+        account_list = self.query.fetch_account_names()
         return account_list
     
     def fetch_threat_details(self):
-        threat_details = self.query.threat_ticket_selection_query(self.ticket.threat_id)
+        threat_details = self.query.fetch_threat_details(self.ticket.threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
     
     def _generate_new_ticket_id(self):
-        max_id = self.query.max_ticket_id_query()
+        max_id = self.query.fetch_max_ticket_id()
         ticket_id = max_id + 1
         return ticket_id
     

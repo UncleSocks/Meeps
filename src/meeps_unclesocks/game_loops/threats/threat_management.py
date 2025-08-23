@@ -9,7 +9,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -28,7 +28,7 @@ class ThreatStateManager():
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.threat_variables()
     
     def threat_variables(self) -> None:
@@ -38,17 +38,17 @@ class ThreatStateManager():
         self.threat_delete_confirm_window = False
     
     def threat_id_name_mapper(self) -> dict:
-        threat_id_name_list = self.query.threat_id_name_query()
+        threat_id_name_list = self.query.fetch_threat_names_ids()
         threat_id_name_map = {threat[1]: threat[0] for threat in threat_id_name_list}
         return threat_id_name_map
 
     def fetch_threat_names(self) -> list:
-        threat_name_list = self.query.threat_list_query()
+        threat_name_list = self.query.fetch_threat_names()
         return threat_name_list
 
     def fetch_threat_details(self) -> tuple:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        threat_details = self.query.threat_management_selection_query(selected_threat_id)
+        threat_details = self.query.fetch_threat_details(selected_threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
     

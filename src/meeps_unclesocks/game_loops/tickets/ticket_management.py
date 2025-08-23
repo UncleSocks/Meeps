@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -28,27 +28,27 @@ class TicketStateManager():
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.ticket_variables()
 
     def ticket_variables(self):
-        self.ticket_title_list = self.query.ticket_titles_query()
+        self.ticket_title_list = self.fetch_ticket_titles()
         self.ticket_title_id_map = self.ticket_id_title_mapper()
         self.selected_ticket = None
         self.ticket_delete_confirm_window = False
 
     def ticket_id_title_mapper(self):
-        ticket_id_title_list = self.query.ticket_id_title_list()
+        ticket_id_title_list = self.query.fetch_ticket_titles_ids()
         ticket_id_title_map = {ticket[1]: ticket[0] for ticket in ticket_id_title_list}
         return ticket_id_title_map
     
     def fetch_ticket_titles(self):
-        ticket_title_list = self.query.ticket_titles_query()
+        ticket_title_list = self.query.fetch_ticket_titles()
         return ticket_title_list
     
     def fetch_ticket_details(self):
         selected_ticket_id = self.ticket_title_id_map[self.selected_ticket]
-        ticket_details = self.query.ticket_account_query(selected_ticket_id)
+        ticket_details = self.query.fetch_ticket_account_details(selected_ticket_id)
         ticket = TicketDetails(*ticket_details)
         return ticket
     

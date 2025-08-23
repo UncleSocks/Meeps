@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, DefaultImages, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -28,16 +28,16 @@ class AccountCreationStateManager():
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.account = AccountDetails()
         self.confirm_window = False
 
     def fetch_account_names(self):
-        account_name_list = self.query.account_name_list_query()
+        account_name_list = self.query.fetch_account_names()
         return account_name_list
     
     def _generate_new_account_id(self):
-        max_id = self.query.max_account_id_query()
+        max_id = self.query.fetch_max_account_id()
         account_id = max_id + 1
         return account_id
     

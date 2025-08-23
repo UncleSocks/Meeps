@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -28,16 +28,17 @@ class ThreatCreationStateManager():
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.threat = ThreatDetails()
         self.threat_confirm_window = False
 
     def fetch_threat_names(self):
-        threat_name_list = self.query.threat_list_query()
+        threat_name_list = self.query.fetch_threat_names()
         return threat_name_list
     
     def _generate_new_threat_id(self):
-        max_id = self.query.max_threat_id_query()
+        max_id = self.query.fetch_max_threat_id()
+        print(max_id)
         threat_id = max_id + 1
         return threat_id
     

@@ -12,7 +12,7 @@ from constants import ButtonAction, StateTracker, \
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager, LoopingSoundManager, \
     BackgroundMusicManager, TicketTranscriptManager
-from queries import SqliteQueries
+from queries import DatabaseQueries
 
 
 
@@ -43,7 +43,7 @@ class ShiftStateManager:
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
-        self.query = SqliteQueries(self.cursor)
+        self.query = DatabaseQueries(self.cursor)
         self.ticket_interval = self.randomize_ticket_interval()
         self.introduction_variables()
         self.shift_variables()
@@ -98,11 +98,11 @@ class ShiftStateManager:
         return popup_sla_countdown
 
     def fetch_ticket_ids(self):
-        ticket_id_list = self.query.ticket_ids_query()
+        ticket_id_list = self.query.fetch_ticket_ids()
         return ticket_id_list
     
     def fetch_ticket_details(self):
-        ticket_detail = self.query.ticket_detail_query(self.selected_ticket_id)
+        ticket_detail = self.query.fetch_ticket_details(self.selected_ticket_id)
         ticket = TicketDetails(*ticket_detail)
         return ticket
     
@@ -111,17 +111,17 @@ class ShiftStateManager:
         return total_tickets
     
     def fetch_threats(self):
-        threat_list = self.query.threat_list_query()
+        threat_list = self.query.fetch_threat_names()
         return threat_list
     
     def threat_id_name_mapper(self):
-        threat_id_name_list = self.query.threat_id_name_query()
+        threat_id_name_list = self.query.fetch_threat_names_ids()
         threat_id_name_map = {threat[1]: threat[0] for threat in threat_id_name_list}
         return threat_id_name_map
     
     def fetch_threat_details(self):
         self.selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        threat_details = self.query.threat_management_selection_query(self.selected_threat_id)
+        threat_details = self.query.fetch_threat_details(self.selected_threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
 

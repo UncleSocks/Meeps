@@ -9,8 +9,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX
 from init import PygameRenderer
 from sound_manager import ButtonSoundManager
-from queries import SqliteQueries
-from queries_s import DatabaseQueries
+from queries import DatabaseQueries
 
 
 
@@ -58,7 +57,7 @@ class AccountStateManager:
     
     def fetch_assigned_tickets(self) -> list:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        assigned_tickets_list = self.query.fetch_ticket_titles(selected_account_id)
+        assigned_tickets_list = self.query.fetch_assigned_tickets(selected_account_id)
         return assigned_tickets_list
     
     def delete_selected_account(self) -> None:
