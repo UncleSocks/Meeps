@@ -56,9 +56,9 @@ class ThreatStateManager:
     
     def delete_selected_threat(self, threat_image_filename) -> None:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        self.modify.delete_entry(table='tickets', key='threat_id', param=[selected_threat_id])
         self.modify.delete_entry(table='threats', key='id', param=[selected_threat_id])
         self._delete_threat_image(threat_image_filename)
+        self._delete_associated_tickets(selected_threat_id)
 
     def _delete_threat_image(self, threat_image_filename):
         try:
@@ -67,6 +67,19 @@ class ThreatStateManager:
                 os.remove(threat_image_path)
         except (FileNotFoundError, TypeError):
             pass
+
+    def _delete_associated_tickets(self, selected_threat_id):
+        ticket_id_list = self.query.fetch_associated_ticket_ids(selected_threat_id)
+        for ticket_id in ticket_id_list:
+            try:
+                transcript_filename = f"{ticket_id}_transcript.wav"
+                transcript_path = os.path.join(AssetBasePath.TRANSCRIPTS.value, transcript_filename)
+                if os.path.exists(transcript_path):
+                    os.remove(transcript_path)
+            except(FileNotFoundError, ValueError):
+                pass
+
+        self.modify.delete_entry(table='tickets', key='threat_id', param=[selected_threat_id])
     
 
 class ThreatUIManager:

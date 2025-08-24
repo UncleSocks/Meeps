@@ -97,6 +97,17 @@ class DatabaseQueries:
         query = 'SELECT title FROM tickets WHERE caller_id=?'
         return self._fetch_all(query, param=[account_id], col=0)
     
+    def fetch_assigned_ticket_ids(self, account_id):
+        query = 'SELECT id FROM tickets WHERE caller_id=?'
+        return self._fetch_all(query, param=[account_id], col=0)
+    
+    
+    """--------------------THREAT QUERIES--------------------"""
+
+    def fetch_associated_ticket_ids(self, threat_id):
+        query = 'SELECT id FROM tickets WHERE threat_id=?'
+        return self._fetch_all(query, param=[threat_id], col=0)
+    
 
 class DatabaseModification:
 

@@ -64,8 +64,8 @@ class AccountStateManager:
     def delete_selected_account(self, account_image_filename) -> None:
         selected_account_id = self.account_id_name_map[self.selected_account]
         self.modify.delete_entry(table='accounts', key='id', param=[selected_account_id])
-        self.modify.delete_entry(table='tickets', key='caller_id', param=[selected_account_id])
         self._delete_account_image(account_image_filename)
+        self._delete_assigned_tickets(selected_account_id)
 
     def _delete_account_image(self, account_image_filename):
         try:
@@ -74,7 +74,22 @@ class AccountStateManager:
                 os.remove(account_image_path)
         except(FileNotFoundError, TypeError):
             pass
-    
+
+    def _delete_assigned_tickets(self, selected_account_id):
+        ticket_id_list = self.query.fetch_assigned_ticket_ids(selected_account_id)
+        print(ticket_id_list)
+        for ticket_id in ticket_id_list:
+            try:
+                transcript_filename = f"{ticket_id}_transcript.wav"
+                transcript_path = os.path.join(AssetBasePath.TRANSCRIPTS.value, transcript_filename)
+                print(transcript_path)
+                if os.path.exists(transcript_path):
+                    os.remove(transcript_path)
+            except(FileNotFoundError, ValueError):
+                pass
+
+        self.modify.delete_entry(table='tickets', key='caller_id', param=[selected_account_id])
+
 
 class AccountUIManager:
 
