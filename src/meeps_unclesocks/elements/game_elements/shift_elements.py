@@ -10,9 +10,9 @@ class IntroductionText(DrawElement):
     POS = (0, 0, 500, 300)
     INPUT = ("Cyberspace has never been this dangerous! Threats are running amok across the Internet, "
              "destroying systems and exfiltrating sensitive customer information. \n"
-             "As an L1 SOC Analyst, armed with ten GIAC certificates and a CISSP at Meeps Security, you must achieve "
-             "at least 80% accuracy in your threat analysis right while meeting the target service-level-agreement (SLA) "
-             "to ensure our clients remain protected.\n\n"
+             "As an L1 SOC Analyst, armed with ten GIAC certificates and a CISSP at Meeps Security, "
+             "you must achieve at least 80% accuracy in your threat analysis right while meeting the "
+             "target service-level-agreement (SLA) to ensure our clients remain protected.\n\n"
              "Good luck, analyst, and happy hunting!")
     ANCHOR = {'center':'center'}
 
