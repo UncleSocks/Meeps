@@ -10,7 +10,7 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries, DatabaseRemovals
+from managers.db_manager import DatabaseQueries, DatabaseModification
 
 
 
@@ -30,7 +30,7 @@ class AccountStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
-        self.delete = DatabaseRemovals(self.cursor, self.connect)
+        self.modify = DatabaseModification(self.cursor, self.connect)
         self.account_variables()
 
     def account_variables(self) -> None:
@@ -63,7 +63,8 @@ class AccountStateManager:
     
     def delete_selected_account(self, account_image_filename) -> None:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        self.delete.delete_account(selected_account_id)
+        self.modify.delete_entry(table='accounts', key='id', param=[selected_account_id])
+        self.modify.delete_entry(table='tickets', key='caller_id', param=[selected_account_id])
         self._delete_account_image(account_image_filename)
 
     def _delete_account_image(self, account_image_filename):
@@ -177,7 +178,7 @@ class AccountEventHandler:
     def _update_account_textbox(self) -> None:
         self.account = self.state.fetch_account_details()
         account_details = self.ui.format_account_details(self.account)
-        
+
         self.ui.selected_account_description.set_text(account_details)
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()
         self.ui.refresh_assigned_tickets(self.state.assigned_ticket_list)

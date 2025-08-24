@@ -9,7 +9,7 @@ from constants import StateTracker, ButtonAction, \
     ImagePaths, ButtonSFX 
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries, DatabaseInsertions
+from managers.db_manager import DatabaseQueries, DatabaseModification
 
 
 
@@ -30,7 +30,7 @@ class ThreatCreationStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
-        self.insert = DatabaseInsertions(self.cursor, self.connect)
+        self.modify = DatabaseModification(self.cursor, self.connect)
         self.threat = ThreatDetails()
         self.threat_confirm_window = False
 
@@ -47,7 +47,7 @@ class ThreatCreationStateManager:
     def add_new_threat(self):
         self.threat.id = self._generate_new_threat_id()
         new_threat_entry = astuple(self.threat)
-        self.insert.insert_entry(table='threats', value=new_threat_entry)
+        self.modify.insert_entry(table='threats', value=new_threat_entry)
 
 
 class ThreatCreationUIManager:

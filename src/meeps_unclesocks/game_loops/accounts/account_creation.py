@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, DefaultImages, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries, DatabaseInsertions
+from managers.db_manager import DatabaseQueries, DatabaseModification
 
 
 
@@ -29,7 +29,7 @@ class AccountCreationStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
-        self.insert = DatabaseInsertions(self.cursor, self.connect)
+        self.modify = DatabaseModification(self.cursor, self.connect)
         self.account = AccountDetails()
         self.confirm_window = False
 
@@ -45,7 +45,7 @@ class AccountCreationStateManager:
     def add_new_account(self):
         self.account.id = self._generate_new_account_id()
         new_account_entry = astuple(self.account)
-        self.insert.insert_entry(table='accounts', value=new_account_entry)
+        self.modify.insert_entry(table='accounts', value=new_account_entry)
 
 
 class AccountCreationUIManager:

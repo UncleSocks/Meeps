@@ -10,7 +10,7 @@ from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries, DatabaseRemovals
+from managers.db_manager import DatabaseQueries, DatabaseModification
 
 
 
@@ -31,7 +31,7 @@ class TicketStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
-        self.delete = DatabaseRemovals(self.cursor, self.connect)
+        self.modify = DatabaseModification(self.cursor, self.connect)
         self.ticket_variables()
 
     def ticket_variables(self):
@@ -57,7 +57,7 @@ class TicketStateManager:
     
     def delete_selected_ticket(self):
         selected_ticket_id = self.ticket_title_id_map[self.selected_ticket]
-        self.delete.delete_ticket(selected_ticket_id)
+        self.modify.delete_entry(table='tickets', key='id', param=[selected_ticket_id])
         self._delete_transcript(selected_ticket_id)
 
     def _delete_transcript(self, selected_ticket_id):

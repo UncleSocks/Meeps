@@ -10,7 +10,7 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries, DatabaseRemovals
+from managers.db_manager import DatabaseQueries, DatabaseModification
 
 
 
@@ -30,7 +30,7 @@ class ThreatStateManager:
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
-        self.delete = DatabaseRemovals(self.cursor, self.connect)
+        self.modify = DatabaseModification(self.cursor, self.connect)
         self.threat_variables()
     
     def threat_variables(self) -> None:
@@ -56,7 +56,8 @@ class ThreatStateManager:
     
     def delete_selected_threat(self, threat_image_filename) -> None:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
-        self.delete.delete_threat(selected_threat_id)
+        self.modify.delete_entry(table='tickets', key='threat_id', param=[selected_threat_id])
+        self.modify.delete_entry(table='threats', key='id', param=[selected_threat_id])
         self._delete_threat_image(threat_image_filename)
 
     def _delete_threat_image(self, threat_image_filename):
