@@ -1,5 +1,5 @@
-import os, sys
 from enum import Enum
+import os, sys
 
 
 

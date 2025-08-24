@@ -5,7 +5,7 @@ from constants import SFXPath, MixerChannels, \
 
 
 
-class ButtonSoundManager():
+class ButtonSoundManager:
 
     def __init__(self):    
 
@@ -34,7 +34,7 @@ class ButtonSoundManager():
         return self.button_sfx_channel.set_volume(volume)
     
 
-class LoopingSoundManager():
+class LoopingSoundManager:
 
     def __init__(self, sound_path, channel):
         self.looping_sound = pygame.mixer.Sound(sound_path)
@@ -50,7 +50,7 @@ class LoopingSoundManager():
         return self.looping_channel.set_volume(volume)
 
 
-class BackgroundMusicManager():
+class BackgroundMusicManager:
 
     def __init__(self, music_path):
         self.music_path = music_path
@@ -68,7 +68,7 @@ class BackgroundMusicManager():
         return pygame.mixer.music.set_volume(volume) 
     
 
-class TicketTranscriptManager():
+class TicketTranscriptManager:
 
     def __init__(self, transcript_path):
         self.transcript_path = transcript_path

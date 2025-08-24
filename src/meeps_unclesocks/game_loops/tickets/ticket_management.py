@@ -1,7 +1,8 @@
 import os
+from dataclasses import dataclass
+
 import pygame
 import pygame_gui
-from dataclasses import dataclass
 
 import elements.game_elements.ticket_elements.ticket_management_elements as tme
 import elements.game_elements.shared_elements as se
@@ -48,7 +49,7 @@ class TicketStateManager():
         ticket_title_list = self.query.fetch_ticket_titles()
         return ticket_title_list
     
-    def fetch_ticket_details(self):
+    def fetch_ticket_details(self) -> TicketDetails:
         selected_ticket_id = self.ticket_title_id_map[self.selected_ticket]
         ticket_details = self.query.fetch_ticket_account_details(selected_ticket_id)
         ticket = TicketDetails(*ticket_details)

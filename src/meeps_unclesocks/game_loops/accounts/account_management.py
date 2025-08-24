@@ -1,12 +1,13 @@
-import pygame
-import pygame_gui
+import os
 from typing import Optional
 from dataclasses import dataclass
 
+import pygame
+import pygame_gui
+
 import elements.game_elements.account_elements.account_management_elements as ame
 import elements.game_elements.shared_elements as se
-from constants import StateTracker, ButtonAction, \
-    ImagePaths, ButtonSFX
+from constants import StateTracker, ButtonAction, AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
 from managers.db_manager import DatabaseQueries, DatabaseRemovals
@@ -20,7 +21,7 @@ class AccountDetails:
     organization: str = ""
     email: str = ""
     contact: str = ""
-    picture_path: str = ""
+    image_filename: str = ""
 
 
 class AccountStateManager:
@@ -49,9 +50,8 @@ class AccountStateManager:
         account_name_list = self.query.fetch_account_names()
         return account_name_list
 
-    def fetch_account_details(self) -> tuple:
+    def fetch_account_details(self) -> AccountDetails:
         selected_account_id = self.account_id_name_map[self.selected_account]
-        print(type(selected_account_id))
         account_details = self.query.fetch_account_details(selected_account_id)
         account = AccountDetails(*account_details)
         return account
@@ -61,9 +61,15 @@ class AccountStateManager:
         assigned_tickets_list = self.query.fetch_assigned_tickets(selected_account_id)
         return assigned_tickets_list
     
-    def delete_selected_account(self) -> None:
+    def delete_selected_account(self, account_image_filename) -> None:
         selected_account_id = self.account_id_name_map[self.selected_account]
         self.delete.delete_account(selected_account_id)
+        self._delete_account_image(account_image_filename)
+
+    def _delete_account_image(self, account_image_filename):
+        account_image_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, account_image_filename])
+        if os.path.exists(account_image_path):
+            os.remove(account_image_path)
     
 
 class AccountUIManager:
@@ -113,7 +119,7 @@ class AccountUIManager:
             f"<b>Organization:</b> {account.organization}\n"
             f"<b>Email:</b> {account.email}\n"
             f"<b>Contact:</b> {account.contact}\n"
-            f"<b>Picture Filename:</b> {account.picture_path}"
+            f"<b>Picture Filename:</b> {account.image_filename}"
         )
         return formatted_account_details
 
@@ -169,8 +175,9 @@ class AccountEventHandler:
         self._update_account_textbox()
 
     def _update_account_textbox(self) -> None:
-        account = self.state.fetch_account_details()
-        account_details = self.ui.format_account_details(account)
+        self.account = self.state.fetch_account_details()
+        account_details = self.ui.format_account_details(self.account)
+        
         self.ui.selected_account_description.set_text(account_details)
         self.state.assigned_ticket_list = self.state.fetch_assigned_tickets()
         self.ui.refresh_assigned_tickets(self.state.assigned_ticket_list)
@@ -270,7 +277,7 @@ class AccountManagementController:
     def _handle_confirm_delete_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.DELETE_BUTTON)
         self.state.account_delete_confirm_window.kill()
-        self.state.delete_selected_account()
+        self.state.delete_selected_account(self.event_handler.account.image_filename)
         self.state.account_name_list = self.state.fetch_account_names()
         self.ui.refresh_account_list(self.state.account_name_list)
 

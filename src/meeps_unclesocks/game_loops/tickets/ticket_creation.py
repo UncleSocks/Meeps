@@ -1,7 +1,8 @@
+from dataclasses import dataclass, astuple
+
 import pygame
 import pygame_gui
 import pyttsx3
-from dataclasses import dataclass, astuple
 
 import init
 import elements.game_elements.ticket_elements.ticket_creation_elements as tce

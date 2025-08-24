@@ -1,12 +1,13 @@
-import pygame
-import pygame_gui
+import os
 from typing import Optional
 from dataclasses import dataclass
 
+import pygame
+import pygame_gui
+
 import elements.game_elements.threat_elements.threat_management_elements as tme
 import elements.game_elements.shared_elements as se
-from constants import StateTracker, ButtonAction, \
-    ImagePaths, ButtonSFX
+from constants import StateTracker, ButtonAction, AssetBasePath, ImagePaths, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
 from managers.db_manager import DatabaseQueries, DatabaseRemovals
@@ -20,10 +21,10 @@ class ThreatDetails:
     description: str = ""
     indicators: str = ""
     countermeasures: str = ""
-    image_file: str = ""
+    image_filename: str = ""
 
 
-class ThreatStateManager():
+class ThreatStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -47,18 +48,24 @@ class ThreatStateManager():
         threat_name_list = self.query.fetch_threat_names()
         return threat_name_list
 
-    def fetch_threat_details(self) -> tuple:
+    def fetch_threat_details(self) -> ThreatDetails:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
         threat_details = self.query.fetch_threat_details(selected_threat_id)
         threat = ThreatDetails(*threat_details)
         return threat
     
-    def delete_selected_threat(self) -> None:
+    def delete_selected_threat(self, threat_image_filename) -> None:
         selected_threat_id = self.threat_id_name_map[self.selected_threat]
         self.delete.delete_threat(selected_threat_id)
+        self._delete_threat_image(threat_image_filename)
+
+    def _delete_threat_image(self, threat_image_filename):
+        threat_image_path = "".join([AssetBasePath.THREAT_ASSETS.value, threat_image_filename])
+        if os.path.exists(threat_image_path):
+            os.remove(threat_image_path)
     
 
-class ThreatUIManager():
+class ThreatUIManager:
 
     def __init__(self, pygame_manager, state_manager: ThreatStateManager):
         self.manager = pygame_manager
@@ -100,7 +107,7 @@ class ThreatUIManager():
         self.threat_description.set_text(f"DESCRIPTION:\n{threat.description}")
         self.threat_indicators.set_text(f"INDICATORS:\n{threat.indicators}")
         self.threat_countermeasures.set_text(f"COUNTERMEASURES:\n{threat.countermeasures}")
-        self.threat_image_filename.set_text(f"{threat.image_file}")
+        self.threat_image_filename.set_text(f"{threat.image_filename}")
         
     def display_confirm_window(self):
         self.state.threat_delete_confirm_window = tme.DeleteConfirmWindow(self.manager).draw_window()
@@ -126,7 +133,7 @@ class ThreatUIManager():
         self.state.threat_id_name_map = self.state.threat_id_name_mapper()
 
 
-class ThreatEventHandler():
+class ThreatEventHandler:
 
     def __init__(self, pygame_manager, state_manager: ThreatStateManager, ui_manager: ThreatUIManager,
                  sound_manager: ButtonSoundManager):
@@ -140,8 +147,8 @@ class ThreatEventHandler():
         self._update_threat_textbox()
         
     def _update_threat_textbox(self) -> None:
-        threat = self.state.fetch_threat_details()
-        self.ui.set_threat_details(threat)
+        self.threat = self.state.fetch_threat_details()
+        self.ui.set_threat_details(self.threat)
 
     def handle_button_pressed(self, event) -> Optional[ButtonAction]:
         if event.ui_element == self.ui.back_button:
@@ -160,7 +167,7 @@ class ThreatEventHandler():
             return ButtonAction.CANCEL_DELETE
 
 
-class ThreatManagementController():
+class ThreatManagementController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect
@@ -227,7 +234,7 @@ class ThreatManagementController():
     def _handle_confirm_delete_action(self) -> None:
         self.button_sfx.play_sfx(ButtonSFX.DELETE_BUTTON)
         self.state.threat_delete_confirm_window.kill()
-        self.state.delete_selected_threat()
+        self.state.delete_selected_threat(self.event_handler.threat.image_filename)
         self.state.threat_name_list = self.state.fetch_threat_names()
         self.ui.refresh_threat_list(self.state.threat_name_list)
 

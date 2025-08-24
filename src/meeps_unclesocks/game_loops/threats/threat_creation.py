@@ -1,6 +1,7 @@
+from dataclasses import dataclass, astuple
+
 import pygame
 import pygame_gui
-from dataclasses import dataclass, astuple
 
 import elements.game_elements.threat_elements.threat_creation_elements as tce
 import elements.game_elements.shared_elements as se
