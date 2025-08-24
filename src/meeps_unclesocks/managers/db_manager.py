@@ -122,3 +122,16 @@ class DatabaseRemovals:
         self._delete_entry(table='tickets', key='threat_id', param=[threat_id])
         self._delete_entry(table='threats', key='id', param=[threat_id])
         return
+    
+
+class DatabaseInsertions:
+
+    def __init__(self, cursor, connect):
+        self.cursor = cursor
+        self.connect = connect
+
+    def insert_entry(self, table: str, value: tuple):
+        placeholders = "?, "*(len(value)-1) + "?"
+        query = f'INSERT INTO {table} VALUES ({placeholders})' 
+        self.cursor.execute(query, value)
+        self.connect.commit()

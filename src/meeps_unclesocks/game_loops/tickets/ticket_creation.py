@@ -10,7 +10,7 @@ import elements.game_elements.shared_elements as se
 from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, ButtonSFX 
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries
+from managers.db_manager import DatabaseQueries, DatabaseInsertions
 
 
 
@@ -33,12 +33,13 @@ class ThreatDetails:
     image: str = ""
 
 
-class TicketCreationStateManager():
+class TicketCreationStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
+        self.insert = DatabaseInsertions(self.cursor, self.connect)
         self.ticket = TicketDetails()
         self.transcript_engine = pyttsx3.init()
         self.ticket_creation_variables()
@@ -93,12 +94,10 @@ class TicketCreationStateManager():
         self.ticket.id = self._generate_new_ticket_id()
         self.ticket.transcript = self._generate_ticket_transcript()
         new_ticket_entry = astuple(self.ticket)
-        
-        self.cursor.execute('INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?)', new_ticket_entry)
-        self.connect.commit()
+        self.insert.insert_entry(table='tickets', value=new_ticket_entry)
 
 
-class TicketCreationUIManager():
+class TicketCreationUIManager:
 
     def __init__(self, pygame_manager, state_manger: TicketCreationStateManager):
         self.manager = pygame_manager
@@ -177,7 +176,7 @@ class TicketCreationUIManager():
 
 
 
-class TicketCreationEventHandler():
+class TicketCreationEventHandler:
 
     def __init__(self, pygame_manager, state_manager: TicketCreationStateManager, ui_manager: TicketCreationUIManager):
         self.manager = pygame_manager
@@ -209,7 +208,7 @@ class TicketCreationEventHandler():
             return ButtonAction.CONFIRM_CREATE
 
 
-class TicketCreationController():
+class TicketCreationController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect

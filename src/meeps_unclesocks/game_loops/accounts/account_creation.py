@@ -8,7 +8,7 @@ from constants import StateTracker, ButtonAction, \
     AssetBasePath, ImagePaths, DefaultImages, ButtonSFX
 from init import PygameRenderer
 from managers.sound_manager import ButtonSoundManager
-from managers.db_manager import DatabaseQueries
+from managers.db_manager import DatabaseQueries, DatabaseInsertions
 
 
 
@@ -23,12 +23,13 @@ class AccountDetails:
     picture_file: str = ""
 
 
-class AccountCreationStateManager():
+class AccountCreationStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
         self.cursor = cursor
         self.query = DatabaseQueries(self.cursor)
+        self.insert = DatabaseInsertions(self.cursor, self.connect)
         self.account = AccountDetails()
         self.confirm_window = False
 
@@ -44,12 +45,10 @@ class AccountCreationStateManager():
     def add_new_account(self):
         self.account.id = self._generate_new_account_id()
         new_account_entry = astuple(self.account)
-        
-        self.cursor.execute('INSERT INTO accounts VALUES (?, ?, ?, ?, ?, ?)', new_account_entry)
-        self.connect.commit()
+        self.insert.insert_entry(table='accounts', value=new_account_entry)
 
 
-class AccountCreationUIManager():
+class AccountCreationUIManager:
 
     def __init__(self, pygame_manager, state_manager: AccountCreationStateManager):
         self.manager = pygame_manager
@@ -131,7 +130,7 @@ class AccountCreationUIManager():
             element.set_text("")
             
 
-class AccountCreationEventHandler():
+class AccountCreationEventHandler:
 
     def __init__(self, pygame_manager, state_manager: AccountCreationStateManager, ui_manager: AccountCreationUIManager):
         self.manager = pygame_manager
@@ -150,7 +149,7 @@ class AccountCreationEventHandler():
             return ButtonAction.CONFIRM_CREATE
 
 
-class AccountCreationController():
+class AccountCreationController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect

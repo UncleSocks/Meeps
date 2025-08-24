@@ -25,7 +25,7 @@ class TicketDetails:
     account_contact: str = ""
 
 
-class TicketStateManager():
+class TicketStateManager:
 
     def __init__(self, connect, cursor):
         self.connect = connect
@@ -67,7 +67,7 @@ class TicketStateManager():
             os.remove(transcript_path)
     
 
-class TicketUIManager():
+class TicketUIManager:
 
     def __init__(self, pygame_manager, state_manager: TicketStateManager):
         self.manager = pygame_manager
@@ -123,7 +123,7 @@ class TicketUIManager():
         self.state.ticket_title_id_map = self.state.ticket_id_title_mapper()
 
 
-class TicketEventHandler():
+class TicketEventHandler:
 
     def __init__(self, pygame_manager, state_manager: TicketStateManager, ui_manager: TicketUIManager):
         self.manager = pygame_manager
@@ -168,7 +168,7 @@ class TicketEventHandler():
             return ButtonAction.CANCEL_DELETE
 
 
-class TicketManagementController():
+class TicketManagementController:
 
     def __init__(self, connect, cursor, manager):
         self.connect = connect
