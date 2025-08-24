@@ -1,12 +1,8 @@
-![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/dcb3f983-15be-4990-838e-70b456791f18)
+<img width="730" height="257" alt="image" src="https://github.com/user-attachments/assets/84868228-75c4-49b1-8e38-4f64c34b200f" />
 
-# Meeps Security: Cybersecurity Awareness and Training Horror Game
+# Meeps Security: Cybersecurity Awareness and Training Mini Horror Game
 
-Meeps Security is a simulation mini-game with horror elements designed to extend cybersecurity training and awareness by playing as an L1 Security Operation Center (SOC) analyst. Players handle incoming calls regarding cybersecurity incidents, evaluating and submitting the appropriate threat to the callers within the given service level agreement (SLA). The player must correctly resolve at least 80% of tickets to pass the assessment during the shift. 
-
-This is named after one of my chows, named Meepo (Yes, the DOTA character).
-
-**Note:** The game is playable, but it is still under development.
+Meeps Security is a mini-game with horror elements designed to extend cybersecurity training and awareness by playing as an L1 Security Operation Center (SOC) analyst. Players handle incoming calls regarding cybersecurity incidents, evaluating and submitting the appropriate threat to the callers within the given service level agreement (SLA). The player must correctly resolve at least 80% of tickets to pass the assessment during the shift. 
 
 ## Prerequisites
 
@@ -22,7 +18,9 @@ The main menu has three buttons: START SHIFT, CREATE TICKETS, and LOG OFF. To pl
 
 MEEPS SECURITY also allows players to manage the tickets, including creating custom tickets by clicking the "MANAGE TICKET" button. At the time of writing, threat management is still under development.
 
-![image](https://github.com/UncleSocks/meeps-security-cybersecurity-awareness-and-training-game/assets/79778613/d449ad9d-8346-4fd8-b552-7c1ab7833ef0)
+<img width="797" height="650" alt="image" src="https://github.com/user-attachments/assets/6bc6d817-21ba-4287-bfc4-74b4a3ba1253" />
+
+
 
 The "LOG OFF" button exits the game -- you can also click on the close window button.
 
