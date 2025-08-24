@@ -1,6 +1,6 @@
 <img width="796" height="263" alt="image" src="https://github.com/user-attachments/assets/524dc39d-25f8-4bf1-a9a7-7daa7532f729" />
 
-# Meeps Security: Cybersecurity Awareness and Training Mini Horror Game
+# Meeps Security: Gamified Cybersecurity Training and Awareness Framework
 
 Meeps Security is a mini-game with horror elements designed to extend cybersecurity training and awareness by playing as an L1 Security Operation Center (SOC) analyst. Players handle incoming calls regarding cybersecurity incidents, evaluating and submitting the appropriate threat to the callers within the given service level agreement (SLA). The player must correctly resolve at least 80% of tickets to pass the assessment during the shift. 
 
