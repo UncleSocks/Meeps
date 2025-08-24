@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, astuple
 
 import pygame
@@ -85,7 +86,7 @@ class TicketCreationStateManager:
     
     def _generate_ticket_transcript(self):
         transcript_filename = f"{self.ticket.id}_transcript.wav"
-        ticket_transcript_path = "".join([AssetBasePath.TRANSCRIPTS.value, transcript_filename])
+        ticket_transcript_path = os.path.join(AssetBasePath.TRANSCRIPTS.value, transcript_filename)
         self.transcript_engine.save_to_file(self.ticket.entry, ticket_transcript_path)
         self.transcript_engine.runAndWait()
         return ticket_transcript_path

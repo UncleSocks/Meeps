@@ -1,6 +1,8 @@
+import os
+from dataclasses import dataclass, astuple
+
 import pygame
 import pygame_gui
-from dataclasses import dataclass, astuple
 
 import elements.game_elements.account_elements.account_creation_elements as ace
 import elements.game_elements.shared_elements as se
@@ -103,7 +105,7 @@ class AccountCreationUIManager:
 
     def _set_new_account_image(self):
         self.state.account.picture_file = self.account_picture_file.get_text()
-        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, self.state.account.picture_file])
+        account_picture_path = os.path.join(AssetBasePath.ACCOUNT_ASSETS.value, self.state.account.picture_file)
         account_picture = ace.NewAccountPicture(self.manager)
 
         try:

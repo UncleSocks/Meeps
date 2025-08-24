@@ -1,3 +1,4 @@
+import os
 import random
 from dataclasses import dataclass
 
@@ -222,7 +223,7 @@ class ShiftUIManager:
         )
 
     def _display_caller_image(self, ticket):
-        account_picture_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, ticket.account_picture])
+        account_picture_path = os.path.join(AssetBasePath.ACCOUNT_ASSETS.value, ticket.account_picture)
         caller_profile_image = she.CallerProfileImagee(self.manager)
 
         try:
@@ -405,7 +406,7 @@ class ShiftEventHandler:
 
     def _load_threat_image(self, image_file):
         image_file = str(image_file)
-        threat_image_path = "".join([AssetBasePath.THREAT_ASSETS.value, image_file])
+        threat_image_path = os.path.join(AssetBasePath.THREAT_ASSETS.value, image_file)
 
         try:
             load_threat_image = pygame.image.load(threat_image_path)
@@ -472,8 +473,8 @@ class ShiftController:
         if self.state.ticket_present and self.state.popup_window is None:
             self.countdown.ticket_sla_countdown(time_delta)
 
-        if not self.state.ticket_id_list and not self.state.ticket_present \
-            and self.state.introduction_page is None \
+        if self.state.total_tickets != 0 and not self.state.ticket_id_list \
+            and not self.state.ticket_present and self.state.introduction_page is None \
                 and self.state.end_shift_report is None:
             self._handle_end_shift_report()
         

@@ -61,10 +61,13 @@ class TicketStateManager:
         self._delete_transcript(selected_ticket_id)
 
     def _delete_transcript(self, selected_ticket_id):
-        transcript_filename = f"{selected_ticket_id}_transcript.wav"
-        transcript_path = "".join([AssetBasePath.TRANSCRIPTS.value, transcript_filename])
-        if os.path.exists(transcript_path):
-            os.remove(transcript_path)
+        try:
+            transcript_filename = f"{selected_ticket_id}_transcript.wav"
+            transcript_path = os.path.join(AssetBasePath.TRANSCRIPTS.value, transcript_filename)
+            if os.path.exists(transcript_path):
+                os.remove(transcript_path)
+        except(FileNotFoundError, ValueError):
+            pass
     
 
 class TicketUIManager:

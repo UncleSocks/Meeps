@@ -61,9 +61,12 @@ class ThreatStateManager:
         self._delete_threat_image(threat_image_filename)
 
     def _delete_threat_image(self, threat_image_filename):
-        threat_image_path = "".join([AssetBasePath.THREAT_ASSETS.value, threat_image_filename])
-        if os.path.exists(threat_image_path):
-            os.remove(threat_image_path)
+        try:
+            threat_image_path = os.path.join(AssetBasePath.THREAT_ASSETS.value, threat_image_filename)
+            if os.path.exists(threat_image_path):
+                os.remove(threat_image_path)
+        except (FileNotFoundError, TypeError):
+            pass
     
 
 class ThreatUIManager:

@@ -68,9 +68,12 @@ class AccountStateManager:
         self._delete_account_image(account_image_filename)
 
     def _delete_account_image(self, account_image_filename):
-        account_image_path = "".join([AssetBasePath.ACCOUNT_ASSETS.value, account_image_filename])
-        if os.path.exists(account_image_path):
-            os.remove(account_image_path)
+        try:
+            account_image_path = os.path.join(AssetBasePath.ACCOUNT_ASSETS.value, account_image_filename)
+            if os.path.exists(account_image_path):
+                os.remove(account_image_path)
+        except(FileNotFoundError, TypeError):
+            pass
     
 
 class AccountUIManager:
