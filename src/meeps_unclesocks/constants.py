@@ -62,8 +62,8 @@ class ButtonAction(Enum):
 
 
 class Timers(Enum):
-    MIN_CALL_INTERVAL = 5
-    MAX_CALL_INTERVAL = 12
+    MIN_CALL_INTERVAL = 3
+    MAX_CALL_INTERVAL = 9
 
 
 class AssetBasePath(Enum):

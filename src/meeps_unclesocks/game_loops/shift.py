@@ -1,4 +1,5 @@
 import os
+import math
 import random
 from dataclasses import dataclass
 
@@ -261,7 +262,7 @@ class ShiftUIManager:
             f"Accurate Ticket Resolution: {self.state.total_score}\n"
             f"Missed Calls: {self.state.missed_calls}\n"
             f"Missed Tickets: {self.state.missed_tickets}\n"
-            f"\n<b>ASSESSMENT RUSULT:<b>{assessment_result}"
+            f"\n<b>ASSESSMENT RUSULT: <b>{assessment_result}"
         )
         self.state.end_shift_report = self.state.end_shift_report.draw_textbox()
 
@@ -333,10 +334,11 @@ class GenerateReport:
 
     def generate_shift_report(self):
         assessment_percent = (self.state.total_score / self.state.total_tickets) * 100
-        if assessment_percent >= 80: 
-            assessment_result = "PASS"
+        rounded_assessment = math.ceil(assessment_percent/10) * 10
+        if rounded_assessment >= 80: 
+            assessment_result = "PASSED"
         else:
-            assessment_result = "FAIL"
+            assessment_result = "FAILED"
         return assessment_result
 
 
