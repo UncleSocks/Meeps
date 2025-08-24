@@ -74,7 +74,7 @@ class AssetBasePath(Enum):
 
 class ImagePaths(Enum):
     TITLE = 'assets/images/static/title.png'
-    TICKET_MANAGEMENT = 'assets/images/static/ticket_mngr.png'
+    TICKET_MANAGEMENT = 'assets/images/static/ticket_mnanager.png'
     TICKET_CREATION = 'assets/images/static/new_ticket.png'
     THREAT_MANAGEMENT = 'assets/images/static/threat_database.png'
     THREAT_CREATION = 'assets/images/static/add_threat.png'
