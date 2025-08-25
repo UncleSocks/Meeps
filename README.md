@@ -49,3 +49,8 @@ Deleting an entry can result in the deletion of those dependent on it. For examp
 A base PE file is available on the release page. This version does not contain any ticket, account, or threat entries. This is useful for those who want to create Meeps Security from scratch with their own threat entry and their cybersecurity scenarios (tickets). 
 
 **NOTE:** Make sure that the `data` directory is present together with the **meeps.exe** file, as this will hold the dynamic assets of the players. Images for the accounts and threats should be stored under the `accounts` and `threats` sub-folders, respectively. 
+
+
+# Possible Future Improvements
+- Create a web-based version
+- Add save and resume capability
