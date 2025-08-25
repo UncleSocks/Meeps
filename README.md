@@ -9,11 +9,9 @@ Meeps Security is a mini-game with horror elements designed to extend cybersecur
 
 The main menu has four buttons: START SHIFT, MANAGE TICKETS, MANAGE ACCOUNTS, and THREAT DATABASE. To start the game, select the "START SHIFT" button. This will take you to the main game loop, where you play as an L1 SOC analyst. 
 
-![demo](https://github.com/user-attachments/assets/1a37e32a-dacc-4e6b-93b9-3f96d7926bc2)
-
-
 The game also allows players to create or delete tickets, accounts (callers), and threats, further expanding the game. The "LOG OFF" button exits the game -- you can also click on the close window button.
 
+![demo](https://github.com/user-attachments/assets/1a37e32a-dacc-4e6b-93b9-3f96d7926bc2)
 
 ## Starting Your Shift
 
