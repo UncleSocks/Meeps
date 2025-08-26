@@ -1,4 +1,4 @@
-<img width="748" height="334" alt="logo-removebg-preview" src="https://github.com/user-attachments/assets/b36de308-b07c-48f4-8292-8f2f6c21fc7a" />
+<img width="853" height="292" alt="image-removebg-preview" src="https://github.com/user-attachments/assets/f9bb08ce-c469-462c-a6c7-9ebaca11dda8" />
 
 # Meeps Security: Gamified Cybersecurity Training and Awareness Framework
 
