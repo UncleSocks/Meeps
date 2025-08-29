@@ -8,7 +8,7 @@ The goal of the game is to help players become familiar with different types of 
 
 ## Dependencies
 
-The game only has three third-party dependencies:
+The game only has three third-party library dependencies:
 - pygame>=2.5.2
 - pygame-gui==0.6.9
 - pyttsx3>=2.90
