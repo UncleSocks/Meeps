@@ -6,6 +6,15 @@
 
 The goal of the game is to help players become familiar with different types of cyber threats and to improve their analysis skills while also introducing key concepts commonly found in Security Operations Center (SOC) environments, such as SLAs and ticket management.
 
+## Dependencies
+
+The game only has three third-party dependencies:
+- pygame>=2.5.2
+- pygame-gui==0.6.9
+- pyttsx3>=2.90
+
+Use the `requirements.txt` file to download and install the needed dependencies. Also note that newer versions of **pygame_gui** might result in weird GUI themes.
+
 
 ## How to Play Meeps Security?
 
